@@ -5396,7 +5396,7 @@ var $author$project$Data$Checklist$decoder = A4(
 														$elm$json$Json$Decode$succeed($author$project$Data$Checklist$Checklist)))))))))))))));
 var $elm$json$Json$Decode$list = _Json_decodeList;
 var $elm$core$Debug$log = _Debug_log;
-var $author$project$McPlugin$decodeChecklists = function (jsonString) {
+var $author$project$Main$decodeChecklists = function (jsonString) {
 	var _v0 = A2(
 		$elm$json$Json$Decode$decodeString,
 		$elm$json$Json$Decode$list($author$project$Data$Checklist$decoder),
@@ -5412,10 +5412,10 @@ var $author$project$McPlugin$decodeChecklists = function (jsonString) {
 };
 var $elm$core$Platform$Cmd$batch = _Platform_batch;
 var $elm$core$Platform$Cmd$none = $elm$core$Platform$Cmd$batch(_List_Nil);
-var $author$project$McPlugin$init = function (flags) {
+var $author$project$Main$init = function (flags) {
 	return _Utils_Tuple2(
 		{
-			checklists: $author$project$McPlugin$decodeChecklists(flags.checklists),
+			checklists: $author$project$Main$decodeChecklists(flags.checklists),
 			procosysPlantId: flags.procosysPlantId
 		},
 		$elm$core$Platform$Cmd$none);
@@ -11307,7 +11307,7 @@ var $mdgriffith$elm_ui$Internal$Model$Class = F2(
 	});
 var $mdgriffith$elm_ui$Internal$Flag$overflow = $mdgriffith$elm_ui$Internal$Flag$flag(20);
 var $mdgriffith$elm_ui$Element$scrollbars = A2($mdgriffith$elm_ui$Internal$Model$Class, $mdgriffith$elm_ui$Internal$Flag$overflow, $mdgriffith$elm_ui$Internal$Style$classes.scrollbars);
-var $author$project$McPlugin$update = F2(
+var $author$project$Main$update = F2(
 	function (msg, model) {
 		switch (msg.$) {
 			case 'NoOp':
@@ -13705,7 +13705,7 @@ var $author$project$View$renderChecklistItem = F4(
 							])) : $mdgriffith$elm_ui$Element$none
 					])));
 	});
-var $author$project$McPlugin$view = function (model) {
+var $author$project$Main$view = function (model) {
 	return $elm$core$List$isEmpty(model.checklists) ? $mdgriffith$elm_ui$Element$text(model.procosysPlantId) : A2(
 		$mdgriffith$elm_ui$Element$Keyed$column,
 		_List_fromArray(
@@ -13719,13 +13719,13 @@ var $author$project$McPlugin$view = function (model) {
 			A3($author$project$View$renderChecklistItem, 14, $elm$core$Maybe$Nothing, $author$project$Types$NotLoaded),
 			model.checklists));
 };
-var $author$project$McPlugin$main = $elm$browser$Browser$element(
+var $author$project$Main$main = $elm$browser$Browser$element(
 	{
-		init: $author$project$McPlugin$init,
+		init: $author$project$Main$init,
 		subscriptions: function (model) {
 			return $elm$core$Platform$Sub$batch(_List_Nil);
 		},
-		update: $author$project$McPlugin$update,
+		update: $author$project$Main$update,
 		view: function (model) {
 			return A2(
 				$mdgriffith$elm_ui$Element$layout,
@@ -13735,10 +13735,10 @@ var $author$project$McPlugin$main = $elm$browser$Browser$element(
 						$mdgriffith$elm_ui$Element$height($mdgriffith$elm_ui$Element$fill),
 						$mdgriffith$elm_ui$Element$scrollbars
 					]),
-				$author$project$McPlugin$view(model));
+				$author$project$Main$view(model));
 		}
 	});
-_Platform_export({'McPlugin':{'init':$author$project$McPlugin$main(
+_Platform_export({'Main':{'init':$author$project$Main$main(
 	A2(
 		$elm$json$Json$Decode$andThen,
 		function (procosysPlantId) {

@@ -1,4 +1,4 @@
-module McPlugin exposing (..)
+module Main exposing (..)
 
 import Browser
 import Data.Checklist as Checklist exposing (Checklist)
