@@ -74,9 +74,9 @@ const webComponent = {
                 onDetached()
             }
         }
-
         customElements.define(name, ElmElement)
     },
 }
+
 
 module.exports = webComponent
