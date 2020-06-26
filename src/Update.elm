@@ -133,9 +133,6 @@ handleApiResult apiResult ( m, c ) =
     case apiResult of
         GotChecklistDetails id result ->
             let
-                _ =
-                    Debug.log "result" result
-
                 updater checklist =
                     { checklist
                         | details =

@@ -12483,7 +12483,6 @@ var $author$project$Types$DataError = {$: 'DataError'};
 var $author$project$Types$Loaded = function (a) {
 	return {$: 'Loaded', a: a};
 };
-var $elm$core$Debug$log = _Debug_log;
 var $author$project$Update$handleApiResult = F2(
 	function (apiResult, _v0) {
 		var m = _v0.a;
@@ -12505,7 +12504,6 @@ var $author$project$Update$handleApiResult = F2(
 					}()
 				});
 		};
-		var _v2 = A2($elm$core$Debug$log, 'result', result);
 		return _Utils_Tuple2(
 			_Utils_update(
 				m,
@@ -13101,33 +13099,61 @@ var $author$project$View$iconFromCategory = function (category) {
 	switch (category) {
 		case 'Circuit/Starter':
 			return $author$project$Icon$circuit;
+		case 'CIRCUIT_AND_STARTER':
+			return $author$project$Icon$circuit;
 		case 'Electrical':
+			return $author$project$Icon$electrical;
+		case 'ELECTRICAL_FIELD':
 			return $author$project$Icon$electrical;
 		case 'Cable':
 			return $author$project$Icon$cable;
+		case 'CABLE':
+			return $author$project$Icon$cable;
 		case 'Instrument':
+			return $author$project$Icon$instrument;
+		case 'INSTRUMENT_FIELD':
 			return $author$project$Icon$instrument;
 		case 'Fire & Gas':
 			return $author$project$Icon$fireAndGas;
+		case 'FIRE_AND_GAS_FIELD':
+			return $author$project$Icon$fireAndGas;
 		case 'Line':
+			return $author$project$Icon$line_;
+		case 'LINE':
 			return $author$project$Icon$line_;
 		case 'Main Equipment':
 			return A2($author$project$Icon$tag, 'M', 'none');
 		case 'Telecom':
 			return $author$project$Icon$telecom;
+		case 'TELECOM_FIELD':
+			return $author$project$Icon$telecom;
 		case 'Junction Box':
+			return $author$project$Icon$junctionBox;
+		case 'JUNCTION_BOX':
 			return $author$project$Icon$junctionBox;
 		case 'Special Item':
 			return A2($author$project$Icon$tag, 'SI', 'none');
+		case 'SPECIAL_ITEM':
+			return A2($author$project$Icon$tag, 'SI', 'none');
 		case 'Heat Tracing Cable':
+			return $author$project$Icon$heatTrace;
+		case 'HEAT_TRACING_CABLE':
 			return $author$project$Icon$heatTrace;
 		case 'Signal':
 			return $author$project$Icon$signal;
+		case 'SIGNAL':
+			return $author$project$Icon$signal;
 		case 'Manual Valve':
+			return $author$project$Icon$manualValve;
+		case 'MANUAL_VALVE':
 			return $author$project$Icon$manualValve;
 		case 'Function':
 			return $author$project$Icon$function;
+		case 'FUNCTION':
+			return $author$project$Icon$function;
 		case 'Ducting':
+			return $author$project$Icon$ducting;
+		case 'DUCTING':
 			return $author$project$Icon$ducting;
 		default:
 			return A2($author$project$Icon$tag, '', 'none');
@@ -14577,8 +14603,8 @@ var $author$project$View$renderChecklistCheckItem = F3(
 			$mdgriffith$elm_ui$Element$column,
 			_List_fromArray(
 				[
-					A2($elm$core$String$startsWith, 'NOTE:', item.text) ? $mdgriffith$elm_ui$Element$Font$regular : $mdgriffith$elm_ui$Element$Font$bold,
-					A2($elm$core$String$startsWith, 'NOTE:', item.text) ? $mdgriffith$elm_ui$Element$Font$size(
+					(A2($elm$core$String$startsWith, 'NOTE', item.text) || A2($elm$core$String$startsWith, '-', item.text)) ? $mdgriffith$elm_ui$Element$Font$regular : $mdgriffith$elm_ui$Element$Font$bold,
+					(A2($elm$core$String$startsWith, 'NOTE', item.text) || A2($elm$core$String$startsWith, '-', item.text)) ? $mdgriffith$elm_ui$Element$Font$size(
 					A2($author$project$Data$Common$scaledInt, size, -3)) : $mdgriffith$elm_ui$Element$Font$size(
 					A2($author$project$Data$Common$scaledInt, size, -2)),
 					$mdgriffith$elm_ui$Element$padding(4),

@@ -150,19 +150,37 @@ iconFromCategory category =
         "Circuit/Starter" ->
             Icon.circuit
 
+        "CIRCUIT_AND_STARTER" ->
+            Icon.circuit
+
         "Electrical" ->
+            Icon.electrical
+
+        "ELECTRICAL_FIELD" ->
             Icon.electrical
 
         "Cable" ->
             Icon.cable
 
+        "CABLE" ->
+            Icon.cable
+
         "Instrument" ->
+            Icon.instrument
+
+        "INSTRUMENT_FIELD" ->
             Icon.instrument
 
         "Fire & Gas" ->
             Icon.fireAndGas
 
+        "FIRE_AND_GAS_FIELD" ->
+            Icon.fireAndGas
+
         "Line" ->
+            Icon.line_
+
+        "LINE" ->
             Icon.line_
 
         "Main Equipment" ->
@@ -171,25 +189,49 @@ iconFromCategory category =
         "Telecom" ->
             Icon.telecom
 
+        "TELECOM_FIELD" ->
+            Icon.telecom
+
         "Junction Box" ->
+            Icon.junctionBox
+
+        "JUNCTION_BOX" ->
             Icon.junctionBox
 
         "Special Item" ->
             Icon.tag "SI" "none"
 
+        "SPECIAL_ITEM" ->
+            Icon.tag "SI" "none"
+
         "Heat Tracing Cable" ->
+            Icon.heatTrace
+
+        "HEAT_TRACING_CABLE" ->
             Icon.heatTrace
 
         "Signal" ->
             Icon.signal
 
+        "SIGNAL" ->
+            Icon.signal
+
         "Manual Valve" ->
+            Icon.manualValve
+
+        "MANUAL_VALVE" ->
             Icon.manualValve
 
         "Function" ->
             Icon.function
 
+        "FUNCTION" ->
+            Icon.function
+
         "Ducting" ->
+            Icon.ducting
+
+        "DUCTING" ->
             Icon.ducting
 
         _ ->
@@ -208,12 +250,12 @@ renderChecklistCheckItem size checklist item =
             |> String.lines
             |> List.map (\txt -> paragraph [ Font.center ] [ text txt ])
             |> column
-                [ if String.startsWith "NOTE:" item.text then
+                [ if String.startsWith "NOTE" item.text || String.startsWith "-" item.text then
                     Font.regular
 
                   else
                     Font.bold
-                , if String.startsWith "NOTE:" item.text then
+                , if String.startsWith "NOTE" item.text || String.startsWith "-" item.text then
                     Font.size (scaledInt size -3)
 
                   else
