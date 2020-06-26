@@ -186,6 +186,9 @@ iconFromCategory category =
         "Main Equipment" ->
             Icon.tag "M" "none"
 
+        "MAIN_EQUIPMENT" ->
+            Icon.tag "M" "none"
+
         "Telecom" ->
             Icon.telecom
 

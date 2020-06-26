@@ -13123,6 +13123,8 @@ var $author$project$View$iconFromCategory = function (category) {
 			return $author$project$Icon$line_;
 		case 'Main Equipment':
 			return A2($author$project$Icon$tag, 'M', 'none');
+		case 'MAIN_EQUIPMENT':
+			return A2($author$project$Icon$tag, 'M', 'none');
 		case 'Telecom':
 			return $author$project$Icon$telecom;
 		case 'TELECOM_FIELD':
