@@ -1,30 +1,50 @@
-module View exposing (renderChecklistItem)
+module View exposing (renderChecklists)
 
 import Data.Checklist as Checklist exposing (Checklist)
 import Data.Common as Common exposing (scaledInt)
 import Element exposing (..)
 import Element.Background as Background
 import Element.Border as Border
-import Element.Events exposing (onClick)
 import Element.Font as Font
 import Element.Input as Input
 import Element.Keyed as Keyed
 import Html as H
 import Html.Attributes as HA
+import Html.Events as HE
 import Icon
+import Json.Decode as D
 import Messages exposing (Msg(..))
 import Palette
 import Types exposing (..)
 
 
-renderChecklistItem : Float -> Maybe Checklist -> WebData Checklist.Details -> Checklist.Checklist -> ( String, Element Msg )
-renderChecklistItem size maybeSelectedChecklist webDataDetails item =
-    let
-        statusText =
-            item.status
-                |> Common.statusToString
-                |> text
+renderChecklists : Float -> Maybe Int -> List Checklist -> Element Msg
+renderChecklists size maybeSelected checklists =
+    checklists
+        |> List.map (renderChecklistItem size maybeSelected)
+        --|> List.intersperse spacer
+        |> Keyed.column
+            [ width fill
+            , height fill
+            , scrollbarY
+            , Background.color Palette.mistBlue
+            , spacing 1
+            ]
 
+
+spacer =
+    el
+        [ width fill
+        , Border.widthEach { top = 1, left = 0, right = 0, bottom = 0 }
+        , Border.color Palette.mistBlue
+        , Border.dashed
+        ]
+        none
+
+
+renderChecklistItem : Float -> Maybe Int -> Checklist.Checklist -> ( String, Element Msg )
+renderChecklistItem size maybeSelected item =
+    let
         colors =
             case item.status of
                 PA ->
@@ -40,96 +60,83 @@ renderChecklistItem size maybeSelectedChecklist webDataDetails item =
                     Palette.whiteOnMistBlue
 
         isSelected =
-            maybeSelectedChecklist == Just item
+            maybeSelected == Just item.id
 
         color =
             Palette.white
 
-        shortDescription =
-            item.description
-                |> String.lines
-                |> List.take 2
-                |> List.map text
-                |> column [ width fill, clip, Font.size (scaledInt size -3) ]
-
-        toppLinje =
-            row [ spacing 10, Font.size <| scaledInt size -3, width fill, centerY ]
-                [ row []
-                    [ el (colors [ paddingXY 2 1, Border.rounded 4, Font.size (scaledInt size -4) ]) (item.status |> Common.statusToString |> text)
-
-                    --, el (Palette.combination Palette.white Palette.blue [ paddingXY 2 1, Border.rounded 4 ]) (String.fromInt item.subSheet |> text)
+        statusBadge =
+            el
+                (colors
+                    [ paddingXY 2 1
+                    , Border.rounded 4
+                    , Font.size (scaledInt size -4)
                     ]
-                , el [ width fill, clip ] (text item.type_)
-                , el []
-                    (item.responsible
-                        |> text
-                    )
-                ]
+                )
+                (item.status |> Common.statusToString |> text)
 
-        tagBeskrivelse p =
-            row [ width fill, clip ]
-                [ el
-                    [ width (px 30)
-                    , height (px 30)
-                    ]
-                  <|
-                    html <|
-                        iconFromCategory p.register
-                , el [ Font.size <| scaledInt size -1, width fill, clip, Font.color Palette.mossGreen ] (text p.tagNo)
+        itemType =
+            el [ alignRight, clip, Font.size <| scaledInt size -2 ] (text item.type_)
+
+        responsible =
+            el [ alignRight, Font.size <| scaledInt size -2 ] (text item.responsible)
+
+        icon =
+            el
+                [ width (px 30)
+                , height (px 30)
+                , inFront <| statusBadge
                 ]
+            <|
+                html <|
+                    iconFromCategory item.register
+
+        tagNo =
+            paragraph [ Font.size <| scaledInt size -1, width fill, Font.color Palette.mossGreen ] [ text item.tagNo ]
+
+        tagDescription =
+            paragraph [ width fill, Font.size (scaledInt size -2) ] [ text item.description ]
     in
     ( String.fromInt item.id
     , column
         [ width fill
-        , height (shrink |> minimum (round <| size * 2))
+        , Background.color <|
+            if isSelected then
+                Palette.mistBlue
 
-        --, onClick <| ChecklistPressed ref plant itemPressedContext item
+            else
+                Palette.white
+        , padding (round <| size / 2)
+        , onClick <| ChecklistPressed item
         , pointer
-        , scrollbars
         ]
-        [ toppLinje
-        , column [ width fill ]
-            [ tagBeskrivelse item
-            , shortDescription
+        [ row [ width fill ]
+            [ icon
+            , row [ width fill, spacing (round size * 2) ]
+                [ column [ width fill ] [ tagNo, tagDescription ]
+                , itemType
+                , responsible
+                ]
             ]
         , if isSelected then
-            column [ width fill ]
-                [ {- row [ spacing 2 ]
-                     [  case itemPressedContext of
-                         Messages.TagContext _ ->
-                             none
+            case item.details of
+                NotLoaded ->
+                    text "NotLoaded"
 
-                         _ ->
-                             tagLogo size item.tagNo
+                Loading ->
+                    text "Loading..."
 
-                     {- , case itemPressedContext of
-                        Messages.CommPkContext _ ->
-                            none
-                        _ ->
+                DataError ->
+                    text "Error getting details"
 
-                            commPkLogo ref device punch.commPk
-                     -}
-                     ]
-                  -}
-                  case webDataDetails of
-                    NotLoaded ->
-                        text "NotLoaded"
-
-                    Loading ->
-                        text "Loading..."
-
-                    DataError ->
-                        text "Error getting details"
-
-                    Loaded details ->
-                        column [ width fill, height fill, Background.color Palette.white ]
-                            [ {- text "Loop Tags:"
-                                 , paragraph [ width fill, spacing 10 ] (details.loopTags |> List.map (\tagNo -> el [] (text tagNo)))
-                                 ,
-                              -}
-                              renderChecklistItems size item details.items
-                            ]
-                ]
+                Loaded details ->
+                    column [ width fill, height fill, Background.color Palette.white, onClick NoOp ]
+                        [ {- text "Loop Tags:"
+                             , paragraph [ width fill, spacing 10 ] (details.loopTags |> List.map (\tagNo -> el [] (text tagNo)))
+                             ,
+                          -}
+                          renderChecklistItems size item details.items
+                        ]
 
           else
             none
@@ -287,3 +294,15 @@ checkButton size isActive =
                 Palette.white
         ]
         none
+
+
+onClick : msg -> Element.Attribute msg
+onClick msg =
+    HE.custom "click"
+        (D.succeed
+            { message = msg
+            , stopPropagation = True
+            , preventDefault = False
+            }
+        )
+        |> htmlAttribute

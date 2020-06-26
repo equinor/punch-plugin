@@ -13,3 +13,9 @@ type Status
     | PB
     | PA
     | OS
+
+
+type alias TokenSuccess =
+    { refNo : Int
+    , token : String
+    }

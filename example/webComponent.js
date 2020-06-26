@@ -25,9 +25,8 @@ const webComponent = {
     register(
         name,
         ElmComponent,
-        {
+        { staticFlags = {},
             setupPorts = () => { },
-            staticFlags = {},
             onDetached = () => { },
             mapFlags = flags => flags,
             onSetupError,
@@ -55,6 +54,8 @@ const webComponent = {
                         flags,
                         node: elmDiv,
                     })
+                    this.subscribe = elmElement.ports.toJs.subscribe
+                    this.send = elmElement.ports.fromJs.send
                     setupPorts(elmElement.ports)
 
                 } catch (error) {
@@ -73,6 +74,7 @@ const webComponent = {
             disconnectedCallback() {
                 onDetached()
             }
+
         }
         customElements.define(name, ElmElement)
     },

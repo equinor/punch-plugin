@@ -95,7 +95,6 @@ type alias Checklist =
     , group : Group
     , type_ : String
     , tagNo : String
-    , tagDescription : String
     , responsible : String
     , status : Status
     , commPk : String
@@ -105,6 +104,7 @@ type alias Checklist =
     , description : String
     , sheet : Int
     , subSheet : Int
+    , details : WebData Details
     }
 
 
@@ -208,7 +208,17 @@ type alias LoopTag =
 detailsApiDecoder : D.Decoder Details
 detailsApiDecoder =
     D.map2 Details
-        (D.field "LoopTags" (D.list loopTagDecoder))
+        (D.maybe (D.field "LoopTags" (D.list loopTagDecoder))
+            |> D.andThen
+                (\maybeLoop ->
+                    case maybeLoop of
+                        Just loopTag ->
+                            D.succeed loopTag
+
+                        Nothing ->
+                            D.succeed []
+                )
+        )
         (D.field "CheckItems" (D.list itemDecoder))
 
 
@@ -225,7 +235,6 @@ apiDecoder =
         |> required "TagFormularType__FormularType__Id" D.string
         |> required "TagFormularType__Tag__TagNo" D.string
         |> required "TagFormularType__Tag__TagNo" D.string
-        |> required "Responsible__Id" D.string
         |> required "Status__Id" statusDecoder
         |> required "TagFormularType__Tag__McPkg__CommPkg__CommPkgNo" Common.nullString
         |> required "TagFormularType__Tag__McPkg__McPkgNo" Common.nullString
@@ -234,6 +243,7 @@ apiDecoder =
         |> required "TagFormularType__Tag__Description" Common.nullString
         |> required "TagFormularType__SheetNo" Common.nullInt
         |> required "TagFormularType__SubsheetNo" Common.nullInt
+        |> hardcoded NotLoaded
 
 
 decoder : D.Decoder Checklist
@@ -243,16 +253,16 @@ decoder =
         |> required "group" groupDecoder
         |> required "type_" D.string
         |> required "tagNo" D.string
-        |> required "tagDescription" D.string
         |> required "responsible" D.string
         |> required "status" statusDecoder
         |> required "commPk" D.string
         |> required "mcPk" D.string
         |> required "updatedAt" D.string
-        |> optional "register" D.string ""
-        |> optional "description" D.string ""
+        |> required "register" D.string
+        |> required "description" D.string
         |> optional "sheet" D.int 0
         |> optional "subSheet" D.int 0
+        |> hardcoded NotLoaded
 
 
 groupEncoder : Group -> E.Value

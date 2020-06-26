@@ -1,7 +1,9 @@
-port module Ports exposing (checklists)
+port module Ports exposing (fromJs, toJs)
 
-import Data.Checklist exposing (Checklist)
-import Json.Decode as D
+import Json.Encode as E
 
 
-port checklists : (D.Value -> msg) -> Sub msg
+port toJs : E.Value -> Cmd msg
+
+
+port fromJs : (E.Value -> msg) -> Sub msg

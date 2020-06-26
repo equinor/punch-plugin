@@ -4,6 +4,7 @@
 
 <head>
     <meta charset="utf-8">
+    <meta content='width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no' name='viewport' />
     <title>Elm McApp Examle</title>
     <script>this.customElements || document.write('<script src="//unpkg.com/document-register-element"><\x2fscript>');</script>
     <script src="https://unpkg.com/built-in-element"></script>
@@ -12,9 +13,20 @@
 
 
 <body>
-    <mc-plugin procosys-plant-id="PCS$JOHAN_SVERDRUP"
-        checklists='[{"id":1, "group": "MCCR", "type_":"INS63","updatedAt":"","mcPk":"2101-J016","commPk":"2101-C01","status":"OK","responsible":"AIPI","tagNo":"A-20PT0105","tagDescription": "Pressure Transmitter"}]'>
+    <mc-plugin id="mcPlugin" procosys-plant-id="PCS$JOHAN_SVERDRUP" api-token="" checklists='
+        [{"id":1, "group": "MCCR", "type_":"INS63","updatedAt":"","mcPk":"2101-J016","commPk":"2101-C01","status":"OK","responsible":"AIPI","tagNo":"A-20PT0105","description": "Pressure Transmitter","register":"Instrument"}
+        ,{"id":2, "group": "MCCR", "type_":"INS03","updatedAt":"","mcPk":"2101-E004","commPk":"2101-C01","status":"OK","responsible":"AIPI","tagNo":"A-20PT0105-Z01","description": "Cable","register":"Cable"}
+        ,{"id":3, "group": "MCCR", "type_":"INS03","updatedAt":"","mcPk":"2101-E004","commPk":"2101-C01","status":"OK","responsible":"AIPI","tagNo":"A-73MA001","description": "Pedestal Crane South","register":"Main Equipment"}
+        ,{"id":4, "group": "MCCR", "type_":"ELE21","updatedAt":"","mcPk":"4401-E004","commPk":"2101-C01","status":"OK","responsible":"AIPI","tagNo":"R-63PT0105","description": "Air Compressor","register":"Instrument"}
+        ,{"id":5, "group": "MCCR", "type_":"ELE15","updatedAt":"","mcPk":"6301-E004","commPk":"2101-C01","status":"OK","responsible":"AIPI","tagNo":"D-20PT0105-Z01","description": "Cable","register":"Cable"}
+]'>
     </mc-plugin>
+    <script>
+        const mcPlugin = document.getElementById("mcPlugin")
+        mcPlugin.subscribe(msg => {
+            console.log(msg)
+        })
+    </script>
 </body>
 
 

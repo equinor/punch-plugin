@@ -1,10 +1,21 @@
-module Messages exposing (Msg(..))
+module Messages exposing (ApiResult(..), Msg(..))
 
-import Data.Checklist exposing (Checklist)
+import Data.Checklist as Checklist exposing (Checklist)
+import Http
 import Json.Decode as D
+import Types exposing (..)
 
 
 type Msg
     = NoOp
-    | ChecklistsFromJs (List Checklist)
+      -- Data Handling
+    | GotChecklists (List Checklist)
+    | GotToken TokenSuccess
     | DecodeError D.Error
+      -- Screen Interaction
+    | ChecklistPressed Checklist
+    | GotApiResult ApiResult
+
+
+type ApiResult
+    = GotChecklistDetails Int (Result Http.Error Checklist.Details)
