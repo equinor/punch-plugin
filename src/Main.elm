@@ -23,7 +23,7 @@ view model =
         text "No Checklists"
 
     else
-        View.renderChecklists 16 model.selectedChecklist (Dict.values model.checklists)
+        View.renderChecklists 16 model.selectedChecklist model.errorMsg (Dict.values model.checklists)
 
 
 main : Program Flags Model Msg
@@ -32,7 +32,7 @@ main =
         { init = Model.initialModel
         , update = update
         , subscriptions = \model -> Ports.fromJs handleJsMsg
-        , view = \model -> layoutWith { options = [ noStaticStyleSheet ] } [ width fill, height fill, Font.color Palette.slateBlue, Font.size 14 ] (view model)
+        , view = \model -> layout [ width fill, height fill, Font.color Palette.slateBlue, Font.size 14 ] (view model)
         }
 
 

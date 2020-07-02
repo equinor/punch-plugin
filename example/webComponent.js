@@ -30,10 +30,15 @@ const webComponent = {
             onDetached = () => { },
             mapFlags = flags => flags,
             onSetupError,
-            useShadowDom = false,
         } = {}
     ) {
         class ElmElement extends HTMLElement {
+            constructor() {
+                const self = super();
+                self._queue = []
+                return self;
+            }
+
             connectedCallback() {
                 const context = {}
                 try {
@@ -43,20 +48,22 @@ const webComponent = {
                     const flags = mapFlags(props)
                     context.flags = flags
 
-                    const parentDiv = useShadowDom ? this.attachShadow({ mode: 'open' }) : this;
+                    const parentDiv = this.attachShadow({ mode: 'open' });
 
                     const elmDiv = document.createElement('div')
 
                     parentDiv.innerHTML = ''
                     parentDiv.appendChild(elmDiv)
 
-                    const elmElement = ElmComponent.init({
-                        flags,
-                        node: elmDiv,
-                    })
-                    this.subscribe = elmElement.ports.toJs.subscribe
-                    this.send = elmElement.ports.fromJs.send
-                    setupPorts(elmElement.ports)
+                    this._app =
+                        ElmComponent.init({
+                            flags,
+                            node: elmDiv,
+                        })
+                    this.subscribe = this._app.ports.toJs.subscribe
+                    this.send = this._app.ports.fromJs.send
+                    setupPorts(this._app.ports)
+                    this._queue.map(msg => this._app.ports.fromJs.send(msg))
 
                 } catch (error) {
                     if (onSetupError) {
@@ -75,6 +82,13 @@ const webComponent = {
                 onDetached()
             }
 
+            set checklists(checklists) {
+                if (this.hasOwnProperty("_app")) {
+                    this._app.ports.fromJs.send({ topic: "checklists", payload: checklists })
+                } else {
+                    this._queue.push({ topic: "checklists", payload: checklists })
+                }
+            }
         }
         customElements.define(name, ElmElement)
     },

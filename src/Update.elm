@@ -3,10 +3,12 @@ module Update exposing (update)
 import Api
 import Data.Checklist exposing (Checklist)
 import Dict exposing (Dict)
+import Http
 import Json.Encode as E
 import Messages exposing (..)
 import Model exposing (Model)
 import Ports
+import Svg.Attributes exposing (z)
 import Types exposing (..)
 
 
@@ -46,6 +48,136 @@ update msg model =
                 mc
                     |> selectChecklist checklist
                     |> getChecklistDetails checklist
+
+        NaCheckItemPressed checklist checkItem ->
+            let
+                apiCall =
+                    if checkItem.isNa then
+                        Api.clearCheckItem
+
+                    else
+                        Api.setCheckItemNa
+            in
+            mc
+                |> apiRequest [ apiCall checklist checkItem ]
+
+        OkCheckItemPressed checklist checkItem ->
+            let
+                apiCall =
+                    if checkItem.isOk then
+                        Api.clearCheckItem
+
+                    else
+                        Api.setCheckItemOk
+            in
+            mc
+                |> apiRequest [ apiCall checklist checkItem ]
+
+        SignChecklistButtonPressed checklist ->
+            mc
+                |> apiRequest [ Api.signChecklist checklist ]
+
+        UnsignChecklistButtonPressed checklist ->
+            mc
+                |> apiRequest [ Api.unSignChecklist checklist ]
+
+        VerifyChecklistButtonPressed checklist ->
+            mc
+                |> apiRequest [ Api.verifyChecklist checklist ]
+
+        UnverifyChecklistButtonPressed checklist ->
+            mc
+                |> apiRequest [ Api.unVerifyChecklist checklist ]
+
+        MetaTableCellLostFocus checklist checkItem tableRow cell ->
+            mc
+                |> apiRequest [ Api.updateMetaTableCell checklist checkItem tableRow cell ]
+
+        MetaTableCellInput checklist checkItem tableRow columnLabel str ->
+            let
+                updater cl =
+                    case cl.details of
+                        Loaded details ->
+                            { cl
+                                | details =
+                                    Loaded
+                                        { details
+                                            | items =
+                                                List.map
+                                                    (\item ->
+                                                        if item.id == checkItem.id then
+                                                            let
+                                                                oldTable =
+                                                                    item.metaTable
+                                                            in
+                                                            { item
+                                                                | metaTable =
+                                                                    { oldTable
+                                                                        | rows =
+                                                                            List.map
+                                                                                (\row ->
+                                                                                    if row.id == tableRow.id then
+                                                                                        { row
+                                                                                            | cells =
+                                                                                                List.map
+                                                                                                    (\cell ->
+                                                                                                        if cell.columnId == columnLabel.id then
+                                                                                                            { cell | value = str }
+
+                                                                                                        else
+                                                                                                            cell
+                                                                                                    )
+                                                                                                    row.cells
+                                                                                        }
+
+                                                                                    else
+                                                                                        row
+                                                                                )
+                                                                                oldTable.rows
+                                                                    }
+                                                            }
+
+                                                        else
+                                                            item
+                                                    )
+                                                    details.items
+                                        }
+                            }
+
+                        _ ->
+                            cl
+            in
+            ( { model
+                | checklists =
+                    Dict.update checklist.id (Maybe.map updater) model.checklists
+              }
+            , Cmd.none
+            )
+
+        CommentFieldInput checklist str ->
+            let
+                updater cl =
+                    case cl.details of
+                        Loaded details ->
+                            let
+                                oldChecklistDetails =
+                                    details.checklistDetails
+                            in
+                            { cl | details = Loaded { details | checklistDetails = { oldChecklistDetails | comment = str } } }
+
+                        _ ->
+                            cl
+            in
+            ( { model
+                | checklists =
+                    Dict.update checklist.id (Maybe.map updater) model.checklists
+              }
+            , Cmd.none
+            )
+
+        CommentFieldLostFocus checklist str ->
+            mc
+                |> apiRequest [ Api.updateComment checklist str ]
 
 
 setChecklistsTo : List Checklist -> MC -> MC
@@ -142,6 +274,85 @@ handleApiResult apiResult ( m, c ) =
 
                                 Err err ->
                                     DataError
+                        , status =
+                            case result of
+                                Ok details ->
+                                    details.checklistDetails.status
+
+                                Err err ->
+                                    checklist.status
                     }
             in
             ( { m | checklists = Dict.update id (Maybe.map updater) m.checklists }, c )
+
+        SetNaResult checklist checkItem result ->
+            case result of
+                Ok _ ->
+                    ( m, c ) |> apiRequest [ Api.checklistDetails checklist ]
+
+                Err err ->
+                    ( m, c )
+
+        SetOkResult checklist checkItem result ->
+            case result of
+                Ok _ ->
+                    ( m, c ) |> apiRequest [ Api.checklistDetails checklist ]
+
+                Err err ->
+                    ( m, c )
+
+        ClearResult checklist checkItem result ->
+            case result of
+                Ok _ ->
+                    ( m, c ) |> apiRequest [ Api.checklistDetails checklist ]
+
+                Err err ->
+                    ( m, c )
+
+        SignChecklistResult checklist result ->
+            case result of
+                Ok details ->
+                    ( m, c ) |> apiRequest [ Api.checklistDetails checklist ]
+
+                Err err ->
+                    ( m, c )
+
+        UnsignChecklistResult checklist result ->
+            case result of
+                Ok _ ->
+                    ( m, c ) |> apiRequest [ Api.checklistDetails checklist ]
+
+                Err err ->
+                    ( m, c )
+
+        VerifyChecklistResult checklist result ->
+            case result of
+                Ok _ ->
+                    ( m, c ) |> apiRequest [ Api.checklistDetails checklist ]
+
+                Err err ->
+                    ( m, c )
+
+        UnverifyChecklistResult checklist result ->
+            case result of
+                Ok err ->
+                    ( m, c ) |> apiRequest [ Api.checklistDetails checklist ]
+
+                Err err ->
+                    ( m, c )
+
+        UpdateMetaTableCellResult checklist result ->
+            case result of
+                Ok err ->
+                    ( m, c ) |> apiRequest [ Api.checklistDetails checklist ]
+
+                Err err ->
+                    ( m, c )
+
+        CommentChecklistResult checklist result ->
+            case result of
+                Ok err ->
+                    ( m, c ) |> apiRequest [ Api.checklistDetails checklist ]
+
+                Err err ->
+                    ( m, c )

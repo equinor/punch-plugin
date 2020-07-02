@@ -17,6 +17,7 @@ type alias Model =
     , checklists : Dict Int Checklist
     , selectedChecklist : Maybe Int
     , requests : Dict Int (List (String -> String -> Cmd Msg))
+    , errorMsg : String
     }
 
 
@@ -27,6 +28,7 @@ initialModel flags =
       , checklists = Dict.empty
       , selectedChecklist = Nothing
       , requests = Dict.empty
+      , errorMsg = ""
       }
     , Cmd.none
     )
@@ -39,8 +41,4 @@ decodeChecklists jsonString =
             checklists
 
         Err err ->
-            let
-                _ =
-                    Debug.log "DecodeError" err
-            in
             []

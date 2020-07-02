@@ -2,9 +2,11 @@ module View exposing (renderChecklists)
 
 import Data.Checklist as Checklist exposing (Checklist)
 import Data.Common as Common exposing (scaledInt)
+import Dict
 import Element exposing (..)
 import Element.Background as Background
 import Element.Border as Border
+import Element.Events exposing (onLoseFocus)
 import Element.Font as Font
 import Element.Input as Input
 import Element.Keyed as Keyed
@@ -18,18 +20,62 @@ import Palette
 import Types exposing (..)
 
 
-renderChecklists : Float -> Maybe Int -> List Checklist -> Element Msg
-renderChecklists size maybeSelected checklists =
-    checklists
-        |> List.map (renderChecklistItem size maybeSelected)
-        --|> List.intersperse spacer
-        |> Keyed.column
-            [ width fill
-            , height fill
-            , scrollbarY
-            , Background.color Palette.mistBlue
-            , spacing 1
-            ]
+renderChecklists : Float -> Maybe Int -> String -> List Checklist -> Element Msg
+renderChecklists size maybeSelected errorMsg checklists =
+    let
+        groupToString group =
+            case group of
+                Checklist.MCCR ->
+                    "MCCR"
+
+                Checklist.CPCL ->
+                    "CPCL"
+
+                Checklist.Preservation ->
+                    "Pres"
+
+                Checklist.RunningLogs ->
+                    "rLog"
+
+                Checklist.DCCL ->
+                    "DCCL"
+
+                Checklist.SignalTag ->
+                    "SignalTag"
+
+        updater c mV =
+            Just <|
+                case mV of
+                    Just list ->
+                        c :: list
+
+                    Nothing ->
+                        [ c ]
+
+        groups =
+            checklists
+                |> List.foldl (\c dict -> Dict.update (groupToString c.group) (updater c) dict) Dict.empty
+                |> Dict.toList
+    in
+    column [ spacing -1, width fill ]
+        (groups
+            |> List.map
+                (\( groupName, groupChecklists ) ->
+                    column [ width fill ]
+                        [ el [ Font.bold, Font.color Palette.mossGreen ] (text groupName)
+                        , groupChecklists
+                            |> List.map (renderChecklistItem size maybeSelected errorMsg)
+                            --|> List.intersperse spacer
+                            |> Keyed.column
+                                [ width fill
+                                , height fill
+                                , scrollbarY
+                                , Background.color Palette.mistBlue
+                                , spacing 1
+                                ]
+                        ]
+                )
+        )
 
 
 spacer =
@@ -42,8 +88,8 @@ spacer =
         none
 
 
-renderChecklistItem : Float -> Maybe Int -> Checklist.Checklist -> ( String, Element Msg )
-renderChecklistItem size maybeSelected item =
+renderChecklistItem : Float -> Maybe Int -> String -> Checklist.Checklist -> ( String, Element Msg )
+renderChecklistItem size maybeSelected errorMsg item =
     let
         colors =
             case item.status of
@@ -57,7 +103,7 @@ renderChecklistItem size maybeSelected item =
                     Palette.combination Palette.white Palette.alphaMossGreen
 
                 _ ->
-                    Palette.whiteOnMistBlue
+                    Palette.combination Palette.white Palette.grey
 
         isSelected =
             maybeSelected == Just item.id
@@ -86,6 +132,7 @@ renderChecklistItem size maybeSelected item =
                 [ width (px 30)
                 , height (px 30)
                 , inFront <| statusBadge
+                , clip
                 ]
             <|
                 html <|
@@ -107,10 +154,12 @@ renderChecklistItem size maybeSelected item =
             else
                 Palette.white
         , padding (round <| size / 2)
-        , onClick <| ChecklistPressed item
-        , pointer
         ]
-        [ row [ width fill ]
+        [ row
+            [ width fill
+            , onClick <| ChecklistPressed item
+            , pointer
+            ]
             [ icon
             , row [ width fill, spacing (round size * 2) ]
                 [ column [ width fill ] [ tagNo, tagDescription ]
@@ -130,18 +179,179 @@ renderChecklistItem size maybeSelected item =
                     text "Error getting details"
 
                 Loaded details ->
+                    let
+                        hasUnsignedItems =
+                            List.any (\i -> not i.isHeading && not i.isOk && not i.isNa) details.items
+                    in
                     column [ width fill, height fill, Background.color Palette.white, onClick NoOp ]
                         [ {- text "Loop Tags:"
                              , paragraph [ width fill, spacing 10 ] (details.loopTags |> List.map (\tagNo -> el [] (text tagNo)))
                              ,
                           -}
-                          renderChecklistItems size item details.items
+                          row
+                            [ width fill
+                            , Background.color Palette.blue
+                            , Font.color Palette.white
+                            , paddingXY 8 6
+                            , Font.size (scaledInt size -1)
+                            ]
+                            [ el [] (text "Check items")
+                            , row [ alignRight, spacing 6 ] [ el [] (text "OK"), el [] (text "N/A") ]
+                            ]
+                        , renderChecklistItems size item details
+                        , renderCommentField size item details
+                        , if String.isEmpty details.checklistDetails.signedAt then
+                            none
+
+                          else
+                            el
+                                [ width fill
+                                , Background.color Palette.blue
+                                , Font.color Palette.white
+                                , padding 8
+                                , Font.size (scaledInt size -1)
+                                ]
+                                (text "Signatures")
+                        , signatures size item hasUnsignedItems details
+                        , if String.isEmpty errorMsg then
+                            none
+
+                          else
+                            paragraph [ width fill, Background.color Palette.alphaYellow, padding 6 ] [ text errorMsg ]
                         ]
 
           else
             none
         ]
     )
+
+
+renderCommentField : Float -> Checklist -> Checklist.Details -> Element Msg
+renderCommentField size checklist details =
+    let
+        isEnabled =
+            String.isEmpty details.checklistDetails.signedAt
+    in
+    if String.isEmpty details.checklistDetails.comment && not isEnabled then
+        none
+
+    else
+        column [ width fill ]
+            [ el
+                [ width fill
+                , Background.color Palette.blue
+                , Font.color Palette.white
+                , padding 8
+                , Font.size (scaledInt size -1)
+                ]
+                (text "Comment")
+            , if isEnabled then
+                Input.multiline
+                    [ width fill
+                    , onLoseFocus <| CommentFieldLostFocus checklist details.checklistDetails.comment
+                    ]
+                    { label = Input.labelHidden ""
+                    , onChange = CommentFieldInput checklist
+                    , placeholder = Just <| Input.placeholder [] (text "No comment")
+                    , spellcheck = True
+                    , text = details.checklistDetails.comment
+                    }
+
+              else
+                details.checklistDetails.comment
+                    |> String.lines
+                    |> List.map (\txt -> paragraph [ width fill ] [ text txt ])
+                    |> column [ width fill, padding 8 ]
+            ]
+
+
+signatures : Float -> Checklist -> Bool -> Checklist.Details -> Element Msg
+signatures size checklist hasUnsignedItems details =
+    let
+        x =
+            details.checklistDetails
+    in
+    column [ width fill, padding 10, spacing 2 ]
+        [ if String.isEmpty x.signedAt then
+            el [ alignRight ] <|
+                signButton size
+                    "Sign"
+                    (if hasUnsignedItems then
+                        Just "There is unsigned items"
+
+                     else
+                        Nothing
+                    )
+                    (SignChecklistButtonPressed checklist)
+
+          else
+            wrappedRow [ width fill, spacingXY 10 0 ]
+                [ el [ Font.bold ] (text "Signed by")
+                , row [ alignRight, spacing 10 ]
+                    [ text (x.signedByFirstName ++ " " ++ x.signedByLastName)
+                    , el [ alignRight ] (text <| String.left 10 x.signedAt)
+                    ]
+                , signButton size
+                    "Unsign"
+                    (if x.verifiedAt /= "" then
+                        Just "Checklist is verified"
+
+                     else
+                        Nothing
+                    )
+                    (UnsignChecklistButtonPressed checklist)
+                ]
+        , if checklist.group == Checklist.MCCR && x.signedAt /= "" then
+            if String.isEmpty x.verifiedAt then
+                el [ alignRight ] <|
+                    signButton size "Verify" Nothing (VerifyChecklistButtonPressed checklist)
+
+            else
+                wrappedRow [ width fill, spacingXY 10 0 ]
+                    [ el [ Font.bold ] (text "Verified by")
+                    , row [ alignRight, spacing 10 ]
+                        [ el [ alignRight ] <| text (x.verifiedByFirstName ++ " " ++ x.verifiedByLastName)
+                        , el [ alignRight ] (text <| String.left 10 x.verifiedAt)
+                        ]
+                    , signButton size "Unverify" Nothing (UnverifyChecklistButtonPressed checklist)
+                    ]
+
+          else
+            none
+        ]
+
+
+signButton : Float -> String -> Maybe String -> Msg -> Element Msg
+signButton size name maybeDisabled msg =
+    let
+        activeAttributes =
+            [ pointer
+            , onClick msg
+            ]
+
+        deactiveAttributes message =
+            [ alpha 0.3
+            , htmlAttribute <| HA.style "cursor" "not-allowed"
+            , htmlAttribute <| HA.title message
+            ]
+    in
+    el
+        ([ width <| px <| round <| size * 4
+         , height <| px <| round <| size * 2
+         , Background.color Palette.blue
+         , Font.color Palette.white
+         , Border.rounded 10
+         ]
+            ++ (case maybeDisabled of
+                    Just message ->
+                        deactiveAttributes message
+
+                    Nothing ->
+                        activeAttributes
+               )
+        )
+    <|
+        el [ centerX, centerY, Font.size (round size) ] (text name)
 
 
 iconFromCategory : String -> H.Html msg
@@ -241,13 +451,17 @@ iconFromCategory category =
             Icon.tag "" "none"
 
 
-renderChecklistItems : Float -> Checklist -> List Checklist.Item -> Element Msg
-renderChecklistItems size checklist items =
-    column [ width fill, spacing -1 ] (List.map (renderChecklistCheckItem size checklist) items)
+renderChecklistItems : Float -> Checklist -> Checklist.Details -> Element Msg
+renderChecklistItems size checklist details =
+    column [ width fill, spacing -1 ] (List.map (renderChecklistCheckItem size checklist details.checklistDetails.signedAt) details.items)
 
 
-renderChecklistCheckItem : Float -> Checklist -> Checklist.Item -> Element Msg
-renderChecklistCheckItem size checklist item =
+renderChecklistCheckItem : Float -> Checklist -> String -> Checklist.Item -> Element Msg
+renderChecklistCheckItem size checklist signedAt item =
+    let
+        isDisabled =
+            signedAt /= ""
+    in
     if item.isHeading then
         item.text
             |> String.lines
@@ -278,17 +492,17 @@ renderChecklistCheckItem size checklist item =
                     none
 
                   else
-                    renderMetaTable size checklist item
+                    renderMetaTable size isDisabled checklist item
                 ]
             , row [ centerY, alignRight, spacing 10 ]
-                [ checkButton size item.isNa
-                , checkButton size item.isOk
+                [ checkButton size isDisabled item.isOk (OkCheckItemPressed checklist item)
+                , checkButton size isDisabled item.isNa (NaCheckItemPressed checklist item)
                 ]
             ]
 
 
-renderMetaTable : Float -> Checklist -> Checklist.Item -> Element Msg
-renderMetaTable size checklist checkItem =
+renderMetaTable : Float -> Bool -> Checklist -> Checklist.Item -> Element Msg
+renderMetaTable size isDisabled checklist checkItem =
     table [ width fill ]
         { columns =
             checkItem.metaTable.columnLabels
@@ -301,7 +515,7 @@ renderMetaTable size checklist checkItem =
                                 row.cells
                                     |> List.filter (\cell -> cell.columnId == ch.id)
                                     |> List.head
-                                    |> Maybe.map (renderCellInput size checklist checkItem ch row)
+                                    |> Maybe.map (renderCellInput size isDisabled checklist checkItem ch row)
                                     |> Maybe.withDefault none
                         }
                     )
@@ -309,35 +523,51 @@ renderMetaTable size checklist checkItem =
         }
 
 
-renderCellInput : Float -> Checklist -> Checklist.Item -> Checklist.ColumnLabel -> Checklist.Row -> Checklist.Cell -> Element Msg
-renderCellInput size checklist checkItem columnHeader tableRow cell =
-    row [ spacing 4 ]
-        [ Input.text
-            [ Font.size (round size)
-            ]
-            { label = Input.labelHidden ""
-            , onChange = \txt -> NoOp --MetaTableCellInput checklist checkItem tableRow columnHeader
-            , placeholder = Nothing
-            , text = cell.value
-            }
+renderCellInput : Float -> Bool -> Checklist -> Checklist.Item -> Checklist.ColumnLabel -> Checklist.Row -> Checklist.Cell -> Element Msg
+renderCellInput size isDisabled checklist checkItem columnHeader tableRow cell =
+    row [ spacing 4, Font.size (round size) ]
+        [ if isDisabled then
+            el [ Font.color Palette.blue ] (text cell.value)
+
+          else
+            Input.text
+                [ onLoseFocus <| MetaTableCellLostFocus checklist checkItem tableRow cell ]
+                { label = Input.labelHidden ""
+                , onChange = MetaTableCellInput checklist checkItem tableRow columnHeader
+                , placeholder = Nothing
+                , text = cell.value
+                }
         , text cell.unit
         ]
 
 
-checkButton size isActive =
+checkButton : Float -> Bool -> Bool -> Msg -> Element Msg
+checkButton size isDisabled isActive msg =
     el
-        [ height <| px <| round <| size
-        , width <| px <| round <| size
-        , Border.rounded 1000
-        , Border.color Palette.mistBlue
-        , Border.width 2
-        , Background.color <|
+        ([ height <| px <| round <| size
+         , width <| px <| round <| size
+         , Border.rounded 1000
+         , Border.color Palette.mistBlue
+         , Border.width 2
+         , Background.color <|
             if isActive then
                 Palette.blue
 
             else
                 Palette.white
-        ]
+         ]
+            ++ (if isDisabled then
+                    [ alpha 0.3
+                    , htmlAttribute <| HA.style "cursor" "not-allowed"
+                    , htmlAttribute <| HA.title "Checklist is signed"
+                    ]
+
+                else
+                    [ pointer
+                    , onClick msg
+                    ]
+               )
+        )
         none
 
 

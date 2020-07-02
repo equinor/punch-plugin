@@ -5687,7 +5687,7 @@ var $elm$core$Platform$Cmd$batch = _Platform_batch;
 var $elm$core$Platform$Cmd$none = $elm$core$Platform$Cmd$batch(_List_Nil);
 var $author$project$Model$initialModel = function (flags) {
 	return _Utils_Tuple2(
-		{apiToken: '', checklists: $elm$core$Dict$empty, procosysPlantId: flags.procosysPlantId, requests: $elm$core$Dict$empty, selectedChecklist: $elm$core$Maybe$Nothing},
+		{apiToken: '', checklists: $elm$core$Dict$empty, errorMsg: '', procosysPlantId: flags.procosysPlantId, requests: $elm$core$Dict$empty, selectedChecklist: $elm$core$Maybe$Nothing},
 		$elm$core$Platform$Cmd$none);
 };
 var $mdgriffith$elm_ui$Internal$Style$classes = {above: 'a', active: 'atv', alignBottom: 'ab', alignCenterX: 'cx', alignCenterY: 'cy', alignContainerBottom: 'acb', alignContainerCenterX: 'accx', alignContainerCenterY: 'accy', alignContainerRight: 'acr', alignLeft: 'al', alignRight: 'ar', alignTop: 'at', alignedHorizontally: 'ah', alignedVertically: 'av', any: 's', behind: 'bh', below: 'b', bold: 'w7', borderDashed: 'bd', borderDotted: 'bdt', borderNone: 'bn', borderSolid: 'bs', capturePointerEvents: 'cpe', clip: 'cp', clipX: 'cpx', clipY: 'cpy', column: 'c', container: 'ctr', contentBottom: 'cb', contentCenterX: 'ccx', contentCenterY: 'ccy', contentLeft: 'cl', contentRight: 'cr', contentTop: 'ct', cursorPointer: 'cptr', cursorText: 'ctxt', focus: 'fcs', focusedWithin: 'focus-within', fullSize: 'fs', grid: 'g', hasBehind: 'hbh', heightContent: 'hc', heightExact: 'he', heightFill: 'hf', heightFillPortion: 'hfp', hover: 'hv', imageContainer: 'ic', inFront: 'fr', inputLabel: 'lbl', inputMultiline: 'iml', inputMultilineFiller: 'imlf', inputMultilineParent: 'imlp', inputMultilineWrapper: 'implw', inputText: 'it', italic: 'i', link: 'lnk', nearby: 'nb', noTextSelection: 'notxt', onLeft: 'ol', onRight: 'or', opaque: 'oq', overflowHidden: 'oh', page: 'pg', paragraph: 'p', passPointerEvents: 'ppe', root: 'ui', row: 'r', scrollbars: 'sb', scrollbarsX: 'sbx', scrollbarsY: 'sby', seButton: 'sbt', single: 'e', sizeByCapital: 'cap', spaceEvenly: 'sev', strike: 'sk', text: 't', textCenter: 'tc', textExtraBold: 'w8', textExtraLight: 'w2', textHeavy: 'w9', textJustify: 'tj', textJustifyAll: 'tja', textLeft: 'tl', textLight: 'w3', textMedium: 'w5', textNormalWeight: 'w4', textRight: 'tr', textSemiBold: 'w6', textThin: 'w1', textUnitalicized: 'tun', transition: 'ts', transparent: 'clr', underline: 'u', widthContent: 'wc', widthExact: 'we', widthFill: 'wf', widthFillPortion: 'wfp', wrapped: 'wrp'};
@@ -11536,11 +11536,8 @@ var $mdgriffith$elm_ui$Element$layoutWith = F3(
 				_Utils_ap($mdgriffith$elm_ui$Internal$Model$rootStyle, attrs)),
 			child);
 	});
-var $mdgriffith$elm_ui$Internal$Model$NoStaticStyleSheet = {$: 'NoStaticStyleSheet'};
-var $mdgriffith$elm_ui$Internal$Model$RenderModeOption = function (a) {
-	return {$: 'RenderModeOption', a: a};
-};
-var $mdgriffith$elm_ui$Element$noStaticStyleSheet = $mdgriffith$elm_ui$Internal$Model$RenderModeOption($mdgriffith$elm_ui$Internal$Model$NoStaticStyleSheet);
+var $mdgriffith$elm_ui$Element$layout = $mdgriffith$elm_ui$Element$layoutWith(
+	{options: _List_Nil});
 var $mdgriffith$elm_ui$Element$Font$size = function (i) {
 	return A2(
 		$mdgriffith$elm_ui$Internal$Model$StyleClass,
@@ -11552,7 +11549,9 @@ var $mdgriffith$elm_ui$Element$rgb255 = F3(
 		return A4($mdgriffith$elm_ui$Internal$Model$Rgba, red / 255, green / 255, blue / 255, 1);
 	});
 var $author$project$Palette$slateBlue = A3($mdgriffith$elm_ui$Element$rgb255, 36, 55, 70);
-var $author$project$Types$Loading = {$: 'Loading'};
+var $author$project$Types$Loaded = function (a) {
+	return {$: 'Loaded', a: a};
+};
 var $author$project$Api$clientId = '47641c40-0135-459b-8ab4-459e68dc8d08/.default';
 var $author$project$Ports$toJs = _Platform_outgoingPort('toJs', $elm$core$Basics$identity);
 var $author$project$Update$createEvent = F2(
@@ -11603,13 +11602,13 @@ var $author$project$Update$apiRequest = F2(
 								])))
 					])));
 	});
+var $author$project$Messages$ClearResult = F3(
+	function (a, b, c) {
+		return {$: 'ClearResult', a: a, b: b, c: c};
+	});
 var $author$project$Messages$GotApiResult = function (a) {
 	return {$: 'GotApiResult', a: a};
 };
-var $author$project$Messages$GotChecklistDetails = F2(
-	function (a, b) {
-		return {$: 'GotChecklistDetails', a: a, b: b};
-	});
 var $elm$url$Url$Builder$QueryParameter = F2(
 	function (a, b) {
 		return {$: 'QueryParameter', a: a, b: b};
@@ -11628,121 +11627,6 @@ var $elm$core$Basics$composeL = F3(
 		return g(
 			f(x));
 	});
-var $author$project$Data$Checklist$Details = F2(
-	function (loopTags, items) {
-		return {items: items, loopTags: loopTags};
-	});
-var $author$project$Data$Checklist$Item = F7(
-	function (id, isHeading, isNa, isOk, metaTable, sequenceNumber, text) {
-		return {id: id, isHeading: isHeading, isNa: isNa, isOk: isOk, metaTable: metaTable, sequenceNumber: sequenceNumber, text: text};
-	});
-var $author$project$Data$Checklist$MetaTable = F3(
-	function (columnLabels, info, rows) {
-		return {columnLabels: columnLabels, info: info, rows: rows};
-	});
-var $elm$json$Json$Decode$bool = _Json_decodeBool;
-var $elm$json$Json$Decode$map7 = _Json_map7;
-var $author$project$Data$Checklist$ColumnLabel = F2(
-	function (id, label) {
-		return {id: id, label: label};
-	});
-var $author$project$Data$Common$nullString = $elm$json$Json$Decode$oneOf(
-	_List_fromArray(
-		[
-			$elm$json$Json$Decode$string,
-			$elm$json$Json$Decode$null('')
-		]));
-var $author$project$Data$Checklist$columnLabelDecoder = A3(
-	$elm$json$Json$Decode$map2,
-	$author$project$Data$Checklist$ColumnLabel,
-	A2($elm$json$Json$Decode$field, 'Id', $elm$json$Json$Decode$int),
-	A2($elm$json$Json$Decode$field, 'Label', $author$project$Data$Common$nullString));
-var $elm$json$Json$Decode$map3 = _Json_map3;
-var $author$project$Data$Checklist$Row = F3(
-	function (cells, id, label) {
-		return {cells: cells, id: id, label: label};
-	});
-var $author$project$Data$Checklist$Cell = F3(
-	function (columnId, unit, value) {
-		return {columnId: columnId, unit: unit, value: value};
-	});
-var $author$project$Data$Checklist$cellDecoder = A4(
-	$elm$json$Json$Decode$map3,
-	$author$project$Data$Checklist$Cell,
-	A2($elm$json$Json$Decode$field, 'ColumnId', $elm$json$Json$Decode$int),
-	A2($elm$json$Json$Decode$field, 'Unit', $author$project$Data$Common$nullString),
-	A2($elm$json$Json$Decode$field, 'Value', $author$project$Data$Common$nullString));
-var $author$project$Data$Checklist$rowDecoder = A4(
-	$elm$json$Json$Decode$map3,
-	$author$project$Data$Checklist$Row,
-	A2(
-		$elm$json$Json$Decode$field,
-		'Cells',
-		$elm$json$Json$Decode$list($author$project$Data$Checklist$cellDecoder)),
-	A2($elm$json$Json$Decode$field, 'Id', $elm$json$Json$Decode$int),
-	A2($elm$json$Json$Decode$field, 'Label', $author$project$Data$Common$nullString));
-var $author$project$Data$Checklist$metaTableDecoder = A4(
-	$elm$json$Json$Decode$map3,
-	$author$project$Data$Checklist$MetaTable,
-	A2(
-		$elm$json$Json$Decode$field,
-		'ColumnLabels',
-		$elm$json$Json$Decode$list($author$project$Data$Checklist$columnLabelDecoder)),
-	A2($elm$json$Json$Decode$field, 'Info', $author$project$Data$Common$nullString),
-	A2(
-		$elm$json$Json$Decode$field,
-		'Rows',
-		$elm$json$Json$Decode$list($author$project$Data$Checklist$rowDecoder)));
-var $author$project$Data$Checklist$itemDecoder = A8(
-	$elm$json$Json$Decode$map7,
-	$author$project$Data$Checklist$Item,
-	A2($elm$json$Json$Decode$field, 'Id', $elm$json$Json$Decode$int),
-	A2($elm$json$Json$Decode$field, 'IsHeading', $elm$json$Json$Decode$bool),
-	A2($elm$json$Json$Decode$field, 'IsNotApplicable', $elm$json$Json$Decode$bool),
-	A2($elm$json$Json$Decode$field, 'IsOk', $elm$json$Json$Decode$bool),
-	A2(
-		$elm$json$Json$Decode$field,
-		'MetaTable',
-		$elm$json$Json$Decode$oneOf(
-			_List_fromArray(
-				[
-					$author$project$Data$Checklist$metaTableDecoder,
-					$elm$json$Json$Decode$null(
-					A3($author$project$Data$Checklist$MetaTable, _List_Nil, '', _List_Nil))
-				]))),
-	A2($elm$json$Json$Decode$field, 'SequenceNumber', $elm$json$Json$Decode$string),
-	A2($elm$json$Json$Decode$field, 'Text', $author$project$Data$Common$nullString));
-var $author$project$Data$Checklist$loopTagDecoder = A2($elm$json$Json$Decode$field, 'TagNo', $elm$json$Json$Decode$string);
-var $elm$json$Json$Decode$maybe = function (decoder) {
-	return $elm$json$Json$Decode$oneOf(
-		_List_fromArray(
-			[
-				A2($elm$json$Json$Decode$map, $elm$core$Maybe$Just, decoder),
-				$elm$json$Json$Decode$succeed($elm$core$Maybe$Nothing)
-			]));
-};
-var $author$project$Data$Checklist$detailsApiDecoder = A3(
-	$elm$json$Json$Decode$map2,
-	$author$project$Data$Checklist$Details,
-	A2(
-		$elm$json$Json$Decode$andThen,
-		function (maybeLoop) {
-			if (maybeLoop.$ === 'Just') {
-				var loopTag = maybeLoop.a;
-				return $elm$json$Json$Decode$succeed(loopTag);
-			} else {
-				return $elm$json$Json$Decode$succeed(_List_Nil);
-			}
-		},
-		$elm$json$Json$Decode$maybe(
-			A2(
-				$elm$json$Json$Decode$field,
-				'LoopTags',
-				$elm$json$Json$Decode$list($author$project$Data$Checklist$loopTagDecoder)))),
-	A2(
-		$elm$json$Json$Decode$field,
-		'CheckItems',
-		$elm$json$Json$Decode$list($author$project$Data$Checklist$itemDecoder)));
 var $elm$http$Http$BadStatus_ = F2(
 	function (a, b) {
 		return {$: 'BadStatus_', a: a, b: b};
@@ -12143,26 +12027,13 @@ var $elm$core$Dict$update = F3(
 			return A2($elm$core$Dict$remove, targetKey, dictionary);
 		}
 	});
-var $elm$http$Http$emptyBody = _Http_emptyBody;
-var $elm$json$Json$Decode$decodeString = _Json_runOnString;
-var $elm$http$Http$expectStringResponse = F2(
+var $elm$http$Http$expectBytesResponse = F2(
 	function (toMsg, toResult) {
 		return A3(
 			_Http_expect,
-			'',
-			$elm$core$Basics$identity,
+			'arraybuffer',
+			_Http_toDataView,
 			A2($elm$core$Basics$composeR, toResult, toMsg));
-	});
-var $elm$core$Result$mapError = F2(
-	function (f, result) {
-		if (result.$ === 'Ok') {
-			var v = result.a;
-			return $elm$core$Result$Ok(v);
-		} else {
-			var e = result.a;
-			return $elm$core$Result$Err(
-				f(e));
-		}
 	});
 var $elm$http$Http$BadBody = function (a) {
 	return {$: 'BadBody', a: a};
@@ -12175,6 +12046,17 @@ var $elm$http$Http$BadUrl = function (a) {
 };
 var $elm$http$Http$NetworkError = {$: 'NetworkError'};
 var $elm$http$Http$Timeout = {$: 'Timeout'};
+var $elm$core$Result$mapError = F2(
+	function (f, result) {
+		if (result.$ === 'Ok') {
+			var v = result.a;
+			return $elm$core$Result$Ok(v);
+		} else {
+			var e = result.a;
+			return $elm$core$Result$Err(
+				f(e));
+		}
+	});
 var $elm$http$Http$resolve = F2(
 	function (toResult, response) {
 		switch (response.$) {
@@ -12198,31 +12080,26 @@ var $elm$http$Http$resolve = F2(
 					toResult(body));
 		}
 	});
-var $elm$http$Http$expectJson = F2(
-	function (toMsg, decoder) {
-		return A2(
-			$elm$http$Http$expectStringResponse,
-			toMsg,
-			$elm$http$Http$resolve(
-				function (string) {
-					return A2(
-						$elm$core$Result$mapError,
-						$elm$json$Json$Decode$errorToString,
-						A2($elm$json$Json$Decode$decodeString, decoder, string));
-				}));
-	});
+var $elm$http$Http$expectWhatever = function (toMsg) {
+	return A2(
+		$elm$http$Http$expectBytesResponse,
+		toMsg,
+		$elm$http$Http$resolve(
+			function (_v0) {
+				return $elm$core$Result$Ok(_Utils_Tuple0);
+			}));
+};
 var $elm$http$Http$Header = F2(
 	function (a, b) {
 		return {$: 'Header', a: a, b: b};
 	});
 var $elm$http$Http$header = $elm$http$Http$Header;
-var $elm$url$Url$Builder$int = F2(
-	function (key, value) {
-		return A2(
-			$elm$url$Url$Builder$QueryParameter,
-			$elm$url$Url$percentEncode(key),
-			$elm$core$String$fromInt(value));
-	});
+var $elm$http$Http$jsonBody = function (value) {
+	return A2(
+		_Http_pair,
+		'application/json',
+		A2($elm$json$Json$Encode$encode, 0, value));
+};
 var $elm$http$Http$Request = function (a) {
 	return {$: 'Request', a: a};
 };
@@ -12392,8 +12269,8 @@ var $elm$url$Url$Builder$crossOrigin = F3(
 	function (prePath, pathSegments, parameters) {
 		return prePath + ('/' + (A2($elm$core$String$join, '/', pathSegments) + $elm$url$Url$Builder$toQuery(parameters)));
 	});
-var $author$project$Api$Production = {$: 'Production'};
-var $author$project$Api$environment = $author$project$Api$Production;
+var $author$project$Api$Development = {$: 'Development'};
+var $author$project$Api$environment = $author$project$Api$Development;
 var $author$project$Api$url = F2(
 	function (paths, queryParams) {
 		var _v0 = $author$project$Api$environment;
@@ -12410,6 +12287,218 @@ var $author$project$Api$url = F2(
 				A2($elm$core$List$cons, 'api', paths),
 				A2($elm$core$List$cons, $author$project$Api$apiVersion, queryParams));
 		}
+	});
+var $author$project$Api$clearCheckItem = F4(
+	function (checklist, checkItem, plantId, token) {
+		return $elm$http$Http$request(
+			{
+				body: $elm$http$Http$jsonBody(
+					$elm$json$Json$Encode$object(
+						_List_fromArray(
+							[
+								_Utils_Tuple2(
+								'CheckListId',
+								$elm$json$Json$Encode$int(checklist.id)),
+								_Utils_Tuple2(
+								'CheckItemId',
+								$elm$json$Json$Encode$int(checkItem.id))
+							]))),
+				expect: $elm$http$Http$expectWhatever(
+					A2(
+						$elm$core$Basics$composeL,
+						$author$project$Messages$GotApiResult,
+						A2($author$project$Messages$ClearResult, checklist, checkItem))),
+				headers: _List_fromArray(
+					[
+						A2($elm$http$Http$header, 'Authorization', 'Bearer ' + token)
+					]),
+				method: 'POST',
+				timeout: $elm$core$Maybe$Nothing,
+				tracker: $elm$core$Maybe$Nothing,
+				url: A2(
+					$author$project$Api$url,
+					_List_fromArray(
+						['CheckList', 'Item', 'Clear']),
+					_List_fromArray(
+						[
+							A2($elm$url$Url$Builder$string, 'plantId', plantId),
+							$author$project$Api$apiVersion
+						]))
+			});
+	});
+var $author$project$Types$Loading = {$: 'Loading'};
+var $author$project$Messages$GotChecklistDetails = F2(
+	function (a, b) {
+		return {$: 'GotChecklistDetails', a: a, b: b};
+	});
+var $author$project$Data$Checklist$Details = F3(
+	function (loopTags, items, checklistDetails) {
+		return {checklistDetails: checklistDetails, items: items, loopTags: loopTags};
+	});
+var $author$project$Data$Checklist$ChecklistDetails = F8(
+	function (comment, signedAt, signedByFirstName, signedByLastName, verifiedAt, verifiedByFirstName, verifiedByLastName, status) {
+		return {comment: comment, signedAt: signedAt, signedByFirstName: signedByFirstName, signedByLastName: signedByLastName, status: status, verifiedAt: verifiedAt, verifiedByFirstName: verifiedByFirstName, verifiedByLastName: verifiedByLastName};
+	});
+var $author$project$Data$Common$nullString = $elm$json$Json$Decode$oneOf(
+	_List_fromArray(
+		[
+			$elm$json$Json$Decode$string,
+			$elm$json$Json$Decode$null('')
+		]));
+var $author$project$Data$Checklist$checklistDetails = A3(
+	$NoRedInk$elm_json_decode_pipeline$Json$Decode$Pipeline$required,
+	'Status',
+	$author$project$Data$Checklist$statusDecoder,
+	A4(
+		$NoRedInk$elm_json_decode_pipeline$Json$Decode$Pipeline$optional,
+		'VerifiedByLastName',
+		$author$project$Data$Common$nullString,
+		'',
+		A4(
+			$NoRedInk$elm_json_decode_pipeline$Json$Decode$Pipeline$optional,
+			'VerifiedByFirstName',
+			$author$project$Data$Common$nullString,
+			'',
+			A4(
+				$NoRedInk$elm_json_decode_pipeline$Json$Decode$Pipeline$optional,
+				'VerifiedAt',
+				$author$project$Data$Common$nullString,
+				'',
+				A3(
+					$NoRedInk$elm_json_decode_pipeline$Json$Decode$Pipeline$required,
+					'SignedByLastName',
+					$author$project$Data$Common$nullString,
+					A3(
+						$NoRedInk$elm_json_decode_pipeline$Json$Decode$Pipeline$required,
+						'SignedByFirstName',
+						$author$project$Data$Common$nullString,
+						A3(
+							$NoRedInk$elm_json_decode_pipeline$Json$Decode$Pipeline$required,
+							'SignedAt',
+							$author$project$Data$Common$nullString,
+							A3(
+								$NoRedInk$elm_json_decode_pipeline$Json$Decode$Pipeline$required,
+								'Comment',
+								$author$project$Data$Common$nullString,
+								$elm$json$Json$Decode$succeed($author$project$Data$Checklist$ChecklistDetails)))))))));
+var $author$project$Data$Checklist$Item = F7(
+	function (id, isHeading, isNa, isOk, metaTable, sequenceNumber, text) {
+		return {id: id, isHeading: isHeading, isNa: isNa, isOk: isOk, metaTable: metaTable, sequenceNumber: sequenceNumber, text: text};
+	});
+var $author$project$Data$Checklist$MetaTable = F3(
+	function (columnLabels, info, rows) {
+		return {columnLabels: columnLabels, info: info, rows: rows};
+	});
+var $elm$json$Json$Decode$bool = _Json_decodeBool;
+var $elm$json$Json$Decode$map7 = _Json_map7;
+var $author$project$Data$Checklist$ColumnLabel = F2(
+	function (id, label) {
+		return {id: id, label: label};
+	});
+var $author$project$Data$Checklist$columnLabelDecoder = A3(
+	$elm$json$Json$Decode$map2,
+	$author$project$Data$Checklist$ColumnLabel,
+	A2($elm$json$Json$Decode$field, 'Id', $elm$json$Json$Decode$int),
+	A2($elm$json$Json$Decode$field, 'Label', $author$project$Data$Common$nullString));
+var $elm$json$Json$Decode$map3 = _Json_map3;
+var $author$project$Data$Checklist$Row = F3(
+	function (cells, id, label) {
+		return {cells: cells, id: id, label: label};
+	});
+var $author$project$Data$Checklist$Cell = F3(
+	function (columnId, unit, value) {
+		return {columnId: columnId, unit: unit, value: value};
+	});
+var $author$project$Data$Checklist$cellDecoder = A4(
+	$elm$json$Json$Decode$map3,
+	$author$project$Data$Checklist$Cell,
+	A2($elm$json$Json$Decode$field, 'ColumnId', $elm$json$Json$Decode$int),
+	A2($elm$json$Json$Decode$field, 'Unit', $author$project$Data$Common$nullString),
+	A2($elm$json$Json$Decode$field, 'Value', $author$project$Data$Common$nullString));
+var $author$project$Data$Checklist$rowDecoder = A4(
+	$elm$json$Json$Decode$map3,
+	$author$project$Data$Checklist$Row,
+	A2(
+		$elm$json$Json$Decode$field,
+		'Cells',
+		$elm$json$Json$Decode$list($author$project$Data$Checklist$cellDecoder)),
+	A2($elm$json$Json$Decode$field, 'Id', $elm$json$Json$Decode$int),
+	A2($elm$json$Json$Decode$field, 'Label', $author$project$Data$Common$nullString));
+var $author$project$Data$Checklist$metaTableDecoder = A4(
+	$elm$json$Json$Decode$map3,
+	$author$project$Data$Checklist$MetaTable,
+	A2(
+		$elm$json$Json$Decode$field,
+		'ColumnLabels',
+		$elm$json$Json$Decode$list($author$project$Data$Checklist$columnLabelDecoder)),
+	A2($elm$json$Json$Decode$field, 'Info', $author$project$Data$Common$nullString),
+	A2(
+		$elm$json$Json$Decode$field,
+		'Rows',
+		$elm$json$Json$Decode$list($author$project$Data$Checklist$rowDecoder)));
+var $author$project$Data$Checklist$itemDecoder = A8(
+	$elm$json$Json$Decode$map7,
+	$author$project$Data$Checklist$Item,
+	A2($elm$json$Json$Decode$field, 'Id', $elm$json$Json$Decode$int),
+	A2($elm$json$Json$Decode$field, 'IsHeading', $elm$json$Json$Decode$bool),
+	A2($elm$json$Json$Decode$field, 'IsNotApplicable', $elm$json$Json$Decode$bool),
+	A2($elm$json$Json$Decode$field, 'IsOk', $elm$json$Json$Decode$bool),
+	A2(
+		$elm$json$Json$Decode$field,
+		'MetaTable',
+		$elm$json$Json$Decode$oneOf(
+			_List_fromArray(
+				[
+					$author$project$Data$Checklist$metaTableDecoder,
+					$elm$json$Json$Decode$null(
+					A3($author$project$Data$Checklist$MetaTable, _List_Nil, '', _List_Nil))
+				]))),
+	A2($elm$json$Json$Decode$field, 'SequenceNumber', $elm$json$Json$Decode$string),
+	A2($elm$json$Json$Decode$field, 'Text', $author$project$Data$Common$nullString));
+var $author$project$Data$Checklist$loopTagDecoder = A2($elm$json$Json$Decode$field, 'TagNo', $elm$json$Json$Decode$string);
+var $author$project$Data$Checklist$detailsApiDecoder = A3(
+	$NoRedInk$elm_json_decode_pipeline$Json$Decode$Pipeline$required,
+	'CheckList',
+	$author$project$Data$Checklist$checklistDetails,
+	A3(
+		$NoRedInk$elm_json_decode_pipeline$Json$Decode$Pipeline$required,
+		'CheckItems',
+		$elm$json$Json$Decode$list($author$project$Data$Checklist$itemDecoder),
+		A4(
+			$NoRedInk$elm_json_decode_pipeline$Json$Decode$Pipeline$optional,
+			'LoopTags',
+			$elm$json$Json$Decode$list($author$project$Data$Checklist$loopTagDecoder),
+			_List_Nil,
+			$elm$json$Json$Decode$succeed($author$project$Data$Checklist$Details))));
+var $elm$http$Http$emptyBody = _Http_emptyBody;
+var $elm$json$Json$Decode$decodeString = _Json_runOnString;
+var $elm$http$Http$expectStringResponse = F2(
+	function (toMsg, toResult) {
+		return A3(
+			_Http_expect,
+			'',
+			$elm$core$Basics$identity,
+			A2($elm$core$Basics$composeR, toResult, toMsg));
+	});
+var $elm$http$Http$expectJson = F2(
+	function (toMsg, decoder) {
+		return A2(
+			$elm$http$Http$expectStringResponse,
+			toMsg,
+			$elm$http$Http$resolve(
+				function (string) {
+					return A2(
+						$elm$core$Result$mapError,
+						$elm$json$Json$Decode$errorToString,
+						A2($elm$json$Json$Decode$decodeString, decoder, string));
+				}));
+	});
+var $elm$url$Url$Builder$int = F2(
+	function (key, value) {
+		return A2(
+			$elm$url$Url$Builder$QueryParameter,
+			$elm$url$Url$percentEncode(key),
+			$elm$core$String$fromInt(value));
 	});
 var $author$project$Api$checklistDetails = F3(
 	function (checklist, plantId, token) {
@@ -12480,41 +12569,192 @@ var $author$project$Update$getChecklistDetails = F2(
 				c));
 	});
 var $author$project$Types$DataError = {$: 'DataError'};
-var $author$project$Types$Loaded = function (a) {
-	return {$: 'Loaded', a: a};
-};
 var $author$project$Update$handleApiResult = F2(
 	function (apiResult, _v0) {
 		var m = _v0.a;
 		var c = _v0.b;
-		var id = apiResult.a;
-		var result = apiResult.b;
-		var updater = function (checklist) {
-			return _Utils_update(
-				checklist,
-				{
-					details: function () {
-						if (result.$ === 'Ok') {
-							var details = result.a;
-							return $author$project$Types$Loaded(details);
-						} else {
-							var err = result.a;
-							return $author$project$Types$DataError;
-						}
-					}()
-				});
-		};
-		return _Utils_Tuple2(
-			_Utils_update(
-				m,
-				{
-					checklists: A3(
-						$elm$core$Dict$update,
-						id,
-						$elm$core$Maybe$map(updater),
-						m.checklists)
-				}),
-			c);
+		switch (apiResult.$) {
+			case 'GotChecklistDetails':
+				var id = apiResult.a;
+				var result = apiResult.b;
+				var updater = function (checklist) {
+					return _Utils_update(
+						checklist,
+						{
+							details: function () {
+								if (result.$ === 'Ok') {
+									var details = result.a;
+									return $author$project$Types$Loaded(details);
+								} else {
+									var err = result.a;
+									return $author$project$Types$DataError;
+								}
+							}(),
+							status: function () {
+								if (result.$ === 'Ok') {
+									var details = result.a;
+									return details.checklistDetails.status;
+								} else {
+									var err = result.a;
+									return checklist.status;
+								}
+							}()
+						});
+				};
+				return _Utils_Tuple2(
+					_Utils_update(
+						m,
+						{
+							checklists: A3(
+								$elm$core$Dict$update,
+								id,
+								$elm$core$Maybe$map(updater),
+								m.checklists)
+						}),
+					c);
+			case 'SetNaResult':
+				var checklist = apiResult.a;
+				var checkItem = apiResult.b;
+				var result = apiResult.c;
+				if (result.$ === 'Ok') {
+					return A2(
+						$author$project$Update$apiRequest,
+						_List_fromArray(
+							[
+								$author$project$Api$checklistDetails(checklist)
+							]),
+						_Utils_Tuple2(m, c));
+				} else {
+					var err = result.a;
+					return _Utils_Tuple2(m, c);
+				}
+			case 'SetOkResult':
+				var checklist = apiResult.a;
+				var checkItem = apiResult.b;
+				var result = apiResult.c;
+				if (result.$ === 'Ok') {
+					return A2(
+						$author$project$Update$apiRequest,
+						_List_fromArray(
+							[
+								$author$project$Api$checklistDetails(checklist)
+							]),
+						_Utils_Tuple2(m, c));
+				} else {
+					var err = result.a;
+					return _Utils_Tuple2(m, c);
+				}
+			case 'ClearResult':
+				var checklist = apiResult.a;
+				var checkItem = apiResult.b;
+				var result = apiResult.c;
+				if (result.$ === 'Ok') {
+					return A2(
+						$author$project$Update$apiRequest,
+						_List_fromArray(
+							[
+								$author$project$Api$checklistDetails(checklist)
+							]),
+						_Utils_Tuple2(m, c));
+				} else {
+					var err = result.a;
+					return _Utils_Tuple2(m, c);
+				}
+			case 'SignChecklistResult':
+				var checklist = apiResult.a;
+				var result = apiResult.b;
+				if (result.$ === 'Ok') {
+					var details = result.a;
+					return A2(
+						$author$project$Update$apiRequest,
+						_List_fromArray(
+							[
+								$author$project$Api$checklistDetails(checklist)
+							]),
+						_Utils_Tuple2(m, c));
+				} else {
+					var err = result.a;
+					return _Utils_Tuple2(m, c);
+				}
+			case 'UnsignChecklistResult':
+				var checklist = apiResult.a;
+				var result = apiResult.b;
+				if (result.$ === 'Ok') {
+					return A2(
+						$author$project$Update$apiRequest,
+						_List_fromArray(
+							[
+								$author$project$Api$checklistDetails(checklist)
+							]),
+						_Utils_Tuple2(m, c));
+				} else {
+					var err = result.a;
+					return _Utils_Tuple2(m, c);
+				}
+			case 'VerifyChecklistResult':
+				var checklist = apiResult.a;
+				var result = apiResult.b;
+				if (result.$ === 'Ok') {
+					return A2(
+						$author$project$Update$apiRequest,
+						_List_fromArray(
+							[
+								$author$project$Api$checklistDetails(checklist)
+							]),
+						_Utils_Tuple2(m, c));
+				} else {
+					var err = result.a;
+					return _Utils_Tuple2(m, c);
+				}
+			case 'UnverifyChecklistResult':
+				var checklist = apiResult.a;
+				var result = apiResult.b;
+				if (result.$ === 'Ok') {
+					var err = result.a;
+					return A2(
+						$author$project$Update$apiRequest,
+						_List_fromArray(
+							[
+								$author$project$Api$checklistDetails(checklist)
+							]),
+						_Utils_Tuple2(m, c));
+				} else {
+					var err = result.a;
+					return _Utils_Tuple2(m, c);
+				}
+			case 'UpdateMetaTableCellResult':
+				var checklist = apiResult.a;
+				var result = apiResult.b;
+				if (result.$ === 'Ok') {
+					var err = result.a;
+					return A2(
+						$author$project$Update$apiRequest,
+						_List_fromArray(
+							[
+								$author$project$Api$checklistDetails(checklist)
+							]),
+						_Utils_Tuple2(m, c));
+				} else {
+					var err = result.a;
+					return _Utils_Tuple2(m, c);
+				}
+			default:
+				var checklist = apiResult.a;
+				var result = apiResult.b;
+				if (result.$ === 'Ok') {
+					var err = result.a;
+					return A2(
+						$author$project$Update$apiRequest,
+						_List_fromArray(
+							[
+								$author$project$Api$checklistDetails(checklist)
+							]),
+						_Utils_Tuple2(m, c));
+				} else {
+					var err = result.a;
+					return _Utils_Tuple2(m, c);
+				}
+		}
 	});
 var $author$project$Update$selectChecklist = F2(
 	function (checklist, _v0) {
@@ -12554,6 +12794,90 @@ var $author$project$Update$sendRequestsWaitingForToken = F2(
 				}
 			}());
 	});
+var $author$project$Messages$SetNaResult = F3(
+	function (a, b, c) {
+		return {$: 'SetNaResult', a: a, b: b, c: c};
+	});
+var $author$project$Api$setCheckItemNa = F4(
+	function (checklist, checkItem, plantId, token) {
+		return $elm$http$Http$request(
+			{
+				body: $elm$http$Http$jsonBody(
+					$elm$json$Json$Encode$object(
+						_List_fromArray(
+							[
+								_Utils_Tuple2(
+								'CheckListId',
+								$elm$json$Json$Encode$int(checklist.id)),
+								_Utils_Tuple2(
+								'CheckItemId',
+								$elm$json$Json$Encode$int(checkItem.id))
+							]))),
+				expect: $elm$http$Http$expectWhatever(
+					A2(
+						$elm$core$Basics$composeL,
+						$author$project$Messages$GotApiResult,
+						A2($author$project$Messages$SetNaResult, checklist, checkItem))),
+				headers: _List_fromArray(
+					[
+						A2($elm$http$Http$header, 'Authorization', 'Bearer ' + token)
+					]),
+				method: 'POST',
+				timeout: $elm$core$Maybe$Nothing,
+				tracker: $elm$core$Maybe$Nothing,
+				url: A2(
+					$author$project$Api$url,
+					_List_fromArray(
+						['CheckList', 'Item', 'SetNA']),
+					_List_fromArray(
+						[
+							A2($elm$url$Url$Builder$string, 'plantId', plantId),
+							$author$project$Api$apiVersion
+						]))
+			});
+	});
+var $author$project$Messages$SetOkResult = F3(
+	function (a, b, c) {
+		return {$: 'SetOkResult', a: a, b: b, c: c};
+	});
+var $author$project$Api$setCheckItemOk = F4(
+	function (checklist, checkItem, plantId, token) {
+		return $elm$http$Http$request(
+			{
+				body: $elm$http$Http$jsonBody(
+					$elm$json$Json$Encode$object(
+						_List_fromArray(
+							[
+								_Utils_Tuple2(
+								'CheckListId',
+								$elm$json$Json$Encode$int(checklist.id)),
+								_Utils_Tuple2(
+								'CheckItemId',
+								$elm$json$Json$Encode$int(checkItem.id))
+							]))),
+				expect: $elm$http$Http$expectWhatever(
+					A2(
+						$elm$core$Basics$composeL,
+						$author$project$Messages$GotApiResult,
+						A2($author$project$Messages$SetOkResult, checklist, checkItem))),
+				headers: _List_fromArray(
+					[
+						A2($elm$http$Http$header, 'Authorization', 'Bearer ' + token)
+					]),
+				method: 'POST',
+				timeout: $elm$core$Maybe$Nothing,
+				tracker: $elm$core$Maybe$Nothing,
+				url: A2(
+					$author$project$Api$url,
+					_List_fromArray(
+						['CheckList', 'Item', 'SetOk']),
+					_List_fromArray(
+						[
+							A2($elm$url$Url$Builder$string, 'plantId', plantId),
+							$author$project$Api$apiVersion
+						]))
+			});
+	});
 var $author$project$Update$setChecklistsTo = F2(
 	function (checklists, _v0) {
 		var m = _v0.a;
@@ -12573,6 +12897,50 @@ var $author$project$Update$setChecklistsTo = F2(
 				}),
 			c);
 	});
+var $author$project$Messages$SignChecklistResult = F2(
+	function (a, b) {
+		return {$: 'SignChecklistResult', a: a, b: b};
+	});
+var $author$project$Api$signChecklist = F3(
+	function (checklist, plantId, token) {
+		return $elm$http$Http$request(
+			{
+				body: $elm$http$Http$jsonBody(
+					$elm$json$Json$Encode$int(checklist.id)),
+				expect: $elm$http$Http$expectWhatever(
+					A2(
+						$elm$core$Basics$composeL,
+						$author$project$Messages$GotApiResult,
+						$author$project$Messages$SignChecklistResult(checklist))),
+				headers: _List_fromArray(
+					[
+						A2($elm$http$Http$header, 'Authorization', 'Bearer ' + token)
+					]),
+				method: 'POST',
+				timeout: $elm$core$Maybe$Nothing,
+				tracker: $elm$core$Maybe$Nothing,
+				url: A2(
+					$author$project$Api$url,
+					_List_fromArray(
+						[
+							'CheckList',
+							function () {
+							var _v0 = checklist.group;
+							if (_v0.$ === 'CPCL') {
+								return 'Comm';
+							} else {
+								return 'MC';
+							}
+						}(),
+							'Sign'
+						]),
+					_List_fromArray(
+						[
+							A2($elm$url$Url$Builder$string, 'plantId', plantId),
+							$author$project$Api$apiVersion
+						]))
+			});
+	});
 var $author$project$Update$unSelectChecklist = function (_v0) {
 	var m = _v0.a;
 	var c = _v0.b;
@@ -12582,6 +12950,242 @@ var $author$project$Update$unSelectChecklist = function (_v0) {
 			{selectedChecklist: $elm$core$Maybe$Nothing}),
 		c);
 };
+var $author$project$Messages$UnsignChecklistResult = F2(
+	function (a, b) {
+		return {$: 'UnsignChecklistResult', a: a, b: b};
+	});
+var $author$project$Api$unSignChecklist = F3(
+	function (checklist, plantId, token) {
+		return $elm$http$Http$request(
+			{
+				body: $elm$http$Http$jsonBody(
+					$elm$json$Json$Encode$int(checklist.id)),
+				expect: $elm$http$Http$expectWhatever(
+					A2(
+						$elm$core$Basics$composeL,
+						$author$project$Messages$GotApiResult,
+						$author$project$Messages$UnsignChecklistResult(checklist))),
+				headers: _List_fromArray(
+					[
+						A2($elm$http$Http$header, 'Authorization', 'Bearer ' + token)
+					]),
+				method: 'POST',
+				timeout: $elm$core$Maybe$Nothing,
+				tracker: $elm$core$Maybe$Nothing,
+				url: A2(
+					$author$project$Api$url,
+					_List_fromArray(
+						[
+							'CheckList',
+							function () {
+							var _v0 = checklist.group;
+							if (_v0.$ === 'CPCL') {
+								return 'Comm';
+							} else {
+								return 'MC';
+							}
+						}(),
+							'Unsign'
+						]),
+					_List_fromArray(
+						[
+							A2($elm$url$Url$Builder$string, 'plantId', plantId),
+							$author$project$Api$apiVersion
+						]))
+			});
+	});
+var $author$project$Messages$UnverifyChecklistResult = F2(
+	function (a, b) {
+		return {$: 'UnverifyChecklistResult', a: a, b: b};
+	});
+var $author$project$Api$unVerifyChecklist = F3(
+	function (checklist, plantId, token) {
+		return $elm$http$Http$request(
+			{
+				body: $elm$http$Http$jsonBody(
+					$elm$json$Json$Encode$int(checklist.id)),
+				expect: $elm$http$Http$expectWhatever(
+					A2(
+						$elm$core$Basics$composeL,
+						$author$project$Messages$GotApiResult,
+						$author$project$Messages$UnverifyChecklistResult(checklist))),
+				headers: _List_fromArray(
+					[
+						A2($elm$http$Http$header, 'Authorization', 'Bearer ' + token)
+					]),
+				method: 'POST',
+				timeout: $elm$core$Maybe$Nothing,
+				tracker: $elm$core$Maybe$Nothing,
+				url: A2(
+					$author$project$Api$url,
+					_List_fromArray(
+						[
+							'CheckList',
+							function () {
+							var _v0 = checklist.group;
+							if (_v0.$ === 'CPCL') {
+								return 'Comm';
+							} else {
+								return 'MC';
+							}
+						}(),
+							'Unverify'
+						]),
+					_List_fromArray(
+						[
+							A2($elm$url$Url$Builder$string, 'plantId', plantId),
+							$author$project$Api$apiVersion
+						]))
+			});
+	});
+var $author$project$Messages$CommentChecklistResult = F2(
+	function (a, b) {
+		return {$: 'CommentChecklistResult', a: a, b: b};
+	});
+var $author$project$Api$updateComment = F4(
+	function (checklist, comment, plantId, token) {
+		return $elm$http$Http$request(
+			{
+				body: $elm$http$Http$jsonBody(
+					$elm$json$Json$Encode$object(
+						_List_fromArray(
+							[
+								_Utils_Tuple2(
+								'CheckListId',
+								$elm$json$Json$Encode$int(checklist.id)),
+								_Utils_Tuple2(
+								'Comment',
+								$elm$json$Json$Encode$string(comment))
+							]))),
+				expect: $elm$http$Http$expectWhatever(
+					A2(
+						$elm$core$Basics$composeL,
+						$author$project$Messages$GotApiResult,
+						$author$project$Messages$CommentChecklistResult(checklist))),
+				headers: _List_fromArray(
+					[
+						A2($elm$http$Http$header, 'Authorization', 'Bearer ' + token)
+					]),
+				method: 'PUT',
+				timeout: $elm$core$Maybe$Nothing,
+				tracker: $elm$core$Maybe$Nothing,
+				url: A2(
+					$author$project$Api$url,
+					_List_fromArray(
+						[
+							'CheckList',
+							function () {
+							var _v0 = checklist.group;
+							if (_v0.$ === 'CPCL') {
+								return 'Comm';
+							} else {
+								return 'MC';
+							}
+						}(),
+							'Comment'
+						]),
+					_List_fromArray(
+						[
+							A2($elm$url$Url$Builder$string, 'plantId', plantId),
+							$author$project$Api$apiVersion
+						]))
+			});
+	});
+var $author$project$Messages$UpdateMetaTableCellResult = F2(
+	function (a, b) {
+		return {$: 'UpdateMetaTableCellResult', a: a, b: b};
+	});
+var $author$project$Api$updateMetaTableCell = F6(
+	function (checklist, checkItem, tableRow, cell, plantId, token) {
+		return $elm$http$Http$request(
+			{
+				body: $elm$http$Http$jsonBody(
+					$elm$json$Json$Encode$object(
+						_List_fromArray(
+							[
+								_Utils_Tuple2(
+								'CheckListId',
+								$elm$json$Json$Encode$int(checklist.id)),
+								_Utils_Tuple2(
+								'CheckItemId',
+								$elm$json$Json$Encode$int(checkItem.id)),
+								_Utils_Tuple2(
+								'RowId',
+								$elm$json$Json$Encode$int(tableRow.id)),
+								_Utils_Tuple2(
+								'ColumnId',
+								$elm$json$Json$Encode$int(cell.columnId)),
+								_Utils_Tuple2(
+								'Value',
+								$elm$json$Json$Encode$string(cell.value))
+							]))),
+				expect: $elm$http$Http$expectWhatever(
+					A2(
+						$elm$core$Basics$composeL,
+						$author$project$Messages$GotApiResult,
+						$author$project$Messages$UpdateMetaTableCellResult(checklist))),
+				headers: _List_fromArray(
+					[
+						A2($elm$http$Http$header, 'Authorization', 'Bearer ' + token)
+					]),
+				method: 'PUT',
+				timeout: $elm$core$Maybe$Nothing,
+				tracker: $elm$core$Maybe$Nothing,
+				url: A2(
+					$author$project$Api$url,
+					_List_fromArray(
+						['CheckList', 'Item', 'MetaTableCell']),
+					_List_fromArray(
+						[
+							A2($elm$url$Url$Builder$string, 'plantId', plantId),
+							$author$project$Api$apiVersion
+						]))
+			});
+	});
+var $author$project$Messages$VerifyChecklistResult = F2(
+	function (a, b) {
+		return {$: 'VerifyChecklistResult', a: a, b: b};
+	});
+var $author$project$Api$verifyChecklist = F3(
+	function (checklist, plantId, token) {
+		return $elm$http$Http$request(
+			{
+				body: $elm$http$Http$jsonBody(
+					$elm$json$Json$Encode$int(checklist.id)),
+				expect: $elm$http$Http$expectWhatever(
+					A2(
+						$elm$core$Basics$composeL,
+						$author$project$Messages$GotApiResult,
+						$author$project$Messages$VerifyChecklistResult(checklist))),
+				headers: _List_fromArray(
+					[
+						A2($elm$http$Http$header, 'Authorization', 'Bearer ' + token)
+					]),
+				method: 'POST',
+				timeout: $elm$core$Maybe$Nothing,
+				tracker: $elm$core$Maybe$Nothing,
+				url: A2(
+					$author$project$Api$url,
+					_List_fromArray(
+						[
+							'CheckList',
+							function () {
+							var _v0 = checklist.group;
+							if (_v0.$ === 'CPCL') {
+								return 'Comm';
+							} else {
+								return 'MC';
+							}
+						}(),
+							'Verify'
+						]),
+					_List_fromArray(
+						[
+							A2($elm$url$Url$Builder$string, 'plantId', plantId),
+							$author$project$Api$apiVersion
+						]))
+			});
+	});
 var $author$project$Update$update = F2(
 	function (msg, model) {
 		var mc = _Utils_Tuple2(model, $elm$core$Platform$Cmd$none);
@@ -12600,7 +13204,7 @@ var $author$project$Update$update = F2(
 			case 'DecodeError':
 				var err = msg.a;
 				return mc;
-			default:
+			case 'ChecklistPressed':
 				var checklist = msg.a;
 				return _Utils_eq(
 					model.selectedChecklist,
@@ -12608,6 +13212,190 @@ var $author$project$Update$update = F2(
 					$author$project$Update$getChecklistDetails,
 					checklist,
 					A2($author$project$Update$selectChecklist, checklist, mc));
+			case 'NaCheckItemPressed':
+				var checklist = msg.a;
+				var checkItem = msg.b;
+				var apiCall = checkItem.isNa ? $author$project$Api$clearCheckItem : $author$project$Api$setCheckItemNa;
+				return A2(
+					$author$project$Update$apiRequest,
+					_List_fromArray(
+						[
+							A2(apiCall, checklist, checkItem)
+						]),
+					mc);
+			case 'OkCheckItemPressed':
+				var checklist = msg.a;
+				var checkItem = msg.b;
+				var apiCall = checkItem.isOk ? $author$project$Api$clearCheckItem : $author$project$Api$setCheckItemOk;
+				return A2(
+					$author$project$Update$apiRequest,
+					_List_fromArray(
+						[
+							A2(apiCall, checklist, checkItem)
+						]),
+					mc);
+			case 'SignChecklistButtonPressed':
+				var checklist = msg.a;
+				return A2(
+					$author$project$Update$apiRequest,
+					_List_fromArray(
+						[
+							$author$project$Api$signChecklist(checklist)
+						]),
+					mc);
+			case 'UnsignChecklistButtonPressed':
+				var checklist = msg.a;
+				return A2(
+					$author$project$Update$apiRequest,
+					_List_fromArray(
+						[
+							$author$project$Api$unSignChecklist(checklist)
+						]),
+					mc);
+			case 'VerifyChecklistButtonPressed':
+				var checklist = msg.a;
+				return A2(
+					$author$project$Update$apiRequest,
+					_List_fromArray(
+						[
+							$author$project$Api$verifyChecklist(checklist)
+						]),
+					mc);
+			case 'UnverifyChecklistButtonPressed':
+				var checklist = msg.a;
+				return A2(
+					$author$project$Update$apiRequest,
+					_List_fromArray(
+						[
+							$author$project$Api$unVerifyChecklist(checklist)
+						]),
+					mc);
+			case 'MetaTableCellLostFocus':
+				var checklist = msg.a;
+				var checkItem = msg.b;
+				var tableRow = msg.c;
+				var cell = msg.d;
+				return A2(
+					$author$project$Update$apiRequest,
+					_List_fromArray(
+						[
+							A4($author$project$Api$updateMetaTableCell, checklist, checkItem, tableRow, cell)
+						]),
+					mc);
+			case 'MetaTableCellInput':
+				var checklist = msg.a;
+				var checkItem = msg.b;
+				var tableRow = msg.c;
+				var columnLabel = msg.d;
+				var str = msg.e;
+				var updater = function (cl) {
+					var _v1 = cl.details;
+					if (_v1.$ === 'Loaded') {
+						var details = _v1.a;
+						return _Utils_update(
+							cl,
+							{
+								details: $author$project$Types$Loaded(
+									_Utils_update(
+										details,
+										{
+											items: A2(
+												$elm$core$List$map,
+												function (item) {
+													if (_Utils_eq(item.id, checkItem.id)) {
+														var oldTable = item.metaTable;
+														return _Utils_update(
+															item,
+															{
+																metaTable: _Utils_update(
+																	oldTable,
+																	{
+																		rows: A2(
+																			$elm$core$List$map,
+																			function (row) {
+																				return _Utils_eq(row.id, tableRow.id) ? _Utils_update(
+																					row,
+																					{
+																						cells: A2(
+																							$elm$core$List$map,
+																							function (cell) {
+																								return _Utils_eq(cell.columnId, columnLabel.id) ? _Utils_update(
+																									cell,
+																									{value: str}) : cell;
+																							},
+																							row.cells)
+																					}) : row;
+																			},
+																			oldTable.rows)
+																	})
+															});
+													} else {
+														return item;
+													}
+												},
+												details.items)
+										}))
+							});
+					} else {
+						return cl;
+					}
+				};
+				return _Utils_Tuple2(
+					_Utils_update(
+						model,
+						{
+							checklists: A3(
+								$elm$core$Dict$update,
+								checklist.id,
+								$elm$core$Maybe$map(updater),
+								model.checklists)
+						}),
+					$elm$core$Platform$Cmd$none);
+			case 'CommentFieldInput':
+				var checklist = msg.a;
+				var str = msg.b;
+				var updater = function (cl) {
+					var _v2 = cl.details;
+					if (_v2.$ === 'Loaded') {
+						var details = _v2.a;
+						var oldChecklistDetails = details.checklistDetails;
+						return _Utils_update(
+							cl,
+							{
+								details: $author$project$Types$Loaded(
+									_Utils_update(
+										details,
+										{
+											checklistDetails: _Utils_update(
+												oldChecklistDetails,
+												{comment: str})
+										}))
+							});
+					} else {
+						return cl;
+					}
+				};
+				return _Utils_Tuple2(
+					_Utils_update(
+						model,
+						{
+							checklists: A3(
+								$elm$core$Dict$update,
+								checklist.id,
+								$elm$core$Maybe$map(updater),
+								model.checklists)
+						}),
+					$elm$core$Platform$Cmd$none);
+			default:
+				var checklist = msg.a;
+				var str = msg.b;
+				return A2(
+					$author$project$Update$apiRequest,
+					_List_fromArray(
+						[
+							A2($author$project$Api$updateComment, checklist, str)
+						]),
+					mc);
 		}
 	});
 var $elm$core$Dict$isEmpty = function (dict) {
@@ -12617,6 +13405,12 @@ var $elm$core$Dict$isEmpty = function (dict) {
 		return false;
 	}
 };
+var $mdgriffith$elm_ui$Internal$Model$Class = F2(
+	function (a, b) {
+		return {$: 'Class', a: a, b: b};
+	});
+var $mdgriffith$elm_ui$Internal$Flag$fontWeight = $mdgriffith$elm_ui$Internal$Flag$flag(13);
+var $mdgriffith$elm_ui$Element$Font$bold = A2($mdgriffith$elm_ui$Internal$Model$Class, $mdgriffith$elm_ui$Internal$Flag$fontWeight, $mdgriffith$elm_ui$Internal$Style$classes.bold);
 var $mdgriffith$elm_ui$Element$Background$color = function (clr) {
 	return A2(
 		$mdgriffith$elm_ui$Internal$Model$StyleClass,
@@ -12635,45 +13429,6 @@ var $mdgriffith$elm_ui$Internal$Model$Width = function (a) {
 	return {$: 'Width', a: a};
 };
 var $mdgriffith$elm_ui$Element$width = $mdgriffith$elm_ui$Internal$Model$Width;
-var $mdgriffith$elm_ui$Element$Keyed$column = F2(
-	function (attrs, children) {
-		return A4(
-			$mdgriffith$elm_ui$Internal$Model$element,
-			$mdgriffith$elm_ui$Internal$Model$asColumn,
-			$mdgriffith$elm_ui$Internal$Model$div,
-			A2(
-				$elm$core$List$cons,
-				$mdgriffith$elm_ui$Internal$Model$htmlClass($mdgriffith$elm_ui$Internal$Style$classes.contentTop + (' ' + $mdgriffith$elm_ui$Internal$Style$classes.contentLeft)),
-				A2(
-					$elm$core$List$cons,
-					$mdgriffith$elm_ui$Element$height($mdgriffith$elm_ui$Element$shrink),
-					A2(
-						$elm$core$List$cons,
-						$mdgriffith$elm_ui$Element$width($mdgriffith$elm_ui$Element$shrink),
-						attrs))),
-			$mdgriffith$elm_ui$Internal$Model$Keyed(children));
-	});
-var $author$project$Palette$mistBlue = A3($mdgriffith$elm_ui$Element$rgb255, 213, 234, 244);
-var $author$project$Messages$ChecklistPressed = function (a) {
-	return {$: 'ChecklistPressed', a: a};
-};
-var $author$project$Messages$NoOp = {$: 'NoOp'};
-var $mdgriffith$elm_ui$Internal$Model$AlignX = function (a) {
-	return {$: 'AlignX', a: a};
-};
-var $mdgriffith$elm_ui$Internal$Model$Right = {$: 'Right'};
-var $mdgriffith$elm_ui$Element$alignRight = $mdgriffith$elm_ui$Internal$Model$AlignX($mdgriffith$elm_ui$Internal$Model$Right);
-var $mdgriffith$elm_ui$Element$rgba255 = F4(
-	function (red, green, blue, a) {
-		return A4($mdgriffith$elm_ui$Internal$Model$Rgba, red / 255, green / 255, blue / 255, a);
-	});
-var $author$project$Palette$alphaMossGreen = A4($mdgriffith$elm_ui$Element$rgba255, 0, 112, 121, 0.7);
-var $mdgriffith$elm_ui$Internal$Model$Class = F2(
-	function (a, b) {
-		return {$: 'Class', a: a, b: b};
-	});
-var $mdgriffith$elm_ui$Internal$Flag$overflow = $mdgriffith$elm_ui$Internal$Flag$flag(20);
-var $mdgriffith$elm_ui$Element$clip = A2($mdgriffith$elm_ui$Internal$Model$Class, $mdgriffith$elm_ui$Internal$Flag$overflow, $mdgriffith$elm_ui$Internal$Style$classes.clip);
 var $mdgriffith$elm_ui$Element$column = F2(
 	function (attrs, children) {
 		return A4(
@@ -12692,15 +13447,23 @@ var $mdgriffith$elm_ui$Element$column = F2(
 						attrs))),
 			$mdgriffith$elm_ui$Internal$Model$Unkeyed(children));
 	});
-var $author$project$Palette$combination = F3(
-	function (fontColor, backgroundColor, attributes) {
-		return _Utils_ap(
-			attributes,
-			_List_fromArray(
-				[
-					$mdgriffith$elm_ui$Element$Font$color(fontColor),
-					$mdgriffith$elm_ui$Element$Background$color(backgroundColor)
-				]));
+var $mdgriffith$elm_ui$Element$Keyed$column = F2(
+	function (attrs, children) {
+		return A4(
+			$mdgriffith$elm_ui$Internal$Model$element,
+			$mdgriffith$elm_ui$Internal$Model$asColumn,
+			$mdgriffith$elm_ui$Internal$Model$div,
+			A2(
+				$elm$core$List$cons,
+				$mdgriffith$elm_ui$Internal$Model$htmlClass($mdgriffith$elm_ui$Internal$Style$classes.contentTop + (' ' + $mdgriffith$elm_ui$Internal$Style$classes.contentLeft)),
+				A2(
+					$elm$core$List$cons,
+					$mdgriffith$elm_ui$Element$height($mdgriffith$elm_ui$Element$shrink),
+					A2(
+						$elm$core$List$cons,
+						$mdgriffith$elm_ui$Element$width($mdgriffith$elm_ui$Element$shrink),
+						attrs))),
+			$mdgriffith$elm_ui$Internal$Model$Keyed(children));
 	});
 var $mdgriffith$elm_ui$Element$el = F2(
 	function (attrs, child) {
@@ -12719,6 +13482,37 @@ var $mdgriffith$elm_ui$Element$el = F2(
 				_List_fromArray(
 					[child])));
 	});
+var $author$project$Palette$mistBlue = A3($mdgriffith$elm_ui$Element$rgb255, 213, 234, 244);
+var $author$project$Palette$mossGreen = A3($mdgriffith$elm_ui$Element$rgb255, 0, 112, 121);
+var $author$project$Messages$ChecklistPressed = function (a) {
+	return {$: 'ChecklistPressed', a: a};
+};
+var $author$project$Messages$NoOp = {$: 'NoOp'};
+var $mdgriffith$elm_ui$Internal$Model$AlignX = function (a) {
+	return {$: 'AlignX', a: a};
+};
+var $mdgriffith$elm_ui$Internal$Model$Right = {$: 'Right'};
+var $mdgriffith$elm_ui$Element$alignRight = $mdgriffith$elm_ui$Internal$Model$AlignX($mdgriffith$elm_ui$Internal$Model$Right);
+var $mdgriffith$elm_ui$Element$rgba255 = F4(
+	function (red, green, blue, a) {
+		return A4($mdgriffith$elm_ui$Internal$Model$Rgba, red / 255, green / 255, blue / 255, a);
+	});
+var $author$project$Palette$alphaMossGreen = A4($mdgriffith$elm_ui$Element$rgba255, 0, 112, 121, 0.7);
+var $author$project$Palette$alphaYellow = A4($mdgriffith$elm_ui$Element$rgba255, 251, 202, 54, 1);
+var $author$project$Palette$blue = A3($mdgriffith$elm_ui$Element$rgb255, 95, 192, 220);
+var $mdgriffith$elm_ui$Internal$Flag$overflow = $mdgriffith$elm_ui$Internal$Flag$flag(20);
+var $mdgriffith$elm_ui$Element$clip = A2($mdgriffith$elm_ui$Internal$Model$Class, $mdgriffith$elm_ui$Internal$Flag$overflow, $mdgriffith$elm_ui$Internal$Style$classes.clip);
+var $author$project$Palette$combination = F3(
+	function (fontColor, backgroundColor, attributes) {
+		return _Utils_ap(
+			attributes,
+			_List_fromArray(
+				[
+					$mdgriffith$elm_ui$Element$Font$color(fontColor),
+					$mdgriffith$elm_ui$Element$Background$color(backgroundColor)
+				]));
+	});
+var $author$project$Palette$grey = A3($mdgriffith$elm_ui$Element$rgb255, 217, 217, 217);
 var $elm$core$Basics$always = F2(
 	function (a, _v0) {
 		return a;
@@ -13178,7 +13972,6 @@ var $mdgriffith$elm_ui$Element$createNearby = F2(
 var $mdgriffith$elm_ui$Element$inFront = function (element) {
 	return A2($mdgriffith$elm_ui$Element$createNearby, $mdgriffith$elm_ui$Internal$Model$InFront, element);
 };
-var $author$project$Palette$mossGreen = A3($mdgriffith$elm_ui$Element$rgb255, 0, 112, 121);
 var $mdgriffith$elm_ui$Internal$Model$Empty = {$: 'Empty'};
 var $mdgriffith$elm_ui$Element$none = $mdgriffith$elm_ui$Internal$Model$Empty;
 var $elm$virtual_dom$VirtualDom$Custom = function (a) {
@@ -13296,8 +14089,14 @@ var $mdgriffith$elm_ui$Internal$Model$Px = function (a) {
 };
 var $mdgriffith$elm_ui$Element$px = $mdgriffith$elm_ui$Internal$Model$Px;
 var $author$project$Palette$red = A3($mdgriffith$elm_ui$Element$rgb255, 255, 59, 59);
-var $mdgriffith$elm_ui$Internal$Flag$fontWeight = $mdgriffith$elm_ui$Internal$Flag$flag(13);
-var $mdgriffith$elm_ui$Element$Font$bold = A2($mdgriffith$elm_ui$Internal$Model$Class, $mdgriffith$elm_ui$Internal$Flag$fontWeight, $mdgriffith$elm_ui$Internal$Style$classes.bold);
+var $author$project$Messages$NaCheckItemPressed = F2(
+	function (a, b) {
+		return {$: 'NaCheckItemPressed', a: a, b: b};
+	});
+var $author$project$Messages$OkCheckItemPressed = F2(
+	function (a, b) {
+		return {$: 'OkCheckItemPressed', a: a, b: b};
+	});
 var $mdgriffith$elm_ui$Internal$Flag$fontAlignment = $mdgriffith$elm_ui$Internal$Flag$flag(12);
 var $mdgriffith$elm_ui$Element$Font$center = A2($mdgriffith$elm_ui$Internal$Model$Class, $mdgriffith$elm_ui$Internal$Flag$fontAlignment, $mdgriffith$elm_ui$Internal$Style$classes.textCenter);
 var $mdgriffith$elm_ui$Internal$Model$CenterX = {$: 'CenterX'};
@@ -13307,7 +14106,27 @@ var $mdgriffith$elm_ui$Internal$Model$AlignY = function (a) {
 };
 var $mdgriffith$elm_ui$Internal$Model$CenterY = {$: 'CenterY'};
 var $mdgriffith$elm_ui$Element$centerY = $mdgriffith$elm_ui$Internal$Model$AlignY($mdgriffith$elm_ui$Internal$Model$CenterY);
-var $author$project$Palette$blue = A3($mdgriffith$elm_ui$Element$rgb255, 95, 192, 220);
+var $mdgriffith$elm_ui$Internal$Model$Transparency = F2(
+	function (a, b) {
+		return {$: 'Transparency', a: a, b: b};
+	});
+var $mdgriffith$elm_ui$Internal$Flag$transparency = $mdgriffith$elm_ui$Internal$Flag$flag(0);
+var $mdgriffith$elm_ui$Element$alpha = function (o) {
+	var transparency = function (x) {
+		return 1 - x;
+	}(
+		A2(
+			$elm$core$Basics$min,
+			1.0,
+			A2($elm$core$Basics$max, 0.0, o)));
+	return A2(
+		$mdgriffith$elm_ui$Internal$Model$StyleClass,
+		$mdgriffith$elm_ui$Internal$Flag$transparency,
+		A2(
+			$mdgriffith$elm_ui$Internal$Model$Transparency,
+			'transparency-' + $mdgriffith$elm_ui$Internal$Model$floatClass(transparency),
+			transparency));
+};
 var $mdgriffith$elm_ui$Internal$Flag$borderColor = $mdgriffith$elm_ui$Internal$Flag$flag(28);
 var $mdgriffith$elm_ui$Element$Border$color = function (clr) {
 	return A2(
@@ -13330,6 +14149,7 @@ var $mdgriffith$elm_ui$Element$Border$rounded = function (radius) {
 			'border-radius',
 			$elm$core$String$fromInt(radius) + 'px'));
 };
+var $elm$html$Html$Attributes$title = $elm$html$Html$Attributes$stringProperty('title');
 var $mdgriffith$elm_ui$Element$rgb = F3(
 	function (r, g, b) {
 		return A4($mdgriffith$elm_ui$Internal$Model$Rgba, r, g, b, 1);
@@ -13351,24 +14171,37 @@ var $mdgriffith$elm_ui$Element$Border$width = function (v) {
 			v,
 			v));
 };
-var $author$project$View$checkButton = F2(
-	function (size, isActive) {
+var $author$project$View$checkButton = F4(
+	function (size, isDisabled, isActive, msg) {
 		return A2(
 			$mdgriffith$elm_ui$Element$el,
-			_List_fromArray(
-				[
-					$mdgriffith$elm_ui$Element$height(
-					$mdgriffith$elm_ui$Element$px(
-						$elm$core$Basics$round(size))),
-					$mdgriffith$elm_ui$Element$width(
-					$mdgriffith$elm_ui$Element$px(
-						$elm$core$Basics$round(size))),
-					$mdgriffith$elm_ui$Element$Border$rounded(1000),
-					$mdgriffith$elm_ui$Element$Border$color($author$project$Palette$mistBlue),
-					$mdgriffith$elm_ui$Element$Border$width(2),
-					$mdgriffith$elm_ui$Element$Background$color(
-					isActive ? $author$project$Palette$blue : $author$project$Palette$white)
-				]),
+			_Utils_ap(
+				_List_fromArray(
+					[
+						$mdgriffith$elm_ui$Element$height(
+						$mdgriffith$elm_ui$Element$px(
+							$elm$core$Basics$round(size))),
+						$mdgriffith$elm_ui$Element$width(
+						$mdgriffith$elm_ui$Element$px(
+							$elm$core$Basics$round(size))),
+						$mdgriffith$elm_ui$Element$Border$rounded(1000),
+						$mdgriffith$elm_ui$Element$Border$color($author$project$Palette$mistBlue),
+						$mdgriffith$elm_ui$Element$Border$width(2),
+						$mdgriffith$elm_ui$Element$Background$color(
+						isActive ? $author$project$Palette$blue : $author$project$Palette$white)
+					]),
+				isDisabled ? _List_fromArray(
+					[
+						$mdgriffith$elm_ui$Element$alpha(0.3),
+						$mdgriffith$elm_ui$Element$htmlAttribute(
+						A2($elm$html$Html$Attributes$style, 'cursor', 'not-allowed')),
+						$mdgriffith$elm_ui$Element$htmlAttribute(
+						$elm$html$Html$Attributes$title('Checklist is signed'))
+					]) : _List_fromArray(
+					[
+						$mdgriffith$elm_ui$Element$pointer,
+						$author$project$View$onClick(msg)
+					])),
 			$mdgriffith$elm_ui$Element$none);
 	});
 var $mdgriffith$elm_ui$Internal$Flag$borderStyle = $mdgriffith$elm_ui$Internal$Flag$flag(11);
@@ -13384,10 +14217,35 @@ var $elm$core$List$head = function (list) {
 		return $elm$core$Maybe$Nothing;
 	}
 };
+var $author$project$Messages$MetaTableCellInput = F5(
+	function (a, b, c, d, e) {
+		return {$: 'MetaTableCellInput', a: a, b: b, c: c, d: d, e: e};
+	});
+var $author$project$Messages$MetaTableCellLostFocus = F4(
+	function (a, b, c, d) {
+		return {$: 'MetaTableCellLostFocus', a: a, b: b, c: c, d: d};
+	});
 var $mdgriffith$elm_ui$Element$Input$HiddenLabel = function (a) {
 	return {$: 'HiddenLabel', a: a};
 };
 var $mdgriffith$elm_ui$Element$Input$labelHidden = $mdgriffith$elm_ui$Element$Input$HiddenLabel;
+var $elm$virtual_dom$VirtualDom$Normal = function (a) {
+	return {$: 'Normal', a: a};
+};
+var $elm$html$Html$Events$on = F2(
+	function (event, decoder) {
+		return A2(
+			$elm$virtual_dom$VirtualDom$on,
+			event,
+			$elm$virtual_dom$VirtualDom$Normal(decoder));
+	});
+var $elm$html$Html$Events$onBlur = function (msg) {
+	return A2(
+		$elm$html$Html$Events$on,
+		'blur',
+		$elm$json$Json$Decode$succeed(msg));
+};
+var $mdgriffith$elm_ui$Element$Events$onLoseFocus = A2($elm$core$Basics$composeL, $mdgriffith$elm_ui$Internal$Model$Attr, $elm$html$Html$Events$onBlur);
 var $mdgriffith$elm_ui$Internal$Model$AsRow = {$: 'AsRow'};
 var $mdgriffith$elm_ui$Internal$Model$asRow = $mdgriffith$elm_ui$Internal$Model$AsRow;
 var $mdgriffith$elm_ui$Element$row = F2(
@@ -13962,27 +14820,6 @@ var $mdgriffith$elm_ui$Element$Input$renderBox = function (_v0) {
 	var left = _v0.left;
 	return $elm$core$String$fromInt(top) + ('px ' + ($elm$core$String$fromInt(right) + ('px ' + ($elm$core$String$fromInt(bottom) + ('px ' + ($elm$core$String$fromInt(left) + 'px'))))));
 };
-var $mdgriffith$elm_ui$Internal$Model$Transparency = F2(
-	function (a, b) {
-		return {$: 'Transparency', a: a, b: b};
-	});
-var $mdgriffith$elm_ui$Internal$Flag$transparency = $mdgriffith$elm_ui$Internal$Flag$flag(0);
-var $mdgriffith$elm_ui$Element$alpha = function (o) {
-	var transparency = function (x) {
-		return 1 - x;
-	}(
-		A2(
-			$elm$core$Basics$min,
-			1.0,
-			A2($elm$core$Basics$max, 0.0, o)));
-	return A2(
-		$mdgriffith$elm_ui$Internal$Model$StyleClass,
-		$mdgriffith$elm_ui$Internal$Flag$transparency,
-		A2(
-			$mdgriffith$elm_ui$Internal$Model$Transparency,
-			'transparency-' + $mdgriffith$elm_ui$Internal$Model$floatClass(transparency),
-			transparency));
-};
 var $mdgriffith$elm_ui$Element$Input$charcoal = A3($mdgriffith$elm_ui$Element$rgb, 136 / 255, 138 / 255, 133 / 255);
 var $mdgriffith$elm_ui$Element$rgba = $mdgriffith$elm_ui$Internal$Model$Rgba;
 var $mdgriffith$elm_ui$Element$Input$renderPlaceholder = F3(
@@ -14277,28 +15114,34 @@ var $mdgriffith$elm_ui$Element$Input$text = $mdgriffith$elm_ui$Element$Input$tex
 		spellchecked: false,
 		type_: $mdgriffith$elm_ui$Element$Input$TextInputNode('text')
 	});
-var $author$project$View$renderCellInput = F6(
-	function (size, checklist, checkItem, columnHeader, tableRow, cell) {
+var $author$project$View$renderCellInput = F7(
+	function (size, isDisabled, checklist, checkItem, columnHeader, tableRow, cell) {
 		return A2(
 			$mdgriffith$elm_ui$Element$row,
 			_List_fromArray(
 				[
-					$mdgriffith$elm_ui$Element$spacing(4)
+					$mdgriffith$elm_ui$Element$spacing(4),
+					$mdgriffith$elm_ui$Element$Font$size(
+					$elm$core$Basics$round(size))
 				]),
 			_List_fromArray(
 				[
-					A2(
+					isDisabled ? A2(
+					$mdgriffith$elm_ui$Element$el,
+					_List_fromArray(
+						[
+							$mdgriffith$elm_ui$Element$Font$color($author$project$Palette$blue)
+						]),
+					$mdgriffith$elm_ui$Element$text(cell.value)) : A2(
 					$mdgriffith$elm_ui$Element$Input$text,
 					_List_fromArray(
 						[
-							$mdgriffith$elm_ui$Element$Font$size(
-							$elm$core$Basics$round(size))
+							$mdgriffith$elm_ui$Element$Events$onLoseFocus(
+							A4($author$project$Messages$MetaTableCellLostFocus, checklist, checkItem, tableRow, cell))
 						]),
 					{
 						label: $mdgriffith$elm_ui$Element$Input$labelHidden(''),
-						onChange: function (txt) {
-							return $author$project$Messages$NoOp;
-						},
+						onChange: A4($author$project$Messages$MetaTableCellInput, checklist, checkItem, tableRow, columnHeader),
 						placeholder: $elm$core$Maybe$Nothing,
 						text: cell.value
 					}),
@@ -14543,8 +15386,8 @@ var $mdgriffith$elm_ui$Element$table = F2(
 				data: config.data
 			});
 	});
-var $author$project$View$renderMetaTable = F3(
-	function (size, checklist, checkItem) {
+var $author$project$View$renderMetaTable = F4(
+	function (size, isDisabled, checklist, checkItem) {
 		return A2(
 			$mdgriffith$elm_ui$Element$table,
 			_List_fromArray(
@@ -14570,7 +15413,7 @@ var $author$project$View$renderMetaTable = F3(
 									$mdgriffith$elm_ui$Element$none,
 									A2(
 										$elm$core$Maybe$map,
-										A5($author$project$View$renderCellInput, size, checklist, checkItem, ch, row),
+										A6($author$project$View$renderCellInput, size, isDisabled, checklist, checkItem, ch, row),
 										$elm$core$List$head(
 											A2(
 												$elm$core$List$filter,
@@ -14599,8 +15442,9 @@ var $mdgriffith$elm_ui$Element$Border$widthXY = F2(
 				y,
 				x));
 	});
-var $author$project$View$renderChecklistCheckItem = F3(
-	function (size, checklist, item) {
+var $author$project$View$renderChecklistCheckItem = F4(
+	function (size, checklist, signedAt, item) {
+		var isDisabled = signedAt !== '';
 		return item.isHeading ? A2(
 			$mdgriffith$elm_ui$Element$column,
 			_List_fromArray(
@@ -14665,7 +15509,7 @@ var $author$project$View$renderChecklistCheckItem = F3(
 											]));
 								},
 								$elm$core$String$lines(item.text))),
-							$elm$core$List$isEmpty(item.metaTable.columnLabels) ? $mdgriffith$elm_ui$Element$none : A3($author$project$View$renderMetaTable, size, checklist, item)
+							$elm$core$List$isEmpty(item.metaTable.columnLabels) ? $mdgriffith$elm_ui$Element$none : A4($author$project$View$renderMetaTable, size, isDisabled, checklist, item)
 						])),
 					A2(
 					$mdgriffith$elm_ui$Element$row,
@@ -14677,13 +15521,23 @@ var $author$project$View$renderChecklistCheckItem = F3(
 						]),
 					_List_fromArray(
 						[
-							A2($author$project$View$checkButton, size, item.isNa),
-							A2($author$project$View$checkButton, size, item.isOk)
+							A4(
+							$author$project$View$checkButton,
+							size,
+							isDisabled,
+							item.isOk,
+							A2($author$project$Messages$OkCheckItemPressed, checklist, item)),
+							A4(
+							$author$project$View$checkButton,
+							size,
+							isDisabled,
+							item.isNa,
+							A2($author$project$Messages$NaCheckItemPressed, checklist, item))
 						]))
 				]));
 	});
 var $author$project$View$renderChecklistItems = F3(
-	function (size, checklist, items) {
+	function (size, checklist, details) {
 		return A2(
 			$mdgriffith$elm_ui$Element$column,
 			_List_fromArray(
@@ -14693,8 +15547,465 @@ var $author$project$View$renderChecklistItems = F3(
 				]),
 			A2(
 				$elm$core$List$map,
-				A2($author$project$View$renderChecklistCheckItem, size, checklist),
-				items));
+				A3($author$project$View$renderChecklistCheckItem, size, checklist, details.checklistDetails.signedAt),
+				details.items));
+	});
+var $author$project$Messages$CommentFieldInput = F2(
+	function (a, b) {
+		return {$: 'CommentFieldInput', a: a, b: b};
+	});
+var $author$project$Messages$CommentFieldLostFocus = F2(
+	function (a, b) {
+		return {$: 'CommentFieldLostFocus', a: a, b: b};
+	});
+var $mdgriffith$elm_ui$Element$Input$multiline = F2(
+	function (attrs, multi) {
+		return A3(
+			$mdgriffith$elm_ui$Element$Input$textHelper,
+			{autofill: $elm$core$Maybe$Nothing, spellchecked: multi.spellcheck, type_: $mdgriffith$elm_ui$Element$Input$TextArea},
+			attrs,
+			{label: multi.label, onChange: multi.onChange, placeholder: multi.placeholder, text: multi.text});
+	});
+var $mdgriffith$elm_ui$Element$Input$Placeholder = F2(
+	function (a, b) {
+		return {$: 'Placeholder', a: a, b: b};
+	});
+var $mdgriffith$elm_ui$Element$Input$placeholder = $mdgriffith$elm_ui$Element$Input$Placeholder;
+var $author$project$View$renderCommentField = F3(
+	function (size, checklist, details) {
+		var isEnabled = $elm$core$String$isEmpty(details.checklistDetails.signedAt);
+		return ($elm$core$String$isEmpty(details.checklistDetails.comment) && (!isEnabled)) ? $mdgriffith$elm_ui$Element$none : A2(
+			$mdgriffith$elm_ui$Element$column,
+			_List_fromArray(
+				[
+					$mdgriffith$elm_ui$Element$width($mdgriffith$elm_ui$Element$fill)
+				]),
+			_List_fromArray(
+				[
+					A2(
+					$mdgriffith$elm_ui$Element$el,
+					_List_fromArray(
+						[
+							$mdgriffith$elm_ui$Element$width($mdgriffith$elm_ui$Element$fill),
+							$mdgriffith$elm_ui$Element$Background$color($author$project$Palette$blue),
+							$mdgriffith$elm_ui$Element$Font$color($author$project$Palette$white),
+							$mdgriffith$elm_ui$Element$padding(8),
+							$mdgriffith$elm_ui$Element$Font$size(
+							A2($author$project$Data$Common$scaledInt, size, -1))
+						]),
+					$mdgriffith$elm_ui$Element$text('Comment')),
+					isEnabled ? A2(
+					$mdgriffith$elm_ui$Element$Input$multiline,
+					_List_fromArray(
+						[
+							$mdgriffith$elm_ui$Element$width($mdgriffith$elm_ui$Element$fill),
+							$mdgriffith$elm_ui$Element$Events$onLoseFocus(
+							A2($author$project$Messages$CommentFieldLostFocus, checklist, details.checklistDetails.comment))
+						]),
+					{
+						label: $mdgriffith$elm_ui$Element$Input$labelHidden(''),
+						onChange: $author$project$Messages$CommentFieldInput(checklist),
+						placeholder: $elm$core$Maybe$Just(
+							A2(
+								$mdgriffith$elm_ui$Element$Input$placeholder,
+								_List_Nil,
+								$mdgriffith$elm_ui$Element$text('No comment'))),
+						spellcheck: true,
+						text: details.checklistDetails.comment
+					}) : A2(
+					$mdgriffith$elm_ui$Element$column,
+					_List_fromArray(
+						[
+							$mdgriffith$elm_ui$Element$width($mdgriffith$elm_ui$Element$fill),
+							$mdgriffith$elm_ui$Element$padding(8)
+						]),
+					A2(
+						$elm$core$List$map,
+						function (txt) {
+							return A2(
+								$mdgriffith$elm_ui$Element$paragraph,
+								_List_fromArray(
+									[
+										$mdgriffith$elm_ui$Element$width($mdgriffith$elm_ui$Element$fill)
+									]),
+								_List_fromArray(
+									[
+										$mdgriffith$elm_ui$Element$text(txt)
+									]));
+						},
+						$elm$core$String$lines(details.checklistDetails.comment)))
+				]));
+	});
+var $author$project$Messages$SignChecklistButtonPressed = function (a) {
+	return {$: 'SignChecklistButtonPressed', a: a};
+};
+var $author$project$Messages$UnsignChecklistButtonPressed = function (a) {
+	return {$: 'UnsignChecklistButtonPressed', a: a};
+};
+var $author$project$Messages$UnverifyChecklistButtonPressed = function (a) {
+	return {$: 'UnverifyChecklistButtonPressed', a: a};
+};
+var $author$project$Messages$VerifyChecklistButtonPressed = function (a) {
+	return {$: 'VerifyChecklistButtonPressed', a: a};
+};
+var $author$project$View$signButton = F4(
+	function (size, name, maybeDisabled, msg) {
+		var deactiveAttributes = function (message) {
+			return _List_fromArray(
+				[
+					$mdgriffith$elm_ui$Element$alpha(0.3),
+					$mdgriffith$elm_ui$Element$htmlAttribute(
+					A2($elm$html$Html$Attributes$style, 'cursor', 'not-allowed')),
+					$mdgriffith$elm_ui$Element$htmlAttribute(
+					$elm$html$Html$Attributes$title(message))
+				]);
+		};
+		var activeAttributes = _List_fromArray(
+			[
+				$mdgriffith$elm_ui$Element$pointer,
+				$author$project$View$onClick(msg)
+			]);
+		return A2(
+			$mdgriffith$elm_ui$Element$el,
+			_Utils_ap(
+				_List_fromArray(
+					[
+						$mdgriffith$elm_ui$Element$width(
+						$mdgriffith$elm_ui$Element$px(
+							$elm$core$Basics$round(size * 4))),
+						$mdgriffith$elm_ui$Element$height(
+						$mdgriffith$elm_ui$Element$px(
+							$elm$core$Basics$round(size * 2))),
+						$mdgriffith$elm_ui$Element$Background$color($author$project$Palette$blue),
+						$mdgriffith$elm_ui$Element$Font$color($author$project$Palette$white),
+						$mdgriffith$elm_ui$Element$Border$rounded(10)
+					]),
+				function () {
+					if (maybeDisabled.$ === 'Just') {
+						var message = maybeDisabled.a;
+						return deactiveAttributes(message);
+					} else {
+						return activeAttributes;
+					}
+				}()),
+			A2(
+				$mdgriffith$elm_ui$Element$el,
+				_List_fromArray(
+					[
+						$mdgriffith$elm_ui$Element$centerX,
+						$mdgriffith$elm_ui$Element$centerY,
+						$mdgriffith$elm_ui$Element$Font$size(
+						$elm$core$Basics$round(size))
+					]),
+				$mdgriffith$elm_ui$Element$text(name)));
+	});
+var $mdgriffith$elm_ui$Element$spacingXY = F2(
+	function (x, y) {
+		return A2(
+			$mdgriffith$elm_ui$Internal$Model$StyleClass,
+			$mdgriffith$elm_ui$Internal$Flag$spacing,
+			A3(
+				$mdgriffith$elm_ui$Internal$Model$SpacingStyle,
+				A2($mdgriffith$elm_ui$Internal$Model$spacingName, x, y),
+				x,
+				y));
+	});
+var $mdgriffith$elm_ui$Internal$Model$Padding = F5(
+	function (a, b, c, d, e) {
+		return {$: 'Padding', a: a, b: b, c: c, d: d, e: e};
+	});
+var $mdgriffith$elm_ui$Internal$Model$Spaced = F3(
+	function (a, b, c) {
+		return {$: 'Spaced', a: a, b: b, c: c};
+	});
+var $mdgriffith$elm_ui$Internal$Model$extractSpacingAndPadding = function (attrs) {
+	return A3(
+		$elm$core$List$foldr,
+		F2(
+			function (attr, _v0) {
+				var pad = _v0.a;
+				var spacing = _v0.b;
+				return _Utils_Tuple2(
+					function () {
+						if (pad.$ === 'Just') {
+							var x = pad.a;
+							return pad;
+						} else {
+							if ((attr.$ === 'StyleClass') && (attr.b.$ === 'PaddingStyle')) {
+								var _v3 = attr.b;
+								var name = _v3.a;
+								var t = _v3.b;
+								var r = _v3.c;
+								var b = _v3.d;
+								var l = _v3.e;
+								return $elm$core$Maybe$Just(
+									A5($mdgriffith$elm_ui$Internal$Model$Padding, name, t, r, b, l));
+							} else {
+								return $elm$core$Maybe$Nothing;
+							}
+						}
+					}(),
+					function () {
+						if (spacing.$ === 'Just') {
+							var x = spacing.a;
+							return spacing;
+						} else {
+							if ((attr.$ === 'StyleClass') && (attr.b.$ === 'SpacingStyle')) {
+								var _v6 = attr.b;
+								var name = _v6.a;
+								var x = _v6.b;
+								var y = _v6.c;
+								return $elm$core$Maybe$Just(
+									A3($mdgriffith$elm_ui$Internal$Model$Spaced, name, x, y));
+							} else {
+								return $elm$core$Maybe$Nothing;
+							}
+						}
+					}());
+			}),
+		_Utils_Tuple2($elm$core$Maybe$Nothing, $elm$core$Maybe$Nothing),
+		attrs);
+};
+var $mdgriffith$elm_ui$Element$wrappedRow = F2(
+	function (attrs, children) {
+		var _v0 = $mdgriffith$elm_ui$Internal$Model$extractSpacingAndPadding(attrs);
+		var padded = _v0.a;
+		var spaced = _v0.b;
+		if (spaced.$ === 'Nothing') {
+			return A4(
+				$mdgriffith$elm_ui$Internal$Model$element,
+				$mdgriffith$elm_ui$Internal$Model$asRow,
+				$mdgriffith$elm_ui$Internal$Model$div,
+				A2(
+					$elm$core$List$cons,
+					$mdgriffith$elm_ui$Internal$Model$htmlClass($mdgriffith$elm_ui$Internal$Style$classes.contentLeft + (' ' + ($mdgriffith$elm_ui$Internal$Style$classes.contentCenterY + (' ' + $mdgriffith$elm_ui$Internal$Style$classes.wrapped)))),
+					A2(
+						$elm$core$List$cons,
+						$mdgriffith$elm_ui$Element$width($mdgriffith$elm_ui$Element$shrink),
+						A2(
+							$elm$core$List$cons,
+							$mdgriffith$elm_ui$Element$height($mdgriffith$elm_ui$Element$shrink),
+							attrs))),
+				$mdgriffith$elm_ui$Internal$Model$Unkeyed(children));
+		} else {
+			var _v2 = spaced.a;
+			var spaceName = _v2.a;
+			var x = _v2.b;
+			var y = _v2.c;
+			var newPadding = function () {
+				if (padded.$ === 'Just') {
+					var _v5 = padded.a;
+					var name = _v5.a;
+					var t = _v5.b;
+					var r = _v5.c;
+					var b = _v5.d;
+					var l = _v5.e;
+					if ((_Utils_cmp(r, x / 2) > -1) && (_Utils_cmp(b, y / 2) > -1)) {
+						var newTop = t - (y / 2);
+						var newRight = r - (x / 2);
+						var newLeft = l - (x / 2);
+						var newBottom = b - (y / 2);
+						return $elm$core$Maybe$Just(
+							A2(
+								$mdgriffith$elm_ui$Internal$Model$StyleClass,
+								$mdgriffith$elm_ui$Internal$Flag$padding,
+								A5(
+									$mdgriffith$elm_ui$Internal$Model$PaddingStyle,
+									A4($mdgriffith$elm_ui$Internal$Model$paddingNameFloat, newTop, newRight, newBottom, newLeft),
+									newTop,
+									newRight,
+									newBottom,
+									newLeft)));
+					} else {
+						return $elm$core$Maybe$Nothing;
+					}
+				} else {
+					return $elm$core$Maybe$Nothing;
+				}
+			}();
+			if (newPadding.$ === 'Just') {
+				var pad = newPadding.a;
+				return A4(
+					$mdgriffith$elm_ui$Internal$Model$element,
+					$mdgriffith$elm_ui$Internal$Model$asRow,
+					$mdgriffith$elm_ui$Internal$Model$div,
+					A2(
+						$elm$core$List$cons,
+						$mdgriffith$elm_ui$Internal$Model$htmlClass($mdgriffith$elm_ui$Internal$Style$classes.contentLeft + (' ' + ($mdgriffith$elm_ui$Internal$Style$classes.contentCenterY + (' ' + $mdgriffith$elm_ui$Internal$Style$classes.wrapped)))),
+						A2(
+							$elm$core$List$cons,
+							$mdgriffith$elm_ui$Element$width($mdgriffith$elm_ui$Element$shrink),
+							A2(
+								$elm$core$List$cons,
+								$mdgriffith$elm_ui$Element$height($mdgriffith$elm_ui$Element$shrink),
+								_Utils_ap(
+									attrs,
+									_List_fromArray(
+										[pad]))))),
+					$mdgriffith$elm_ui$Internal$Model$Unkeyed(children));
+			} else {
+				var halfY = -(y / 2);
+				var halfX = -(x / 2);
+				return A4(
+					$mdgriffith$elm_ui$Internal$Model$element,
+					$mdgriffith$elm_ui$Internal$Model$asEl,
+					$mdgriffith$elm_ui$Internal$Model$div,
+					attrs,
+					$mdgriffith$elm_ui$Internal$Model$Unkeyed(
+						_List_fromArray(
+							[
+								A4(
+								$mdgriffith$elm_ui$Internal$Model$element,
+								$mdgriffith$elm_ui$Internal$Model$asRow,
+								$mdgriffith$elm_ui$Internal$Model$div,
+								A2(
+									$elm$core$List$cons,
+									$mdgriffith$elm_ui$Internal$Model$htmlClass($mdgriffith$elm_ui$Internal$Style$classes.contentLeft + (' ' + ($mdgriffith$elm_ui$Internal$Style$classes.contentCenterY + (' ' + $mdgriffith$elm_ui$Internal$Style$classes.wrapped)))),
+									A2(
+										$elm$core$List$cons,
+										$mdgriffith$elm_ui$Internal$Model$Attr(
+											A2(
+												$elm$html$Html$Attributes$style,
+												'margin',
+												$elm$core$String$fromFloat(halfY) + ('px' + (' ' + ($elm$core$String$fromFloat(halfX) + 'px'))))),
+										A2(
+											$elm$core$List$cons,
+											$mdgriffith$elm_ui$Internal$Model$Attr(
+												A2(
+													$elm$html$Html$Attributes$style,
+													'width',
+													'calc(100% + ' + ($elm$core$String$fromInt(x) + 'px)'))),
+											A2(
+												$elm$core$List$cons,
+												$mdgriffith$elm_ui$Internal$Model$Attr(
+													A2(
+														$elm$html$Html$Attributes$style,
+														'height',
+														'calc(100% + ' + ($elm$core$String$fromInt(y) + 'px)'))),
+												A2(
+													$elm$core$List$cons,
+													A2(
+														$mdgriffith$elm_ui$Internal$Model$StyleClass,
+														$mdgriffith$elm_ui$Internal$Flag$spacing,
+														A3($mdgriffith$elm_ui$Internal$Model$SpacingStyle, spaceName, x, y)),
+													_List_Nil))))),
+								$mdgriffith$elm_ui$Internal$Model$Unkeyed(children))
+							])));
+			}
+		}
+	});
+var $author$project$View$signatures = F4(
+	function (size, checklist, hasUnsignedItems, details) {
+		var x = details.checklistDetails;
+		return A2(
+			$mdgriffith$elm_ui$Element$column,
+			_List_fromArray(
+				[
+					$mdgriffith$elm_ui$Element$width($mdgriffith$elm_ui$Element$fill),
+					$mdgriffith$elm_ui$Element$padding(10),
+					$mdgriffith$elm_ui$Element$spacing(2)
+				]),
+			_List_fromArray(
+				[
+					$elm$core$String$isEmpty(x.signedAt) ? A2(
+					$mdgriffith$elm_ui$Element$el,
+					_List_fromArray(
+						[$mdgriffith$elm_ui$Element$alignRight]),
+					A4(
+						$author$project$View$signButton,
+						size,
+						'Sign',
+						hasUnsignedItems ? $elm$core$Maybe$Just('There is unsigned items') : $elm$core$Maybe$Nothing,
+						$author$project$Messages$SignChecklistButtonPressed(checklist))) : A2(
+					$mdgriffith$elm_ui$Element$wrappedRow,
+					_List_fromArray(
+						[
+							$mdgriffith$elm_ui$Element$width($mdgriffith$elm_ui$Element$fill),
+							A2($mdgriffith$elm_ui$Element$spacingXY, 10, 0)
+						]),
+					_List_fromArray(
+						[
+							A2(
+							$mdgriffith$elm_ui$Element$el,
+							_List_fromArray(
+								[$mdgriffith$elm_ui$Element$Font$bold]),
+							$mdgriffith$elm_ui$Element$text('Signed by')),
+							A2(
+							$mdgriffith$elm_ui$Element$row,
+							_List_fromArray(
+								[
+									$mdgriffith$elm_ui$Element$alignRight,
+									$mdgriffith$elm_ui$Element$spacing(10)
+								]),
+							_List_fromArray(
+								[
+									$mdgriffith$elm_ui$Element$text(x.signedByFirstName + (' ' + x.signedByLastName)),
+									A2(
+									$mdgriffith$elm_ui$Element$el,
+									_List_fromArray(
+										[$mdgriffith$elm_ui$Element$alignRight]),
+									$mdgriffith$elm_ui$Element$text(
+										A2($elm$core$String$left, 10, x.signedAt)))
+								])),
+							A4(
+							$author$project$View$signButton,
+							size,
+							'Unsign',
+							(x.verifiedAt !== '') ? $elm$core$Maybe$Just('Checklist is verified') : $elm$core$Maybe$Nothing,
+							$author$project$Messages$UnsignChecklistButtonPressed(checklist))
+						])),
+					(_Utils_eq(checklist.group, $author$project$Data$Checklist$MCCR) && (x.signedAt !== '')) ? ($elm$core$String$isEmpty(x.verifiedAt) ? A2(
+					$mdgriffith$elm_ui$Element$el,
+					_List_fromArray(
+						[$mdgriffith$elm_ui$Element$alignRight]),
+					A4(
+						$author$project$View$signButton,
+						size,
+						'Verify',
+						$elm$core$Maybe$Nothing,
+						$author$project$Messages$VerifyChecklistButtonPressed(checklist))) : A2(
+					$mdgriffith$elm_ui$Element$wrappedRow,
+					_List_fromArray(
+						[
+							$mdgriffith$elm_ui$Element$width($mdgriffith$elm_ui$Element$fill),
+							A2($mdgriffith$elm_ui$Element$spacingXY, 10, 0)
+						]),
+					_List_fromArray(
+						[
+							A2(
+							$mdgriffith$elm_ui$Element$el,
+							_List_fromArray(
+								[$mdgriffith$elm_ui$Element$Font$bold]),
+							$mdgriffith$elm_ui$Element$text('Verified by')),
+							A2(
+							$mdgriffith$elm_ui$Element$row,
+							_List_fromArray(
+								[
+									$mdgriffith$elm_ui$Element$alignRight,
+									$mdgriffith$elm_ui$Element$spacing(10)
+								]),
+							_List_fromArray(
+								[
+									A2(
+									$mdgriffith$elm_ui$Element$el,
+									_List_fromArray(
+										[$mdgriffith$elm_ui$Element$alignRight]),
+									$mdgriffith$elm_ui$Element$text(x.verifiedByFirstName + (' ' + x.verifiedByLastName))),
+									A2(
+									$mdgriffith$elm_ui$Element$el,
+									_List_fromArray(
+										[$mdgriffith$elm_ui$Element$alignRight]),
+									$mdgriffith$elm_ui$Element$text(
+										A2($elm$core$String$left, 10, x.verifiedAt)))
+								])),
+							A4(
+							$author$project$View$signButton,
+							size,
+							'Unverify',
+							$elm$core$Maybe$Nothing,
+							$author$project$Messages$UnverifyChecklistButtonPressed(checklist))
+						]))) : $mdgriffith$elm_ui$Element$none
+				]));
 	});
 var $author$project$Data$Common$statusToString = function (status) {
 	switch (status.$) {
@@ -14708,10 +16019,9 @@ var $author$project$Data$Common$statusToString = function (status) {
 			return 'OK';
 	}
 };
-var $author$project$Palette$whiteOnMistBlue = A2($author$project$Palette$combination, $author$project$Palette$white, $author$project$Palette$mistBlue);
 var $author$project$Palette$yellow = A3($mdgriffith$elm_ui$Element$rgb255, 251, 202, 54);
-var $author$project$View$renderChecklistItem = F3(
-	function (size, maybeSelected, item) {
+var $author$project$View$renderChecklistItem = F4(
+	function (size, maybeSelected, errorMsg, item) {
 		var tagNo = A2(
 			$mdgriffith$elm_ui$Element$paragraph,
 			_List_fromArray(
@@ -14769,7 +16079,7 @@ var $author$project$View$renderChecklistItem = F3(
 				case 'OK':
 					return A2($author$project$Palette$combination, $author$project$Palette$white, $author$project$Palette$alphaMossGreen);
 				default:
-					return $author$project$Palette$whiteOnMistBlue;
+					return A2($author$project$Palette$combination, $author$project$Palette$white, $author$project$Palette$grey);
 			}
 		}();
 		var statusBadge = A2(
@@ -14792,7 +16102,8 @@ var $author$project$View$renderChecklistItem = F3(
 					$mdgriffith$elm_ui$Element$px(30)),
 					$mdgriffith$elm_ui$Element$height(
 					$mdgriffith$elm_ui$Element$px(30)),
-					$mdgriffith$elm_ui$Element$inFront(statusBadge)
+					$mdgriffith$elm_ui$Element$inFront(statusBadge),
+					$mdgriffith$elm_ui$Element$clip
 				]),
 			$mdgriffith$elm_ui$Element$html(
 				$author$project$View$iconFromCategory(item.register)));
@@ -14807,10 +16118,7 @@ var $author$project$View$renderChecklistItem = F3(
 						$mdgriffith$elm_ui$Element$Background$color(
 						isSelected ? $author$project$Palette$mistBlue : $author$project$Palette$white),
 						$mdgriffith$elm_ui$Element$padding(
-						$elm$core$Basics$round(size / 2)),
-						$author$project$View$onClick(
-						$author$project$Messages$ChecklistPressed(item)),
-						$mdgriffith$elm_ui$Element$pointer
+						$elm$core$Basics$round(size / 2))
 					]),
 				_List_fromArray(
 					[
@@ -14818,7 +16126,10 @@ var $author$project$View$renderChecklistItem = F3(
 						$mdgriffith$elm_ui$Element$row,
 						_List_fromArray(
 							[
-								$mdgriffith$elm_ui$Element$width($mdgriffith$elm_ui$Element$fill)
+								$mdgriffith$elm_ui$Element$width($mdgriffith$elm_ui$Element$fill),
+								$author$project$View$onClick(
+								$author$project$Messages$ChecklistPressed(item)),
+								$mdgriffith$elm_ui$Element$pointer
 							]),
 						_List_fromArray(
 							[
@@ -14857,6 +16168,12 @@ var $author$project$View$renderChecklistItem = F3(
 									return $mdgriffith$elm_ui$Element$text('Error getting details');
 								default:
 									var details = _v0.a;
+									var hasUnsignedItems = A2(
+										$elm$core$List$any,
+										function (i) {
+											return (!i.isHeading) && ((!i.isOk) && (!i.isNa));
+										},
+										details.items);
 									return A2(
 										$mdgriffith$elm_ui$Element$column,
 										_List_fromArray(
@@ -14868,7 +16185,69 @@ var $author$project$View$renderChecklistItem = F3(
 											]),
 										_List_fromArray(
 											[
-												A3($author$project$View$renderChecklistItems, size, item, details.items)
+												A2(
+												$mdgriffith$elm_ui$Element$row,
+												_List_fromArray(
+													[
+														$mdgriffith$elm_ui$Element$width($mdgriffith$elm_ui$Element$fill),
+														$mdgriffith$elm_ui$Element$Background$color($author$project$Palette$blue),
+														$mdgriffith$elm_ui$Element$Font$color($author$project$Palette$white),
+														A2($mdgriffith$elm_ui$Element$paddingXY, 8, 6),
+														$mdgriffith$elm_ui$Element$Font$size(
+														A2($author$project$Data$Common$scaledInt, size, -1))
+													]),
+												_List_fromArray(
+													[
+														A2(
+														$mdgriffith$elm_ui$Element$el,
+														_List_Nil,
+														$mdgriffith$elm_ui$Element$text('Check items')),
+														A2(
+														$mdgriffith$elm_ui$Element$row,
+														_List_fromArray(
+															[
+																$mdgriffith$elm_ui$Element$alignRight,
+																$mdgriffith$elm_ui$Element$spacing(6)
+															]),
+														_List_fromArray(
+															[
+																A2(
+																$mdgriffith$elm_ui$Element$el,
+																_List_Nil,
+																$mdgriffith$elm_ui$Element$text('OK')),
+																A2(
+																$mdgriffith$elm_ui$Element$el,
+																_List_Nil,
+																$mdgriffith$elm_ui$Element$text('N/A'))
+															]))
+													])),
+												A3($author$project$View$renderChecklistItems, size, item, details),
+												A3($author$project$View$renderCommentField, size, item, details),
+												$elm$core$String$isEmpty(details.checklistDetails.signedAt) ? $mdgriffith$elm_ui$Element$none : A2(
+												$mdgriffith$elm_ui$Element$el,
+												_List_fromArray(
+													[
+														$mdgriffith$elm_ui$Element$width($mdgriffith$elm_ui$Element$fill),
+														$mdgriffith$elm_ui$Element$Background$color($author$project$Palette$blue),
+														$mdgriffith$elm_ui$Element$Font$color($author$project$Palette$white),
+														$mdgriffith$elm_ui$Element$padding(8),
+														$mdgriffith$elm_ui$Element$Font$size(
+														A2($author$project$Data$Common$scaledInt, size, -1))
+													]),
+												$mdgriffith$elm_ui$Element$text('Signatures')),
+												A4($author$project$View$signatures, size, item, hasUnsignedItems, details),
+												$elm$core$String$isEmpty(errorMsg) ? $mdgriffith$elm_ui$Element$none : A2(
+												$mdgriffith$elm_ui$Element$paragraph,
+												_List_fromArray(
+													[
+														$mdgriffith$elm_ui$Element$width($mdgriffith$elm_ui$Element$fill),
+														$mdgriffith$elm_ui$Element$Background$color($author$project$Palette$alphaYellow),
+														$mdgriffith$elm_ui$Element$padding(6)
+													]),
+												_List_fromArray(
+													[
+														$mdgriffith$elm_ui$Element$text(errorMsg)
+													]))
 											]));
 							}
 						} else {
@@ -14877,22 +16256,95 @@ var $author$project$View$renderChecklistItem = F3(
 					}()
 					])));
 	});
-var $author$project$View$renderChecklists = F3(
-	function (size, maybeSelected, checklists) {
+var $author$project$View$renderChecklists = F4(
+	function (size, maybeSelected, errorMsg, checklists) {
+		var updater = F2(
+			function (c, mV) {
+				return $elm$core$Maybe$Just(
+					function () {
+						if (mV.$ === 'Just') {
+							var list = mV.a;
+							return A2($elm$core$List$cons, c, list);
+						} else {
+							return _List_fromArray(
+								[c]);
+						}
+					}());
+			});
+		var groupToString = function (group) {
+			switch (group.$) {
+				case 'MCCR':
+					return 'MCCR';
+				case 'CPCL':
+					return 'CPCL';
+				case 'Preservation':
+					return 'Pres';
+				case 'RunningLogs':
+					return 'rLog';
+				case 'DCCL':
+					return 'DCCL';
+				default:
+					return 'SignalTag';
+			}
+		};
+		var groups = $elm$core$Dict$toList(
+			A3(
+				$elm$core$List$foldl,
+				F2(
+					function (c, dict) {
+						return A3(
+							$elm$core$Dict$update,
+							groupToString(c.group),
+							updater(c),
+							dict);
+					}),
+				$elm$core$Dict$empty,
+				checklists));
 		return A2(
-			$mdgriffith$elm_ui$Element$Keyed$column,
+			$mdgriffith$elm_ui$Element$column,
 			_List_fromArray(
 				[
-					$mdgriffith$elm_ui$Element$width($mdgriffith$elm_ui$Element$fill),
-					$mdgriffith$elm_ui$Element$height($mdgriffith$elm_ui$Element$fill),
-					$mdgriffith$elm_ui$Element$scrollbarY,
-					$mdgriffith$elm_ui$Element$Background$color($author$project$Palette$mistBlue),
-					$mdgriffith$elm_ui$Element$spacing(1)
+					$mdgriffith$elm_ui$Element$spacing(-1),
+					$mdgriffith$elm_ui$Element$width($mdgriffith$elm_ui$Element$fill)
 				]),
 			A2(
 				$elm$core$List$map,
-				A2($author$project$View$renderChecklistItem, size, maybeSelected),
-				checklists));
+				function (_v0) {
+					var groupName = _v0.a;
+					var groupChecklists = _v0.b;
+					return A2(
+						$mdgriffith$elm_ui$Element$column,
+						_List_fromArray(
+							[
+								$mdgriffith$elm_ui$Element$width($mdgriffith$elm_ui$Element$fill)
+							]),
+						_List_fromArray(
+							[
+								A2(
+								$mdgriffith$elm_ui$Element$el,
+								_List_fromArray(
+									[
+										$mdgriffith$elm_ui$Element$Font$bold,
+										$mdgriffith$elm_ui$Element$Font$color($author$project$Palette$mossGreen)
+									]),
+								$mdgriffith$elm_ui$Element$text(groupName)),
+								A2(
+								$mdgriffith$elm_ui$Element$Keyed$column,
+								_List_fromArray(
+									[
+										$mdgriffith$elm_ui$Element$width($mdgriffith$elm_ui$Element$fill),
+										$mdgriffith$elm_ui$Element$height($mdgriffith$elm_ui$Element$fill),
+										$mdgriffith$elm_ui$Element$scrollbarY,
+										$mdgriffith$elm_ui$Element$Background$color($author$project$Palette$mistBlue),
+										$mdgriffith$elm_ui$Element$spacing(1)
+									]),
+								A2(
+									$elm$core$List$map,
+									A3($author$project$View$renderChecklistItem, size, maybeSelected, errorMsg),
+									groupChecklists))
+							]));
+				},
+				groups));
 	});
 var $elm$core$Dict$values = function (dict) {
 	return A3(
@@ -14905,10 +16357,11 @@ var $elm$core$Dict$values = function (dict) {
 		dict);
 };
 var $author$project$Main$view = function (model) {
-	return $elm$core$Dict$isEmpty(model.checklists) ? $mdgriffith$elm_ui$Element$text('No Checklists') : A3(
+	return $elm$core$Dict$isEmpty(model.checklists) ? $mdgriffith$elm_ui$Element$text('No Checklists') : A4(
 		$author$project$View$renderChecklists,
 		16,
 		model.selectedChecklist,
+		model.errorMsg,
 		$elm$core$Dict$values(model.checklists));
 };
 var $author$project$Main$main = $elm$browser$Browser$element(
@@ -14919,12 +16372,8 @@ var $author$project$Main$main = $elm$browser$Browser$element(
 		},
 		update: $author$project$Update$update,
 		view: function (model) {
-			return A3(
-				$mdgriffith$elm_ui$Element$layoutWith,
-				{
-					options: _List_fromArray(
-						[$mdgriffith$elm_ui$Element$noStaticStyleSheet])
-				},
+			return A2(
+				$mdgriffith$elm_ui$Element$layout,
 				_List_fromArray(
 					[
 						$mdgriffith$elm_ui$Element$width($mdgriffith$elm_ui$Element$fill),

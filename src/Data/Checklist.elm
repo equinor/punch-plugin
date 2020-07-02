@@ -25,7 +25,13 @@ apiGroupDecoder =
                     "Mechanical Completion Check Record" ->
                         D.succeed MCCR
 
+                    "MCCR" ->
+                        D.succeed MCCR
+
                     "Commissioning Preparatory Check List" ->
+                        D.succeed CPCL
+
+                    "CPCL" ->
                         D.succeed CPCL
 
                     "Preservation" ->
@@ -111,6 +117,19 @@ type alias Checklist =
 type alias Details =
     { loopTags : List LoopTag
     , items : List Item
+    , checklistDetails : ChecklistDetails
+    }
+
+
+type alias ChecklistDetails =
+    { comment : String
+    , signedAt : String
+    , signedByFirstName : String
+    , signedByLastName : String
+    , verifiedAt : String
+    , verifiedByFirstName : String
+    , verifiedByLastName : String
+    , status : Status
     }
 
 
@@ -207,19 +226,23 @@ type alias LoopTag =
 
 detailsApiDecoder : D.Decoder Details
 detailsApiDecoder =
-    D.map2 Details
-        (D.maybe (D.field "LoopTags" (D.list loopTagDecoder))
-            |> D.andThen
-                (\maybeLoop ->
-                    case maybeLoop of
-                        Just loopTag ->
-                            D.succeed loopTag
+    D.succeed Details
+        |> optional "LoopTags" (D.list loopTagDecoder) []
+        |> required "CheckItems" (D.list itemDecoder)
+        |> required "CheckList" checklistDetails
 
-                        Nothing ->
-                            D.succeed []
-                )
-        )
-        (D.field "CheckItems" (D.list itemDecoder))
+
+checklistDetails : D.Decoder ChecklistDetails
+checklistDetails =
+    D.succeed ChecklistDetails
+        |> required "Comment" Common.nullString
+        |> required "SignedAt" Common.nullString
+        |> required "SignedByFirstName" Common.nullString
+        |> required "SignedByLastName" Common.nullString
+        |> optional "VerifiedAt" Common.nullString ""
+        |> optional "VerifiedByFirstName" Common.nullString ""
+        |> optional "VerifiedByLastName" Common.nullString ""
+        |> required "Status" statusDecoder
 
 
 loopTagDecoder : D.Decoder LoopTag
