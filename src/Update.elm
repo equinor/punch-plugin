@@ -179,6 +179,29 @@ update msg model =
             mc
                 |> apiRequest [ Api.updateComment checklist str ]
 
+        CustomCheckItemInput str ->
+            ( { model | customCheckItemField = str }, Cmd.none )
+
+        AddCustomCheckItemButtonPressed checklist ->
+            mc
+                |> apiRequest [ Api.nextCustomItemNo checklist ]
+
+        OkCustomCheckItemPressed checklist customItem ->
+            let
+                apiCall =
+                    if customItem.isOk then
+                        Api.clearCustomCheckItem
+
+                    else
+                        Api.setCustomCheckItemOk
+            in
+            mc
+                |> apiRequest [ apiCall checklist customItem ]
+
+        DeleteCustomCheckItemButtomPressed checklist customItem ->
+            mc
+                |> apiRequest [ Api.deleteCustomItem checklist customItem ]
+
 
 setChecklistsTo : List Checklist -> MC -> MC
 setChecklistsTo checklists ( m, c ) =
@@ -283,9 +306,14 @@ handleApiResult apiResult ( m, c ) =
                                     checklist.status
                     }
             in
-            ( { m | checklists = Dict.update id (Maybe.map updater) m.checklists }, c )
+            ( { m
+                | checklists = Dict.update id (Maybe.map updater) m.checklists
+                , customCheckItemField = ""
+              }
+            , c
+            )
 
-        SetNaResult checklist checkItem result ->
+        SetNaResult checklist result ->
             case result of
                 Ok _ ->
                     ( m, c ) |> apiRequest [ Api.checklistDetails checklist ]
@@ -293,7 +321,7 @@ handleApiResult apiResult ( m, c ) =
                 Err err ->
                     ( m, c )
 
-        SetOkResult checklist checkItem result ->
+        SetOkResult checklist result ->
             case result of
                 Ok _ ->
                     ( m, c ) |> apiRequest [ Api.checklistDetails checklist ]
@@ -301,7 +329,7 @@ handleApiResult apiResult ( m, c ) =
                 Err err ->
                     ( m, c )
 
-        ClearResult checklist checkItem result ->
+        ClearResult checklist result ->
             case result of
                 Ok _ ->
                     ( m, c ) |> apiRequest [ Api.checklistDetails checklist ]
@@ -311,7 +339,7 @@ handleApiResult apiResult ( m, c ) =
 
         SignChecklistResult checklist result ->
             case result of
-                Ok details ->
+                Ok _ ->
                     ( m, c ) |> apiRequest [ Api.checklistDetails checklist ]
 
                 Err err ->
@@ -335,7 +363,7 @@ handleApiResult apiResult ( m, c ) =
 
         UnverifyChecklistResult checklist result ->
             case result of
-                Ok err ->
+                Ok _ ->
                     ( m, c ) |> apiRequest [ Api.checklistDetails checklist ]
 
                 Err err ->
@@ -343,7 +371,7 @@ handleApiResult apiResult ( m, c ) =
 
         UpdateMetaTableCellResult checklist result ->
             case result of
-                Ok err ->
+                Ok _ ->
                     ( m, c ) |> apiRequest [ Api.checklistDetails checklist ]
 
                 Err err ->
@@ -351,8 +379,35 @@ handleApiResult apiResult ( m, c ) =
 
         CommentChecklistResult checklist result ->
             case result of
-                Ok err ->
+                Ok _ ->
                     ( m, c ) |> apiRequest [ Api.checklistDetails checklist ]
+
+                Err _ ->
+                    ( m, c )
+
+        GotNextCustomItemNo checklist result ->
+            case result of
+                Ok nextNo ->
+                    ( m, c )
+                        |> apiRequest [ Api.addCustomItem checklist (String.replace "\"" "" nextNo) m.customCheckItemField False ]
+
+                Err err ->
+                    ( m, c )
+
+        AddCustomItemResult checklist result ->
+            case result of
+                Ok _ ->
+                    ( m, c )
+                        |> apiRequest [ Api.checklistDetails checklist ]
+
+                Err err ->
+                    ( m, c )
+
+        DeleteCustomItemResult checklist result ->
+            case result of
+                Ok _ ->
+                    ( m, c )
+                        |> apiRequest [ Api.checklistDetails checklist ]
 
                 Err err ->
                     ( m, c )

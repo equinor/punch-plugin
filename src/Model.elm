@@ -18,6 +18,7 @@ type alias Model =
     , selectedChecklist : Maybe Int
     , requests : Dict Int (List (String -> String -> Cmd Msg))
     , errorMsg : String
+    , customCheckItemField : String
     }
 
 
@@ -29,6 +30,7 @@ initialModel flags =
       , selectedChecklist = Nothing
       , requests = Dict.empty
       , errorMsg = ""
+      , customCheckItemField = ""
       }
     , Cmd.none
     )

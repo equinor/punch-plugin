@@ -1,4 +1,4 @@
-module Data.Checklist exposing (Cell, Checklist, ColumnLabel, Details, Group(..), Item, MetaTable, Row, apiDecoder, decoder, detailsApiDecoder, groupToString)
+module Data.Checklist exposing (Cell, Checklist, ColumnLabel, CustomItem, Details, Group(..), Item, MetaTable, Row, apiDecoder, decoder, detailsApiDecoder, groupToString)
 
 import Data.Common as Common
 import Json.Decode as D
@@ -117,6 +117,7 @@ type alias Checklist =
 type alias Details =
     { loopTags : List LoopTag
     , items : List Item
+    , customItems : List CustomItem
     , checklistDetails : ChecklistDetails
     }
 
@@ -144,6 +145,14 @@ type alias Item =
     }
 
 
+type alias CustomItem =
+    { id : Int
+    , isOk : Bool
+    , itemNo : String
+    , text : String
+    }
+
+
 itemDecoder : D.Decoder Item
 itemDecoder =
     D.map7 Item
@@ -159,6 +168,15 @@ itemDecoder =
             )
         )
         (D.field "SequenceNumber" D.string)
+        (D.field "Text" Common.nullString)
+
+
+customItemDecoder : D.Decoder CustomItem
+customItemDecoder =
+    D.map4 CustomItem
+        (D.field "Id" D.int)
+        (D.field "IsOk" D.bool)
+        (D.field "ItemNo" D.string)
         (D.field "Text" Common.nullString)
 
 
@@ -229,6 +247,7 @@ detailsApiDecoder =
     D.succeed Details
         |> optional "LoopTags" (D.list loopTagDecoder) []
         |> required "CheckItems" (D.list itemDecoder)
+        |> optional "CustomCheckItems" (D.list customItemDecoder) []
         |> required "CheckList" checklistDetails
 
 

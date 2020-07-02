@@ -5687,7 +5687,7 @@ var $elm$core$Platform$Cmd$batch = _Platform_batch;
 var $elm$core$Platform$Cmd$none = $elm$core$Platform$Cmd$batch(_List_Nil);
 var $author$project$Model$initialModel = function (flags) {
 	return _Utils_Tuple2(
-		{apiToken: '', checklists: $elm$core$Dict$empty, errorMsg: '', procosysPlantId: flags.procosysPlantId, requests: $elm$core$Dict$empty, selectedChecklist: $elm$core$Maybe$Nothing},
+		{apiToken: '', checklists: $elm$core$Dict$empty, customCheckItemField: '', errorMsg: '', procosysPlantId: flags.procosysPlantId, requests: $elm$core$Dict$empty, selectedChecklist: $elm$core$Maybe$Nothing},
 		$elm$core$Platform$Cmd$none);
 };
 var $mdgriffith$elm_ui$Internal$Style$classes = {above: 'a', active: 'atv', alignBottom: 'ab', alignCenterX: 'cx', alignCenterY: 'cy', alignContainerBottom: 'acb', alignContainerCenterX: 'accx', alignContainerCenterY: 'accy', alignContainerRight: 'acr', alignLeft: 'al', alignRight: 'ar', alignTop: 'at', alignedHorizontally: 'ah', alignedVertically: 'av', any: 's', behind: 'bh', below: 'b', bold: 'w7', borderDashed: 'bd', borderDotted: 'bdt', borderNone: 'bn', borderSolid: 'bs', capturePointerEvents: 'cpe', clip: 'cp', clipX: 'cpx', clipY: 'cpy', column: 'c', container: 'ctr', contentBottom: 'cb', contentCenterX: 'ccx', contentCenterY: 'ccy', contentLeft: 'cl', contentRight: 'cr', contentTop: 'ct', cursorPointer: 'cptr', cursorText: 'ctxt', focus: 'fcs', focusedWithin: 'focus-within', fullSize: 'fs', grid: 'g', hasBehind: 'hbh', heightContent: 'hc', heightExact: 'he', heightFill: 'hf', heightFillPortion: 'hfp', hover: 'hv', imageContainer: 'ic', inFront: 'fr', inputLabel: 'lbl', inputMultiline: 'iml', inputMultilineFiller: 'imlf', inputMultilineParent: 'imlp', inputMultilineWrapper: 'implw', inputText: 'it', italic: 'i', link: 'lnk', nearby: 'nb', noTextSelection: 'notxt', onLeft: 'ol', onRight: 'or', opaque: 'oq', overflowHidden: 'oh', page: 'pg', paragraph: 'p', passPointerEvents: 'ppe', root: 'ui', row: 'r', scrollbars: 'sb', scrollbarsX: 'sbx', scrollbarsY: 'sby', seButton: 'sbt', single: 'e', sizeByCapital: 'cap', spaceEvenly: 'sev', strike: 'sk', text: 't', textCenter: 'tc', textExtraBold: 'w8', textExtraLight: 'w2', textHeavy: 'w9', textJustify: 'tj', textJustifyAll: 'tja', textLeft: 'tl', textLight: 'w3', textMedium: 'w5', textNormalWeight: 'w4', textRight: 'tr', textSemiBold: 'w6', textThin: 'w1', textUnitalicized: 'tun', transition: 'ts', transparent: 'clr', underline: 'u', widthContent: 'wc', widthExact: 'we', widthFill: 'wf', widthFillPortion: 'wfp', wrapped: 'wrp'};
@@ -11602,9 +11602,9 @@ var $author$project$Update$apiRequest = F2(
 								])))
 					])));
 	});
-var $author$project$Messages$ClearResult = F3(
-	function (a, b, c) {
-		return {$: 'ClearResult', a: a, b: b, c: c};
+var $author$project$Messages$ClearResult = F2(
+	function (a, b) {
+		return {$: 'ClearResult', a: a, b: b};
 	});
 var $author$project$Messages$GotApiResult = function (a) {
 	return {$: 'GotApiResult', a: a};
@@ -12307,7 +12307,7 @@ var $author$project$Api$clearCheckItem = F4(
 					A2(
 						$elm$core$Basics$composeL,
 						$author$project$Messages$GotApiResult,
-						A2($author$project$Messages$ClearResult, checklist, checkItem))),
+						$author$project$Messages$ClearResult(checklist))),
 				headers: _List_fromArray(
 					[
 						A2($elm$http$Http$header, 'Authorization', 'Bearer ' + token)
@@ -12326,14 +12326,94 @@ var $author$project$Api$clearCheckItem = F4(
 						]))
 			});
 	});
+var $author$project$Api$clearCustomCheckItem = F4(
+	function (checklist, checkItem, plantId, token) {
+		return $elm$http$Http$request(
+			{
+				body: $elm$http$Http$jsonBody(
+					$elm$json$Json$Encode$object(
+						_List_fromArray(
+							[
+								_Utils_Tuple2(
+								'CheckListId',
+								$elm$json$Json$Encode$int(checklist.id)),
+								_Utils_Tuple2(
+								'CustomCheckItemId',
+								$elm$json$Json$Encode$int(checkItem.id))
+							]))),
+				expect: $elm$http$Http$expectWhatever(
+					A2(
+						$elm$core$Basics$composeL,
+						$author$project$Messages$GotApiResult,
+						$author$project$Messages$ClearResult(checklist))),
+				headers: _List_fromArray(
+					[
+						A2($elm$http$Http$header, 'Authorization', 'Bearer ' + token)
+					]),
+				method: 'POST',
+				timeout: $elm$core$Maybe$Nothing,
+				tracker: $elm$core$Maybe$Nothing,
+				url: A2(
+					$author$project$Api$url,
+					_List_fromArray(
+						['CheckList', 'CustomItem', 'Clear']),
+					_List_fromArray(
+						[
+							A2($elm$url$Url$Builder$string, 'plantId', plantId),
+							$author$project$Api$apiVersion
+						]))
+			});
+	});
+var $author$project$Messages$DeleteCustomItemResult = F2(
+	function (a, b) {
+		return {$: 'DeleteCustomItemResult', a: a, b: b};
+	});
+var $author$project$Api$deleteCustomItem = F4(
+	function (checklist, customItem, plantId, token) {
+		return $elm$http$Http$request(
+			{
+				body: $elm$http$Http$jsonBody(
+					$elm$json$Json$Encode$object(
+						_List_fromArray(
+							[
+								_Utils_Tuple2(
+								'CheckListId',
+								$elm$json$Json$Encode$int(checklist.id)),
+								_Utils_Tuple2(
+								'CustomCheckItemId',
+								$elm$json$Json$Encode$int(customItem.id))
+							]))),
+				expect: $elm$http$Http$expectWhatever(
+					A2(
+						$elm$core$Basics$composeL,
+						$author$project$Messages$GotApiResult,
+						$author$project$Messages$DeleteCustomItemResult(checklist))),
+				headers: _List_fromArray(
+					[
+						A2($elm$http$Http$header, 'Authorization', 'Bearer ' + token)
+					]),
+				method: 'DELETE',
+				timeout: $elm$core$Maybe$Nothing,
+				tracker: $elm$core$Maybe$Nothing,
+				url: A2(
+					$author$project$Api$url,
+					_List_fromArray(
+						['Checklist', 'CustomItem']),
+					_List_fromArray(
+						[
+							A2($elm$url$Url$Builder$string, 'plantId', plantId),
+							$author$project$Api$apiVersion
+						]))
+			});
+	});
 var $author$project$Types$Loading = {$: 'Loading'};
 var $author$project$Messages$GotChecklistDetails = F2(
 	function (a, b) {
 		return {$: 'GotChecklistDetails', a: a, b: b};
 	});
-var $author$project$Data$Checklist$Details = F3(
-	function (loopTags, items, checklistDetails) {
-		return {checklistDetails: checklistDetails, items: items, loopTags: loopTags};
+var $author$project$Data$Checklist$Details = F4(
+	function (loopTags, items, customItems, checklistDetails) {
+		return {checklistDetails: checklistDetails, customItems: customItems, items: items, loopTags: loopTags};
 	});
 var $author$project$Data$Checklist$ChecklistDetails = F8(
 	function (comment, signedAt, signedByFirstName, signedByLastName, verifiedAt, verifiedByFirstName, verifiedByLastName, status) {
@@ -12381,6 +12461,19 @@ var $author$project$Data$Checklist$checklistDetails = A3(
 								'Comment',
 								$author$project$Data$Common$nullString,
 								$elm$json$Json$Decode$succeed($author$project$Data$Checklist$ChecklistDetails)))))))));
+var $author$project$Data$Checklist$CustomItem = F4(
+	function (id, isOk, itemNo, text) {
+		return {id: id, isOk: isOk, itemNo: itemNo, text: text};
+	});
+var $elm$json$Json$Decode$bool = _Json_decodeBool;
+var $elm$json$Json$Decode$map4 = _Json_map4;
+var $author$project$Data$Checklist$customItemDecoder = A5(
+	$elm$json$Json$Decode$map4,
+	$author$project$Data$Checklist$CustomItem,
+	A2($elm$json$Json$Decode$field, 'Id', $elm$json$Json$Decode$int),
+	A2($elm$json$Json$Decode$field, 'IsOk', $elm$json$Json$Decode$bool),
+	A2($elm$json$Json$Decode$field, 'ItemNo', $elm$json$Json$Decode$string),
+	A2($elm$json$Json$Decode$field, 'Text', $author$project$Data$Common$nullString));
 var $author$project$Data$Checklist$Item = F7(
 	function (id, isHeading, isNa, isOk, metaTable, sequenceNumber, text) {
 		return {id: id, isHeading: isHeading, isNa: isNa, isOk: isOk, metaTable: metaTable, sequenceNumber: sequenceNumber, text: text};
@@ -12389,7 +12482,6 @@ var $author$project$Data$Checklist$MetaTable = F3(
 	function (columnLabels, info, rows) {
 		return {columnLabels: columnLabels, info: info, rows: rows};
 	});
-var $elm$json$Json$Decode$bool = _Json_decodeBool;
 var $elm$json$Json$Decode$map7 = _Json_map7;
 var $author$project$Data$Checklist$ColumnLabel = F2(
 	function (id, label) {
@@ -12460,16 +12552,21 @@ var $author$project$Data$Checklist$detailsApiDecoder = A3(
 	$NoRedInk$elm_json_decode_pipeline$Json$Decode$Pipeline$required,
 	'CheckList',
 	$author$project$Data$Checklist$checklistDetails,
-	A3(
-		$NoRedInk$elm_json_decode_pipeline$Json$Decode$Pipeline$required,
-		'CheckItems',
-		$elm$json$Json$Decode$list($author$project$Data$Checklist$itemDecoder),
-		A4(
-			$NoRedInk$elm_json_decode_pipeline$Json$Decode$Pipeline$optional,
-			'LoopTags',
-			$elm$json$Json$Decode$list($author$project$Data$Checklist$loopTagDecoder),
-			_List_Nil,
-			$elm$json$Json$Decode$succeed($author$project$Data$Checklist$Details))));
+	A4(
+		$NoRedInk$elm_json_decode_pipeline$Json$Decode$Pipeline$optional,
+		'CustomCheckItems',
+		$elm$json$Json$Decode$list($author$project$Data$Checklist$customItemDecoder),
+		_List_Nil,
+		A3(
+			$NoRedInk$elm_json_decode_pipeline$Json$Decode$Pipeline$required,
+			'CheckItems',
+			$elm$json$Json$Decode$list($author$project$Data$Checklist$itemDecoder),
+			A4(
+				$NoRedInk$elm_json_decode_pipeline$Json$Decode$Pipeline$optional,
+				'LoopTags',
+				$elm$json$Json$Decode$list($author$project$Data$Checklist$loopTagDecoder),
+				_List_Nil,
+				$elm$json$Json$Decode$succeed($author$project$Data$Checklist$Details)))));
 var $elm$http$Http$emptyBody = _Http_emptyBody;
 var $elm$json$Json$Decode$decodeString = _Json_runOnString;
 var $elm$http$Http$expectStringResponse = F2(
@@ -12526,10 +12623,13 @@ var $author$project$Api$checklistDetails = F3(
 							'Checklist',
 							function () {
 							var _v0 = checklist.group;
-							if (_v0.$ === 'CPCL') {
-								return 'Comm';
-							} else {
-								return 'MC';
+							switch (_v0.$) {
+								case 'CPCL':
+									return 'Comm';
+								case 'Preservation':
+									return 'Preservation';
+								default:
+									return 'MC';
 							}
 						}()
 						]),
@@ -12569,6 +12669,62 @@ var $author$project$Update$getChecklistDetails = F2(
 				c));
 	});
 var $author$project$Types$DataError = {$: 'DataError'};
+var $author$project$Messages$AddCustomItemResult = F2(
+	function (a, b) {
+		return {$: 'AddCustomItemResult', a: a, b: b};
+	});
+var $elm$json$Json$Encode$bool = _Json_wrap;
+var $author$project$Api$addCustomItem = F6(
+	function (checklist, nextNo, itemString, isOk, plantId, token) {
+		return $elm$http$Http$request(
+			{
+				body: $elm$http$Http$jsonBody(
+					$elm$json$Json$Encode$object(
+						_List_fromArray(
+							[
+								_Utils_Tuple2(
+								'CheckListId',
+								$elm$json$Json$Encode$int(checklist.id)),
+								_Utils_Tuple2(
+								'ItemNo',
+								$elm$json$Json$Encode$string(nextNo)),
+								_Utils_Tuple2(
+								'Text',
+								$elm$json$Json$Encode$string(itemString)),
+								_Utils_Tuple2(
+								'IsOk',
+								$elm$json$Json$Encode$bool(isOk))
+							]))),
+				expect: $elm$http$Http$expectWhatever(
+					A2(
+						$elm$core$Basics$composeL,
+						$author$project$Messages$GotApiResult,
+						$author$project$Messages$AddCustomItemResult(checklist))),
+				headers: _List_fromArray(
+					[
+						A2($elm$http$Http$header, 'Authorization', 'Bearer ' + token)
+					]),
+				method: 'POST',
+				timeout: $elm$core$Maybe$Nothing,
+				tracker: $elm$core$Maybe$Nothing,
+				url: A2(
+					$author$project$Api$url,
+					_List_fromArray(
+						['CheckList', 'CustomItem']),
+					_List_fromArray(
+						[
+							A2($elm$url$Url$Builder$string, 'plantId', plantId),
+							$author$project$Api$apiVersion
+						]))
+			});
+	});
+var $elm$core$String$replace = F3(
+	function (before, after, string) {
+		return A2(
+			$elm$core$String$join,
+			after,
+			A2($elm$core$String$split, before, string));
+	});
 var $author$project$Update$handleApiResult = F2(
 	function (apiResult, _v0) {
 		var m = _v0.a;
@@ -12609,13 +12765,13 @@ var $author$project$Update$handleApiResult = F2(
 								$elm$core$Dict$update,
 								id,
 								$elm$core$Maybe$map(updater),
-								m.checklists)
+								m.checklists),
+							customCheckItemField: ''
 						}),
 					c);
 			case 'SetNaResult':
 				var checklist = apiResult.a;
-				var checkItem = apiResult.b;
-				var result = apiResult.c;
+				var result = apiResult.b;
 				if (result.$ === 'Ok') {
 					return A2(
 						$author$project$Update$apiRequest,
@@ -12630,8 +12786,7 @@ var $author$project$Update$handleApiResult = F2(
 				}
 			case 'SetOkResult':
 				var checklist = apiResult.a;
-				var checkItem = apiResult.b;
-				var result = apiResult.c;
+				var result = apiResult.b;
 				if (result.$ === 'Ok') {
 					return A2(
 						$author$project$Update$apiRequest,
@@ -12646,8 +12801,7 @@ var $author$project$Update$handleApiResult = F2(
 				}
 			case 'ClearResult':
 				var checklist = apiResult.a;
-				var checkItem = apiResult.b;
-				var result = apiResult.c;
+				var result = apiResult.b;
 				if (result.$ === 'Ok') {
 					return A2(
 						$author$project$Update$apiRequest,
@@ -12664,7 +12818,6 @@ var $author$project$Update$handleApiResult = F2(
 				var checklist = apiResult.a;
 				var result = apiResult.b;
 				if (result.$ === 'Ok') {
-					var details = result.a;
 					return A2(
 						$author$project$Update$apiRequest,
 						_List_fromArray(
@@ -12710,7 +12863,6 @@ var $author$project$Update$handleApiResult = F2(
 				var checklist = apiResult.a;
 				var result = apiResult.b;
 				if (result.$ === 'Ok') {
-					var err = result.a;
 					return A2(
 						$author$project$Update$apiRequest,
 						_List_fromArray(
@@ -12726,7 +12878,56 @@ var $author$project$Update$handleApiResult = F2(
 				var checklist = apiResult.a;
 				var result = apiResult.b;
 				if (result.$ === 'Ok') {
+					return A2(
+						$author$project$Update$apiRequest,
+						_List_fromArray(
+							[
+								$author$project$Api$checklistDetails(checklist)
+							]),
+						_Utils_Tuple2(m, c));
+				} else {
 					var err = result.a;
+					return _Utils_Tuple2(m, c);
+				}
+			case 'CommentChecklistResult':
+				var checklist = apiResult.a;
+				var result = apiResult.b;
+				if (result.$ === 'Ok') {
+					return A2(
+						$author$project$Update$apiRequest,
+						_List_fromArray(
+							[
+								$author$project$Api$checklistDetails(checklist)
+							]),
+						_Utils_Tuple2(m, c));
+				} else {
+					return _Utils_Tuple2(m, c);
+				}
+			case 'GotNextCustomItemNo':
+				var checklist = apiResult.a;
+				var result = apiResult.b;
+				if (result.$ === 'Ok') {
+					var nextNo = result.a;
+					return A2(
+						$author$project$Update$apiRequest,
+						_List_fromArray(
+							[
+								A4(
+								$author$project$Api$addCustomItem,
+								checklist,
+								A3($elm$core$String$replace, '\"', '', nextNo),
+								m.customCheckItemField,
+								false)
+							]),
+						_Utils_Tuple2(m, c));
+				} else {
+					var err = result.a;
+					return _Utils_Tuple2(m, c);
+				}
+			case 'AddCustomItemResult':
+				var checklist = apiResult.a;
+				var result = apiResult.b;
+				if (result.$ === 'Ok') {
 					return A2(
 						$author$project$Update$apiRequest,
 						_List_fromArray(
@@ -12742,7 +12943,6 @@ var $author$project$Update$handleApiResult = F2(
 				var checklist = apiResult.a;
 				var result = apiResult.b;
 				if (result.$ === 'Ok') {
-					var err = result.a;
 					return A2(
 						$author$project$Update$apiRequest,
 						_List_fromArray(
@@ -12755,6 +12955,45 @@ var $author$project$Update$handleApiResult = F2(
 					return _Utils_Tuple2(m, c);
 				}
 		}
+	});
+var $author$project$Messages$GotNextCustomItemNo = F2(
+	function (a, b) {
+		return {$: 'GotNextCustomItemNo', a: a, b: b};
+	});
+var $elm$http$Http$expectString = function (toMsg) {
+	return A2(
+		$elm$http$Http$expectStringResponse,
+		toMsg,
+		$elm$http$Http$resolve($elm$core$Result$Ok));
+};
+var $author$project$Api$nextCustomItemNo = F3(
+	function (checklist, plantId, token) {
+		return $elm$http$Http$request(
+			{
+				body: $elm$http$Http$emptyBody,
+				expect: $elm$http$Http$expectString(
+					A2(
+						$elm$core$Basics$composeL,
+						$author$project$Messages$GotApiResult,
+						$author$project$Messages$GotNextCustomItemNo(checklist))),
+				headers: _List_fromArray(
+					[
+						A2($elm$http$Http$header, 'Authorization', 'Bearer ' + token)
+					]),
+				method: 'GET',
+				timeout: $elm$core$Maybe$Nothing,
+				tracker: $elm$core$Maybe$Nothing,
+				url: A2(
+					$author$project$Api$url,
+					_List_fromArray(
+						['Checklist', 'CustomItem', 'NextItemNo']),
+					_List_fromArray(
+						[
+							A2($elm$url$Url$Builder$string, 'plantId', plantId),
+							A2($elm$url$Url$Builder$int, 'checklistId', checklist.id),
+							$author$project$Api$apiVersion
+						]))
+			});
 	});
 var $author$project$Update$selectChecklist = F2(
 	function (checklist, _v0) {
@@ -12794,9 +13033,9 @@ var $author$project$Update$sendRequestsWaitingForToken = F2(
 				}
 			}());
 	});
-var $author$project$Messages$SetNaResult = F3(
-	function (a, b, c) {
-		return {$: 'SetNaResult', a: a, b: b, c: c};
+var $author$project$Messages$SetNaResult = F2(
+	function (a, b) {
+		return {$: 'SetNaResult', a: a, b: b};
 	});
 var $author$project$Api$setCheckItemNa = F4(
 	function (checklist, checkItem, plantId, token) {
@@ -12817,7 +13056,7 @@ var $author$project$Api$setCheckItemNa = F4(
 					A2(
 						$elm$core$Basics$composeL,
 						$author$project$Messages$GotApiResult,
-						A2($author$project$Messages$SetNaResult, checklist, checkItem))),
+						$author$project$Messages$SetNaResult(checklist))),
 				headers: _List_fromArray(
 					[
 						A2($elm$http$Http$header, 'Authorization', 'Bearer ' + token)
@@ -12836,9 +13075,9 @@ var $author$project$Api$setCheckItemNa = F4(
 						]))
 			});
 	});
-var $author$project$Messages$SetOkResult = F3(
-	function (a, b, c) {
-		return {$: 'SetOkResult', a: a, b: b, c: c};
+var $author$project$Messages$SetOkResult = F2(
+	function (a, b) {
+		return {$: 'SetOkResult', a: a, b: b};
 	});
 var $author$project$Api$setCheckItemOk = F4(
 	function (checklist, checkItem, plantId, token) {
@@ -12859,7 +13098,7 @@ var $author$project$Api$setCheckItemOk = F4(
 					A2(
 						$elm$core$Basics$composeL,
 						$author$project$Messages$GotApiResult,
-						A2($author$project$Messages$SetOkResult, checklist, checkItem))),
+						$author$project$Messages$SetOkResult(checklist))),
 				headers: _List_fromArray(
 					[
 						A2($elm$http$Http$header, 'Authorization', 'Bearer ' + token)
@@ -12897,6 +13136,44 @@ var $author$project$Update$setChecklistsTo = F2(
 				}),
 			c);
 	});
+var $author$project$Api$setCustomCheckItemOk = F4(
+	function (checklist, checkItem, plantId, token) {
+		return $elm$http$Http$request(
+			{
+				body: $elm$http$Http$jsonBody(
+					$elm$json$Json$Encode$object(
+						_List_fromArray(
+							[
+								_Utils_Tuple2(
+								'CheckListId',
+								$elm$json$Json$Encode$int(checklist.id)),
+								_Utils_Tuple2(
+								'CustomCheckItemId',
+								$elm$json$Json$Encode$int(checkItem.id))
+							]))),
+				expect: $elm$http$Http$expectWhatever(
+					A2(
+						$elm$core$Basics$composeL,
+						$author$project$Messages$GotApiResult,
+						$author$project$Messages$SetOkResult(checklist))),
+				headers: _List_fromArray(
+					[
+						A2($elm$http$Http$header, 'Authorization', 'Bearer ' + token)
+					]),
+				method: 'POST',
+				timeout: $elm$core$Maybe$Nothing,
+				tracker: $elm$core$Maybe$Nothing,
+				url: A2(
+					$author$project$Api$url,
+					_List_fromArray(
+						['CheckList', 'CustomItem', 'SetOk']),
+					_List_fromArray(
+						[
+							A2($elm$url$Url$Builder$string, 'plantId', plantId),
+							$author$project$Api$apiVersion
+						]))
+			});
+	});
 var $author$project$Messages$SignChecklistResult = F2(
 	function (a, b) {
 		return {$: 'SignChecklistResult', a: a, b: b};
@@ -12926,10 +13203,13 @@ var $author$project$Api$signChecklist = F3(
 							'CheckList',
 							function () {
 							var _v0 = checklist.group;
-							if (_v0.$ === 'CPCL') {
-								return 'Comm';
-							} else {
-								return 'MC';
+							switch (_v0.$) {
+								case 'CPCL':
+									return 'Comm';
+								case 'Preservation':
+									return 'Preservation';
+								default:
+									return 'MC';
 							}
 						}(),
 							'Sign'
@@ -12979,10 +13259,13 @@ var $author$project$Api$unSignChecklist = F3(
 							'CheckList',
 							function () {
 							var _v0 = checklist.group;
-							if (_v0.$ === 'CPCL') {
-								return 'Comm';
-							} else {
-								return 'MC';
+							switch (_v0.$) {
+								case 'CPCL':
+									return 'Comm';
+								case 'Preservation':
+									return 'Preservation';
+								default:
+									return 'MC';
 							}
 						}(),
 							'Unsign'
@@ -13023,10 +13306,13 @@ var $author$project$Api$unVerifyChecklist = F3(
 							'CheckList',
 							function () {
 							var _v0 = checklist.group;
-							if (_v0.$ === 'CPCL') {
-								return 'Comm';
-							} else {
-								return 'MC';
+							switch (_v0.$) {
+								case 'CPCL':
+									return 'Comm';
+								case 'Preservation':
+									return 'Preservation';
+								default:
+									return 'MC';
 							}
 						}(),
 							'Unverify'
@@ -13076,10 +13362,13 @@ var $author$project$Api$updateComment = F4(
 							'CheckList',
 							function () {
 							var _v0 = checklist.group;
-							if (_v0.$ === 'CPCL') {
-								return 'Comm';
-							} else {
-								return 'MC';
+							switch (_v0.$) {
+								case 'CPCL':
+									return 'Comm';
+								case 'Preservation':
+									return 'Preservation';
+								default:
+									return 'MC';
 							}
 						}(),
 							'Comment'
@@ -13171,10 +13460,13 @@ var $author$project$Api$verifyChecklist = F3(
 							'CheckList',
 							function () {
 							var _v0 = checklist.group;
-							if (_v0.$ === 'CPCL') {
-								return 'Comm';
-							} else {
-								return 'MC';
+							switch (_v0.$) {
+								case 'CPCL':
+									return 'Comm';
+								case 'Preservation':
+									return 'Preservation';
+								default:
+									return 'MC';
 							}
 						}(),
 							'Verify'
@@ -13386,7 +13678,7 @@ var $author$project$Update$update = F2(
 								model.checklists)
 						}),
 					$elm$core$Platform$Cmd$none);
-			default:
+			case 'CommentFieldLostFocus':
 				var checklist = msg.a;
 				var str = msg.b;
 				return A2(
@@ -13394,6 +13686,43 @@ var $author$project$Update$update = F2(
 					_List_fromArray(
 						[
 							A2($author$project$Api$updateComment, checklist, str)
+						]),
+					mc);
+			case 'CustomCheckItemInput':
+				var str = msg.a;
+				return _Utils_Tuple2(
+					_Utils_update(
+						model,
+						{customCheckItemField: str}),
+					$elm$core$Platform$Cmd$none);
+			case 'AddCustomCheckItemButtonPressed':
+				var checklist = msg.a;
+				return A2(
+					$author$project$Update$apiRequest,
+					_List_fromArray(
+						[
+							$author$project$Api$nextCustomItemNo(checklist)
+						]),
+					mc);
+			case 'OkCustomCheckItemPressed':
+				var checklist = msg.a;
+				var customItem = msg.b;
+				var apiCall = customItem.isOk ? $author$project$Api$clearCustomCheckItem : $author$project$Api$setCustomCheckItemOk;
+				return A2(
+					$author$project$Update$apiRequest,
+					_List_fromArray(
+						[
+							A2(apiCall, checklist, customItem)
+						]),
+					mc);
+			default:
+				var checklist = msg.a;
+				var customItem = msg.b;
+				return A2(
+					$author$project$Update$apiRequest,
+					_List_fromArray(
+						[
+							A2($author$project$Api$deleteCustomItem, checklist, customItem)
 						]),
 					mc);
 		}
@@ -13499,7 +13828,6 @@ var $mdgriffith$elm_ui$Element$rgba255 = F4(
 	});
 var $author$project$Palette$alphaMossGreen = A4($mdgriffith$elm_ui$Element$rgba255, 0, 112, 121, 0.7);
 var $author$project$Palette$alphaYellow = A4($mdgriffith$elm_ui$Element$rgba255, 251, 202, 54, 1);
-var $author$project$Palette$blue = A3($mdgriffith$elm_ui$Element$rgb255, 95, 192, 220);
 var $mdgriffith$elm_ui$Internal$Flag$overflow = $mdgriffith$elm_ui$Internal$Flag$flag(20);
 var $mdgriffith$elm_ui$Element$clip = A2($mdgriffith$elm_ui$Internal$Model$Class, $mdgriffith$elm_ui$Internal$Flag$overflow, $mdgriffith$elm_ui$Internal$Style$classes.clip);
 var $author$project$Palette$combination = F3(
@@ -14089,6 +14417,7 @@ var $mdgriffith$elm_ui$Internal$Model$Px = function (a) {
 };
 var $mdgriffith$elm_ui$Element$px = $mdgriffith$elm_ui$Internal$Model$Px;
 var $author$project$Palette$red = A3($mdgriffith$elm_ui$Element$rgb255, 255, 59, 59);
+var $author$project$Palette$blue = A3($mdgriffith$elm_ui$Element$rgb255, 95, 192, 220);
 var $author$project$Messages$NaCheckItemPressed = F2(
 	function (a, b) {
 		return {$: 'NaCheckItemPressed', a: a, b: b};
@@ -14850,7 +15179,6 @@ var $mdgriffith$elm_ui$Element$Input$renderPlaceholder = F3(
 	});
 var $mdgriffith$elm_ui$Element$scrollbarY = A2($mdgriffith$elm_ui$Internal$Model$Class, $mdgriffith$elm_ui$Internal$Flag$overflow, $mdgriffith$elm_ui$Internal$Style$classes.scrollbarsY);
 var $elm$html$Html$span = _VirtualDom_node('span');
-var $elm$json$Json$Encode$bool = _Json_wrap;
 var $elm$html$Html$Attributes$boolProperty = F2(
 	function (key, bool) {
 		return A2(
@@ -15542,13 +15870,58 @@ var $author$project$View$renderChecklistItems = F3(
 			$mdgriffith$elm_ui$Element$column,
 			_List_fromArray(
 				[
-					$mdgriffith$elm_ui$Element$width($mdgriffith$elm_ui$Element$fill),
-					$mdgriffith$elm_ui$Element$spacing(-1)
+					$mdgriffith$elm_ui$Element$width($mdgriffith$elm_ui$Element$fill)
 				]),
-			A2(
-				$elm$core$List$map,
-				A3($author$project$View$renderChecklistCheckItem, size, checklist, details.checklistDetails.signedAt),
-				details.items));
+			_List_fromArray(
+				[
+					A2(
+					$mdgriffith$elm_ui$Element$row,
+					_List_fromArray(
+						[
+							$mdgriffith$elm_ui$Element$width($mdgriffith$elm_ui$Element$fill),
+							$mdgriffith$elm_ui$Element$Background$color($author$project$Palette$blue),
+							$mdgriffith$elm_ui$Element$Font$color($author$project$Palette$white),
+							A2($mdgriffith$elm_ui$Element$paddingXY, 8, 6),
+							$mdgriffith$elm_ui$Element$Font$size(
+							A2($author$project$Data$Common$scaledInt, size, -1))
+						]),
+					_List_fromArray(
+						[
+							A2(
+							$mdgriffith$elm_ui$Element$el,
+							_List_Nil,
+							$mdgriffith$elm_ui$Element$text('Check items')),
+							A2(
+							$mdgriffith$elm_ui$Element$row,
+							_List_fromArray(
+								[
+									$mdgriffith$elm_ui$Element$alignRight,
+									$mdgriffith$elm_ui$Element$spacing(6)
+								]),
+							_List_fromArray(
+								[
+									A2(
+									$mdgriffith$elm_ui$Element$el,
+									_List_Nil,
+									$mdgriffith$elm_ui$Element$text('OK')),
+									A2(
+									$mdgriffith$elm_ui$Element$el,
+									_List_Nil,
+									$mdgriffith$elm_ui$Element$text('N/A'))
+								]))
+						])),
+					A2(
+					$mdgriffith$elm_ui$Element$column,
+					_List_fromArray(
+						[
+							$mdgriffith$elm_ui$Element$width($mdgriffith$elm_ui$Element$fill),
+							$mdgriffith$elm_ui$Element$spacing(-1)
+						]),
+					A2(
+						$elm$core$List$map,
+						A3($author$project$View$renderChecklistCheckItem, size, checklist, details.checklistDetails.signedAt),
+						details.items))
+				]));
 	});
 var $author$project$Messages$CommentFieldInput = F2(
 	function (a, b) {
@@ -15636,18 +16009,117 @@ var $author$project$View$renderCommentField = F3(
 						$elm$core$String$lines(details.checklistDetails.comment)))
 				]));
 	});
-var $author$project$Messages$SignChecklistButtonPressed = function (a) {
-	return {$: 'SignChecklistButtonPressed', a: a};
+var $author$project$Messages$AddCustomCheckItemButtonPressed = function (a) {
+	return {$: 'AddCustomCheckItemButtonPressed', a: a};
 };
-var $author$project$Messages$UnsignChecklistButtonPressed = function (a) {
-	return {$: 'UnsignChecklistButtonPressed', a: a};
+var $author$project$Messages$CustomCheckItemInput = function (a) {
+	return {$: 'CustomCheckItemInput', a: a};
 };
-var $author$project$Messages$UnverifyChecklistButtonPressed = function (a) {
-	return {$: 'UnverifyChecklistButtonPressed', a: a};
-};
-var $author$project$Messages$VerifyChecklistButtonPressed = function (a) {
-	return {$: 'VerifyChecklistButtonPressed', a: a};
-};
+var $author$project$Messages$DeleteCustomCheckItemButtomPressed = F2(
+	function (a, b) {
+		return {$: 'DeleteCustomCheckItemButtomPressed', a: a, b: b};
+	});
+var $author$project$Messages$OkCustomCheckItemPressed = F2(
+	function (a, b) {
+		return {$: 'OkCustomCheckItemPressed', a: a, b: b};
+	});
+var $author$project$View$renderCustomChecklistCheckItem = F4(
+	function (size, checklist, signedAt, item) {
+		var notActiveProperties = _List_fromArray(
+			[
+				$mdgriffith$elm_ui$Element$alpha(0.3),
+				$mdgriffith$elm_ui$Element$htmlAttribute(
+				$elm$html$Html$Attributes$title('Checklist is signed')),
+				$mdgriffith$elm_ui$Element$htmlAttribute(
+				A2($elm$html$Html$Attributes$style, 'cursor', 'not-allowed'))
+			]);
+		var isDisabled = signedAt !== '';
+		var activeProperties = _List_fromArray(
+			[
+				$mdgriffith$elm_ui$Element$pointer,
+				$author$project$View$onClick(
+				A2($author$project$Messages$DeleteCustomCheckItemButtomPressed, checklist, item))
+			]);
+		var deleteButton = A2(
+			$mdgriffith$elm_ui$Element$el,
+			_Utils_ap(
+				_List_fromArray(
+					[
+						$mdgriffith$elm_ui$Element$height(
+						$mdgriffith$elm_ui$Element$px(
+							$elm$core$Basics$round(size))),
+						$mdgriffith$elm_ui$Element$width(
+						$mdgriffith$elm_ui$Element$px(
+							$elm$core$Basics$round(size)))
+					]),
+				isDisabled ? notActiveProperties : activeProperties),
+			A2(
+				$mdgriffith$elm_ui$Element$el,
+				_List_fromArray(
+					[$mdgriffith$elm_ui$Element$centerX, $mdgriffith$elm_ui$Element$centerY]),
+				$mdgriffith$elm_ui$Element$text('X')));
+		return A2(
+			$mdgriffith$elm_ui$Element$row,
+			_List_fromArray(
+				[
+					$mdgriffith$elm_ui$Element$width($mdgriffith$elm_ui$Element$fill),
+					A2($mdgriffith$elm_ui$Element$paddingXY, 10, 2),
+					A2($mdgriffith$elm_ui$Element$Border$widthXY, 0, 1),
+					$mdgriffith$elm_ui$Element$Border$dashed,
+					$mdgriffith$elm_ui$Element$Border$color($author$project$Palette$mistBlue)
+				]),
+			_List_fromArray(
+				[
+					A2(
+					$mdgriffith$elm_ui$Element$column,
+					_List_fromArray(
+						[
+							$mdgriffith$elm_ui$Element$width($mdgriffith$elm_ui$Element$fill)
+						]),
+					_List_fromArray(
+						[
+							A2(
+							$mdgriffith$elm_ui$Element$column,
+							_List_fromArray(
+								[
+									$mdgriffith$elm_ui$Element$width($mdgriffith$elm_ui$Element$fill),
+									$mdgriffith$elm_ui$Element$Font$size(
+									A2($author$project$Data$Common$scaledInt, size, -2)),
+									$mdgriffith$elm_ui$Element$padding(4)
+								]),
+							A2(
+								$elm$core$List$map,
+								function (txt) {
+									return A2(
+										$mdgriffith$elm_ui$Element$paragraph,
+										_List_Nil,
+										_List_fromArray(
+											[
+												$mdgriffith$elm_ui$Element$text(txt)
+											]));
+								},
+								$elm$core$String$lines(item.text)))
+						])),
+					A2(
+					$mdgriffith$elm_ui$Element$row,
+					_List_fromArray(
+						[
+							$mdgriffith$elm_ui$Element$centerY,
+							$mdgriffith$elm_ui$Element$alignRight,
+							$mdgriffith$elm_ui$Element$spacing(10)
+						]),
+					_List_fromArray(
+						[
+							A4(
+							$author$project$View$checkButton,
+							size,
+							isDisabled,
+							item.isOk,
+							A2($author$project$Messages$OkCustomCheckItemPressed, checklist, item)),
+							deleteButton
+						]))
+				]));
+	});
 var $author$project$View$signButton = F4(
 	function (size, name, maybeDisabled, msg) {
 		var deactiveAttributes = function (message) {
@@ -15699,6 +16171,115 @@ var $author$project$View$signButton = F4(
 					]),
 				$mdgriffith$elm_ui$Element$text(name)));
 	});
+var $author$project$View$renderCustomChecklistItems = F4(
+	function (size, checklist, details, customCheckItemField) {
+		return A2(
+			$mdgriffith$elm_ui$Element$column,
+			_List_fromArray(
+				[
+					$mdgriffith$elm_ui$Element$width($mdgriffith$elm_ui$Element$fill)
+				]),
+			_List_fromArray(
+				[
+					$elm$core$List$isEmpty(details.customItems) ? $mdgriffith$elm_ui$Element$none : A2(
+					$mdgriffith$elm_ui$Element$row,
+					_List_fromArray(
+						[
+							$mdgriffith$elm_ui$Element$width($mdgriffith$elm_ui$Element$fill),
+							$mdgriffith$elm_ui$Element$Background$color($author$project$Palette$blue),
+							$mdgriffith$elm_ui$Element$Font$color($author$project$Palette$white),
+							A2($mdgriffith$elm_ui$Element$paddingXY, 8, 6),
+							$mdgriffith$elm_ui$Element$Font$size(
+							A2($author$project$Data$Common$scaledInt, size, -1))
+						]),
+					_List_fromArray(
+						[
+							A2(
+							$mdgriffith$elm_ui$Element$el,
+							_List_Nil,
+							$mdgriffith$elm_ui$Element$text('Custom check items')),
+							A2(
+							$mdgriffith$elm_ui$Element$row,
+							_List_fromArray(
+								[
+									$mdgriffith$elm_ui$Element$alignRight,
+									$mdgriffith$elm_ui$Element$spacing(6)
+								]),
+							_List_fromArray(
+								[
+									A2(
+									$mdgriffith$elm_ui$Element$el,
+									_List_Nil,
+									$mdgriffith$elm_ui$Element$text('OK')),
+									A2(
+									$mdgriffith$elm_ui$Element$el,
+									_List_Nil,
+									$mdgriffith$elm_ui$Element$text('Del'))
+								]))
+						])),
+					A2(
+					$mdgriffith$elm_ui$Element$column,
+					_List_fromArray(
+						[
+							$mdgriffith$elm_ui$Element$width($mdgriffith$elm_ui$Element$fill),
+							$mdgriffith$elm_ui$Element$spacing(-1)
+						]),
+					A2(
+						$elm$core$List$map,
+						A3($author$project$View$renderCustomChecklistCheckItem, size, checklist, details.checklistDetails.signedAt),
+						details.customItems)),
+					$elm$core$String$isEmpty(details.checklistDetails.signedAt) ? A2(
+					$mdgriffith$elm_ui$Element$row,
+					_List_fromArray(
+						[
+							$mdgriffith$elm_ui$Element$width($mdgriffith$elm_ui$Element$fill),
+							$mdgriffith$elm_ui$Element$padding(8),
+							$mdgriffith$elm_ui$Element$spacing(10)
+						]),
+					_List_fromArray(
+						[
+							A2(
+							$mdgriffith$elm_ui$Element$Input$text,
+							_List_fromArray(
+								[
+									$mdgriffith$elm_ui$Element$width($mdgriffith$elm_ui$Element$fill)
+								]),
+							{
+								label: $mdgriffith$elm_ui$Element$Input$labelHidden('customItem'),
+								onChange: $author$project$Messages$CustomCheckItemInput,
+								placeholder: $elm$core$Maybe$Just(
+									A2(
+										$mdgriffith$elm_ui$Element$Input$placeholder,
+										_List_Nil,
+										$mdgriffith$elm_ui$Element$text(
+											$elm$core$List$isEmpty(details.customItems) ? 'Optional: custom check-item' : 'type to add more'))),
+								text: customCheckItemField
+							}),
+							A2(
+							$mdgriffith$elm_ui$Element$el,
+							_List_fromArray(
+								[$mdgriffith$elm_ui$Element$alignRight]),
+							A4(
+								$author$project$View$signButton,
+								size,
+								'Add',
+								$elm$core$String$isEmpty(customCheckItemField) ? $elm$core$Maybe$Just('You must type what to check') : $elm$core$Maybe$Nothing,
+								$author$project$Messages$AddCustomCheckItemButtonPressed(checklist)))
+						])) : $mdgriffith$elm_ui$Element$none
+				]));
+	});
+var $author$project$Messages$SignChecklistButtonPressed = function (a) {
+	return {$: 'SignChecklistButtonPressed', a: a};
+};
+var $author$project$Messages$UnsignChecklistButtonPressed = function (a) {
+	return {$: 'UnsignChecklistButtonPressed', a: a};
+};
+var $author$project$Messages$UnverifyChecklistButtonPressed = function (a) {
+	return {$: 'UnverifyChecklistButtonPressed', a: a};
+};
+var $author$project$Messages$VerifyChecklistButtonPressed = function (a) {
+	return {$: 'VerifyChecklistButtonPressed', a: a};
+};
 var $mdgriffith$elm_ui$Element$spacingXY = F2(
 	function (x, y) {
 		return A2(
@@ -15901,110 +16482,148 @@ var $author$project$View$signatures = F4(
 			$mdgriffith$elm_ui$Element$column,
 			_List_fromArray(
 				[
-					$mdgriffith$elm_ui$Element$width($mdgriffith$elm_ui$Element$fill),
-					$mdgriffith$elm_ui$Element$padding(10),
-					$mdgriffith$elm_ui$Element$spacing(2)
+					$mdgriffith$elm_ui$Element$width($mdgriffith$elm_ui$Element$fill)
 				]),
 			_List_fromArray(
 				[
-					$elm$core$String$isEmpty(x.signedAt) ? A2(
+					$elm$core$String$isEmpty(details.checklistDetails.signedAt) ? $mdgriffith$elm_ui$Element$none : A2(
 					$mdgriffith$elm_ui$Element$el,
-					_List_fromArray(
-						[$mdgriffith$elm_ui$Element$alignRight]),
-					A4(
-						$author$project$View$signButton,
-						size,
-						'Sign',
-						hasUnsignedItems ? $elm$core$Maybe$Just('There is unsigned items') : $elm$core$Maybe$Nothing,
-						$author$project$Messages$SignChecklistButtonPressed(checklist))) : A2(
-					$mdgriffith$elm_ui$Element$wrappedRow,
 					_List_fromArray(
 						[
 							$mdgriffith$elm_ui$Element$width($mdgriffith$elm_ui$Element$fill),
-							A2($mdgriffith$elm_ui$Element$spacingXY, 10, 0)
+							$mdgriffith$elm_ui$Element$Background$color($author$project$Palette$blue),
+							$mdgriffith$elm_ui$Element$Font$color($author$project$Palette$white),
+							$mdgriffith$elm_ui$Element$padding(8),
+							$mdgriffith$elm_ui$Element$Font$size(
+							A2($author$project$Data$Common$scaledInt, size, -1))
+						]),
+					$mdgriffith$elm_ui$Element$text('Signatures')),
+					A2(
+					$mdgriffith$elm_ui$Element$column,
+					_List_fromArray(
+						[
+							$mdgriffith$elm_ui$Element$width($mdgriffith$elm_ui$Element$fill),
+							$mdgriffith$elm_ui$Element$padding(10),
+							$mdgriffith$elm_ui$Element$spacing(2)
 						]),
 					_List_fromArray(
 						[
-							A2(
+							$elm$core$String$isEmpty(x.signedAt) ? A2(
 							$mdgriffith$elm_ui$Element$el,
 							_List_fromArray(
-								[$mdgriffith$elm_ui$Element$Font$bold]),
-							$mdgriffith$elm_ui$Element$text('Signed by')),
-							A2(
-							$mdgriffith$elm_ui$Element$row,
-							_List_fromArray(
-								[
-									$mdgriffith$elm_ui$Element$alignRight,
-									$mdgriffith$elm_ui$Element$spacing(10)
-								]),
-							_List_fromArray(
-								[
-									$mdgriffith$elm_ui$Element$text(x.signedByFirstName + (' ' + x.signedByLastName)),
-									A2(
-									$mdgriffith$elm_ui$Element$el,
-									_List_fromArray(
-										[$mdgriffith$elm_ui$Element$alignRight]),
-									$mdgriffith$elm_ui$Element$text(
-										A2($elm$core$String$left, 10, x.signedAt)))
-								])),
+								[$mdgriffith$elm_ui$Element$alignRight]),
 							A4(
-							$author$project$View$signButton,
-							size,
-							'Unsign',
-							(x.verifiedAt !== '') ? $elm$core$Maybe$Just('Checklist is verified') : $elm$core$Maybe$Nothing,
-							$author$project$Messages$UnsignChecklistButtonPressed(checklist))
-						])),
-					(_Utils_eq(checklist.group, $author$project$Data$Checklist$MCCR) && (x.signedAt !== '')) ? ($elm$core$String$isEmpty(x.verifiedAt) ? A2(
-					$mdgriffith$elm_ui$Element$el,
-					_List_fromArray(
-						[$mdgriffith$elm_ui$Element$alignRight]),
-					A4(
-						$author$project$View$signButton,
-						size,
-						'Verify',
-						$elm$core$Maybe$Nothing,
-						$author$project$Messages$VerifyChecklistButtonPressed(checklist))) : A2(
-					$mdgriffith$elm_ui$Element$wrappedRow,
-					_List_fromArray(
-						[
-							$mdgriffith$elm_ui$Element$width($mdgriffith$elm_ui$Element$fill),
-							A2($mdgriffith$elm_ui$Element$spacingXY, 10, 0)
-						]),
-					_List_fromArray(
-						[
-							A2(
-							$mdgriffith$elm_ui$Element$el,
-							_List_fromArray(
-								[$mdgriffith$elm_ui$Element$Font$bold]),
-							$mdgriffith$elm_ui$Element$text('Verified by')),
-							A2(
+								$author$project$View$signButton,
+								size,
+								'Sign',
+								hasUnsignedItems ? $elm$core$Maybe$Just('There is unsigned items') : $elm$core$Maybe$Nothing,
+								$author$project$Messages$SignChecklistButtonPressed(checklist))) : A2(
 							$mdgriffith$elm_ui$Element$row,
 							_List_fromArray(
 								[
-									$mdgriffith$elm_ui$Element$alignRight,
-									$mdgriffith$elm_ui$Element$spacing(10)
+									$mdgriffith$elm_ui$Element$width($mdgriffith$elm_ui$Element$fill)
 								]),
 							_List_fromArray(
 								[
 									A2(
-									$mdgriffith$elm_ui$Element$el,
+									$mdgriffith$elm_ui$Element$wrappedRow,
 									_List_fromArray(
-										[$mdgriffith$elm_ui$Element$alignRight]),
-									$mdgriffith$elm_ui$Element$text(x.verifiedByFirstName + (' ' + x.verifiedByLastName))),
-									A2(
-									$mdgriffith$elm_ui$Element$el,
+										[
+											$mdgriffith$elm_ui$Element$width($mdgriffith$elm_ui$Element$fill),
+											A2($mdgriffith$elm_ui$Element$spacingXY, 10, 0)
+										]),
 									_List_fromArray(
-										[$mdgriffith$elm_ui$Element$alignRight]),
-									$mdgriffith$elm_ui$Element$text(
-										A2($elm$core$String$left, 10, x.verifiedAt)))
+										[
+											A2(
+											$mdgriffith$elm_ui$Element$el,
+											_List_fromArray(
+												[$mdgriffith$elm_ui$Element$Font$bold]),
+											$mdgriffith$elm_ui$Element$text('Signed by')),
+											A2(
+											$mdgriffith$elm_ui$Element$row,
+											_List_fromArray(
+												[
+													$mdgriffith$elm_ui$Element$spacing(10)
+												]),
+											_List_fromArray(
+												[
+													$mdgriffith$elm_ui$Element$text(x.signedByFirstName + (' ' + x.signedByLastName)),
+													A2(
+													$mdgriffith$elm_ui$Element$el,
+													_List_fromArray(
+														[$mdgriffith$elm_ui$Element$alignRight]),
+													$mdgriffith$elm_ui$Element$text(
+														A2($elm$core$String$left, 10, x.signedAt)))
+												]))
+										])),
+									A4(
+									$author$project$View$signButton,
+									size,
+									'Unsign',
+									(x.verifiedAt !== '') ? $elm$core$Maybe$Just('Checklist is verified') : $elm$core$Maybe$Nothing,
+									$author$project$Messages$UnsignChecklistButtonPressed(checklist))
 								])),
+							((!_Utils_eq(checklist.group, $author$project$Data$Checklist$CPCL)) && (x.signedAt !== '')) ? ($elm$core$String$isEmpty(x.verifiedAt) ? A2(
+							$mdgriffith$elm_ui$Element$el,
+							_List_fromArray(
+								[$mdgriffith$elm_ui$Element$alignRight]),
 							A4(
-							$author$project$View$signButton,
-							size,
-							'Unverify',
-							$elm$core$Maybe$Nothing,
-							$author$project$Messages$UnverifyChecklistButtonPressed(checklist))
-						]))) : $mdgriffith$elm_ui$Element$none
+								$author$project$View$signButton,
+								size,
+								'Verify',
+								$elm$core$Maybe$Nothing,
+								$author$project$Messages$VerifyChecklistButtonPressed(checklist))) : A2(
+							$mdgriffith$elm_ui$Element$row,
+							_List_fromArray(
+								[
+									$mdgriffith$elm_ui$Element$width($mdgriffith$elm_ui$Element$fill),
+									A2($mdgriffith$elm_ui$Element$spacingXY, 10, 0)
+								]),
+							_List_fromArray(
+								[
+									A2(
+									$mdgriffith$elm_ui$Element$wrappedRow,
+									_List_fromArray(
+										[
+											$mdgriffith$elm_ui$Element$width($mdgriffith$elm_ui$Element$fill),
+											A2($mdgriffith$elm_ui$Element$spacingXY, 10, 0)
+										]),
+									_List_fromArray(
+										[
+											A2(
+											$mdgriffith$elm_ui$Element$el,
+											_List_fromArray(
+												[$mdgriffith$elm_ui$Element$Font$bold]),
+											$mdgriffith$elm_ui$Element$text('Verified by')),
+											A2(
+											$mdgriffith$elm_ui$Element$row,
+											_List_fromArray(
+												[
+													$mdgriffith$elm_ui$Element$spacing(10)
+												]),
+											_List_fromArray(
+												[
+													A2(
+													$mdgriffith$elm_ui$Element$el,
+													_List_fromArray(
+														[$mdgriffith$elm_ui$Element$alignRight]),
+													$mdgriffith$elm_ui$Element$text(x.verifiedByFirstName + (' ' + x.verifiedByLastName))),
+													A2(
+													$mdgriffith$elm_ui$Element$el,
+													_List_fromArray(
+														[$mdgriffith$elm_ui$Element$alignRight]),
+													$mdgriffith$elm_ui$Element$text(
+														A2($elm$core$String$left, 10, x.verifiedAt)))
+												]))
+										])),
+									A4(
+									$author$project$View$signButton,
+									size,
+									'Unverify',
+									$elm$core$Maybe$Nothing,
+									$author$project$Messages$UnverifyChecklistButtonPressed(checklist))
+								]))) : $mdgriffith$elm_ui$Element$none
+						]))
 				]));
 	});
 var $author$project$Data$Common$statusToString = function (status) {
@@ -16020,8 +16639,8 @@ var $author$project$Data$Common$statusToString = function (status) {
 	}
 };
 var $author$project$Palette$yellow = A3($mdgriffith$elm_ui$Element$rgb255, 251, 202, 54);
-var $author$project$View$renderChecklistItem = F4(
-	function (size, maybeSelected, errorMsg, item) {
+var $author$project$View$renderChecklistItem = F5(
+	function (size, maybeSelected, errorMsg, customCheckItemField, item) {
 		var tagNo = A2(
 			$mdgriffith$elm_ui$Element$paragraph,
 			_List_fromArray(
@@ -16168,12 +16787,19 @@ var $author$project$View$renderChecklistItem = F4(
 									return $mdgriffith$elm_ui$Element$text('Error getting details');
 								default:
 									var details = _v0.a;
-									var hasUnsignedItems = A2(
+									var hasUnsignedNormalItems = A2(
 										$elm$core$List$any,
 										function (i) {
 											return (!i.isHeading) && ((!i.isOk) && (!i.isNa));
 										},
 										details.items);
+									var hasUnsignedCustomItems = A2(
+										$elm$core$List$any,
+										function (i) {
+											return !i.isOk;
+										},
+										details.customItems);
+									var hasUnsignedItems = hasUnsignedNormalItems || hasUnsignedCustomItems;
 									return A2(
 										$mdgriffith$elm_ui$Element$column,
 										_List_fromArray(
@@ -16185,56 +16811,9 @@ var $author$project$View$renderChecklistItem = F4(
 											]),
 										_List_fromArray(
 											[
-												A2(
-												$mdgriffith$elm_ui$Element$row,
-												_List_fromArray(
-													[
-														$mdgriffith$elm_ui$Element$width($mdgriffith$elm_ui$Element$fill),
-														$mdgriffith$elm_ui$Element$Background$color($author$project$Palette$blue),
-														$mdgriffith$elm_ui$Element$Font$color($author$project$Palette$white),
-														A2($mdgriffith$elm_ui$Element$paddingXY, 8, 6),
-														$mdgriffith$elm_ui$Element$Font$size(
-														A2($author$project$Data$Common$scaledInt, size, -1))
-													]),
-												_List_fromArray(
-													[
-														A2(
-														$mdgriffith$elm_ui$Element$el,
-														_List_Nil,
-														$mdgriffith$elm_ui$Element$text('Check items')),
-														A2(
-														$mdgriffith$elm_ui$Element$row,
-														_List_fromArray(
-															[
-																$mdgriffith$elm_ui$Element$alignRight,
-																$mdgriffith$elm_ui$Element$spacing(6)
-															]),
-														_List_fromArray(
-															[
-																A2(
-																$mdgriffith$elm_ui$Element$el,
-																_List_Nil,
-																$mdgriffith$elm_ui$Element$text('OK')),
-																A2(
-																$mdgriffith$elm_ui$Element$el,
-																_List_Nil,
-																$mdgriffith$elm_ui$Element$text('N/A'))
-															]))
-													])),
 												A3($author$project$View$renderChecklistItems, size, item, details),
+												A4($author$project$View$renderCustomChecklistItems, size, item, details, customCheckItemField),
 												A3($author$project$View$renderCommentField, size, item, details),
-												$elm$core$String$isEmpty(details.checklistDetails.signedAt) ? $mdgriffith$elm_ui$Element$none : A2(
-												$mdgriffith$elm_ui$Element$el,
-												_List_fromArray(
-													[
-														$mdgriffith$elm_ui$Element$width($mdgriffith$elm_ui$Element$fill),
-														$mdgriffith$elm_ui$Element$Background$color($author$project$Palette$blue),
-														$mdgriffith$elm_ui$Element$Font$color($author$project$Palette$white),
-														$mdgriffith$elm_ui$Element$padding(8),
-														$mdgriffith$elm_ui$Element$Font$size(
-														A2($author$project$Data$Common$scaledInt, size, -1))
-													]),
-												$mdgriffith$elm_ui$Element$text('Signatures')),
 												A4($author$project$View$signatures, size, item, hasUnsignedItems, details),
 												$elm$core$String$isEmpty(errorMsg) ? $mdgriffith$elm_ui$Element$none : A2(
 												$mdgriffith$elm_ui$Element$paragraph,
@@ -16256,8 +16835,8 @@ var $author$project$View$renderChecklistItem = F4(
 					}()
 					])));
 	});
-var $author$project$View$renderChecklists = F4(
-	function (size, maybeSelected, errorMsg, checklists) {
+var $author$project$View$renderChecklists = F5(
+	function (size, maybeSelected, errorMsg, customCheckItemField, checklists) {
 		var updater = F2(
 			function (c, mV) {
 				return $elm$core$Maybe$Just(
@@ -16278,9 +16857,9 @@ var $author$project$View$renderChecklists = F4(
 				case 'CPCL':
 					return 'CPCL';
 				case 'Preservation':
-					return 'Pres';
+					return 'Preservation';
 				case 'RunningLogs':
-					return 'rLog';
+					return 'runningLogs';
 				case 'DCCL':
 					return 'DCCL';
 				default:
@@ -16304,7 +16883,7 @@ var $author$project$View$renderChecklists = F4(
 			$mdgriffith$elm_ui$Element$column,
 			_List_fromArray(
 				[
-					$mdgriffith$elm_ui$Element$spacing(-1),
+					$mdgriffith$elm_ui$Element$spacing(10),
 					$mdgriffith$elm_ui$Element$width($mdgriffith$elm_ui$Element$fill)
 				]),
 			A2(
@@ -16324,8 +16903,8 @@ var $author$project$View$renderChecklists = F4(
 								$mdgriffith$elm_ui$Element$el,
 								_List_fromArray(
 									[
-										$mdgriffith$elm_ui$Element$Font$bold,
-										$mdgriffith$elm_ui$Element$Font$color($author$project$Palette$mossGreen)
+										$mdgriffith$elm_ui$Element$Font$color($author$project$Palette$mossGreen),
+										$mdgriffith$elm_ui$Element$Font$bold
 									]),
 								$mdgriffith$elm_ui$Element$text(groupName)),
 								A2(
@@ -16340,7 +16919,7 @@ var $author$project$View$renderChecklists = F4(
 									]),
 								A2(
 									$elm$core$List$map,
-									A3($author$project$View$renderChecklistItem, size, maybeSelected, errorMsg),
+									A4($author$project$View$renderChecklistItem, size, maybeSelected, errorMsg, customCheckItemField),
 									groupChecklists))
 							]));
 				},
@@ -16357,11 +16936,12 @@ var $elm$core$Dict$values = function (dict) {
 		dict);
 };
 var $author$project$Main$view = function (model) {
-	return $elm$core$Dict$isEmpty(model.checklists) ? $mdgriffith$elm_ui$Element$text('No Checklists') : A4(
+	return $elm$core$Dict$isEmpty(model.checklists) ? $mdgriffith$elm_ui$Element$text('No Checklists') : A5(
 		$author$project$View$renderChecklists,
 		16,
 		model.selectedChecklist,
 		model.errorMsg,
+		model.customCheckItemField,
 		$elm$core$Dict$values(model.checklists));
 };
 var $author$project$Main$main = $elm$browser$Browser$element(

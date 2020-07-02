@@ -25,16 +25,23 @@ type Msg
     | MetaTableCellLostFocus Checklist Checklist.Item Checklist.Row Checklist.Cell
     | CommentFieldInput Checklist String
     | CommentFieldLostFocus Checklist String
+    | CustomCheckItemInput String
+    | AddCustomCheckItemButtonPressed Checklist
+    | OkCustomCheckItemPressed Checklist Checklist.CustomItem
+    | DeleteCustomCheckItemButtomPressed Checklist Checklist.CustomItem
 
 
 type ApiResult
     = GotChecklistDetails Int (Result Http.Error Checklist.Details)
-    | SetNaResult Checklist Checklist.Item (Result Http.Error ())
-    | SetOkResult Checklist Checklist.Item (Result Http.Error ())
-    | ClearResult Checklist Checklist.Item (Result Http.Error ())
+    | SetNaResult Checklist (Result Http.Error ())
+    | SetOkResult Checklist (Result Http.Error ())
+    | ClearResult Checklist (Result Http.Error ())
     | SignChecklistResult Checklist (Result Http.Error ())
     | UnsignChecklistResult Checklist (Result Http.Error ())
     | VerifyChecklistResult Checklist (Result Http.Error ())
     | UnverifyChecklistResult Checklist (Result Http.Error ())
     | UpdateMetaTableCellResult Checklist (Result Http.Error ())
     | CommentChecklistResult Checklist (Result Http.Error ())
+    | GotNextCustomItemNo Checklist (Result Http.Error String)
+    | AddCustomItemResult Checklist (Result Http.Error ())
+    | DeleteCustomItemResult Checklist (Result Http.Error ())

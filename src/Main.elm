@@ -23,7 +23,7 @@ view model =
         text "No Checklists"
 
     else
-        View.renderChecklists 16 model.selectedChecklist model.errorMsg (Dict.values model.checklists)
+        View.renderChecklists 16 model.selectedChecklist model.errorMsg model.customCheckItemField (Dict.values model.checklists)
 
 
 main : Program Flags Model Msg

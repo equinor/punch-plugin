@@ -1,4 +1,4 @@
-module Api exposing (checklistDetails, clearCheckItem, clientId, setCheckItemNa, setCheckItemOk, signChecklist, unSignChecklist, unVerifyChecklist, updateComment, updateMetaTableCell, verifyChecklist)
+module Api exposing (addCustomItem, checklistDetails, clearCheckItem, clearCustomCheckItem, clientId, deleteCustomItem, nextCustomItemNo, setCheckItemNa, setCheckItemOk, setCustomCheckItemOk, signChecklist, unSignChecklist, unVerifyChecklist, updateComment, updateMetaTableCell, verifyChecklist)
 
 import Data.Checklist as Checklist
 import Http
@@ -56,6 +56,9 @@ checklistDetails checklist plantId token =
                     Checklist.CPCL ->
                         "Comm"
 
+                    Checklist.Preservation ->
+                        "Preservation"
+
                     _ ->
                         "MC"
                 ]
@@ -69,6 +72,53 @@ checklistDetails checklist plantId token =
             Http.expectJson
                 (GotApiResult << GotChecklistDetails checklist.id)
                 Checklist.detailsApiDecoder
+        , timeout = Nothing
+        , tracker = Nothing
+        }
+
+
+nextCustomItemNo : Checklist.Checklist -> String -> String -> Cmd Msg
+nextCustomItemNo checklist plantId token =
+    Http.request
+        { method = "GET"
+        , url =
+            url
+                [ "Checklist", "CustomItem", "NextItemNo" ]
+                [ string "plantId" plantId
+                , int "checklistId" checklist.id
+                , apiVersion
+                ]
+        , headers = [ Http.header "Authorization" ("Bearer " ++ token) ]
+        , body = Http.emptyBody
+        , expect =
+            Http.expectString
+                (GotApiResult << GotNextCustomItemNo checklist)
+        , timeout = Nothing
+        , tracker = Nothing
+        }
+
+
+deleteCustomItem : Checklist.Checklist -> Checklist.CustomItem -> String -> String -> Cmd Msg
+deleteCustomItem checklist customItem plantId token =
+    Http.request
+        { method = "DELETE"
+        , url =
+            url
+                [ "Checklist", "CustomItem" ]
+                [ string "plantId" plantId
+                , apiVersion
+                ]
+        , headers = [ Http.header "Authorization" ("Bearer " ++ token) ]
+        , body =
+            Http.jsonBody
+                (E.object
+                    [ ( "CheckListId", E.int checklist.id )
+                    , ( "CustomCheckItemId", E.int customItem.id )
+                    ]
+                )
+        , expect =
+            Http.expectWhatever
+                (GotApiResult << DeleteCustomItemResult checklist)
         , timeout = Nothing
         , tracker = Nothing
         }
@@ -94,9 +144,7 @@ setCheckItemNa checklist checkItem plantId token =
                 )
         , expect =
             Http.expectWhatever
-                (GotApiResult << SetNaResult checklist checkItem)
-
-        --Checklist.detailsApiDecoder
+                (GotApiResult << SetNaResult checklist)
         , timeout = Nothing
         , tracker = Nothing
         }
@@ -122,9 +170,33 @@ setCheckItemOk checklist checkItem plantId token =
                 )
         , expect =
             Http.expectWhatever
-                (GotApiResult << SetOkResult checklist checkItem)
+                (GotApiResult << SetOkResult checklist)
+        , timeout = Nothing
+        , tracker = Nothing
+        }
 
-        --Checklist.detailsApiDecoder
+
+setCustomCheckItemOk : Checklist.Checklist -> Checklist.CustomItem -> String -> String -> Cmd Msg
+setCustomCheckItemOk checklist checkItem plantId token =
+    Http.request
+        { method = "POST"
+        , url =
+            url
+                [ "CheckList", "CustomItem", "SetOk" ]
+                [ string "plantId" plantId
+                , apiVersion
+                ]
+        , headers = [ Http.header "Authorization" ("Bearer " ++ token) ]
+        , body =
+            Http.jsonBody
+                (E.object
+                    [ ( "CheckListId", E.int checklist.id )
+                    , ( "CustomCheckItemId", E.int checkItem.id )
+                    ]
+                )
+        , expect =
+            Http.expectWhatever
+                (GotApiResult << SetOkResult checklist)
         , timeout = Nothing
         , tracker = Nothing
         }
@@ -150,9 +222,33 @@ clearCheckItem checklist checkItem plantId token =
                 )
         , expect =
             Http.expectWhatever
-                (GotApiResult << ClearResult checklist checkItem)
+                (GotApiResult << ClearResult checklist)
+        , timeout = Nothing
+        , tracker = Nothing
+        }
 
-        --Checklist.detailsApiDecoder
+
+clearCustomCheckItem : Checklist.Checklist -> Checklist.CustomItem -> String -> String -> Cmd Msg
+clearCustomCheckItem checklist checkItem plantId token =
+    Http.request
+        { method = "POST"
+        , url =
+            url
+                [ "CheckList", "CustomItem", "Clear" ]
+                [ string "plantId" plantId
+                , apiVersion
+                ]
+        , headers = [ Http.header "Authorization" ("Bearer " ++ token) ]
+        , body =
+            Http.jsonBody
+                (E.object
+                    [ ( "CheckListId", E.int checklist.id )
+                    , ( "CustomCheckItemId", E.int checkItem.id )
+                    ]
+                )
+        , expect =
+            Http.expectWhatever
+                (GotApiResult << ClearResult checklist)
         , timeout = Nothing
         , tracker = Nothing
         }
@@ -169,6 +265,9 @@ signChecklist checklist plantId token =
                     Checklist.CPCL ->
                         "Comm"
 
+                    Checklist.Preservation ->
+                        "Preservation"
+
                     _ ->
                         "MC"
                 , "Sign"
@@ -183,8 +282,6 @@ signChecklist checklist plantId token =
         , expect =
             Http.expectWhatever
                 (GotApiResult << SignChecklistResult checklist)
-
-        --Checklist.detailsApiDecoder
         , timeout = Nothing
         , tracker = Nothing
         }
@@ -201,6 +298,9 @@ unSignChecklist checklist plantId token =
                     Checklist.CPCL ->
                         "Comm"
 
+                    Checklist.Preservation ->
+                        "Preservation"
+
                     _ ->
                         "MC"
                 , "Unsign"
@@ -215,8 +315,6 @@ unSignChecklist checklist plantId token =
         , expect =
             Http.expectWhatever
                 (GotApiResult << UnsignChecklistResult checklist)
-
-        --Checklist.detailsApiDecoder
         , timeout = Nothing
         , tracker = Nothing
         }
@@ -232,6 +330,9 @@ verifyChecklist checklist plantId token =
                 , case checklist.group of
                     Checklist.CPCL ->
                         "Comm"
+
+                    Checklist.Preservation ->
+                        "Preservation"
 
                     _ ->
                         "MC"
@@ -265,6 +366,9 @@ unVerifyChecklist checklist plantId token =
                     Checklist.CPCL ->
                         "Comm"
 
+                    Checklist.Preservation ->
+                        "Preservation"
+
                     _ ->
                         "MC"
                 , "Unverify"
@@ -279,8 +383,36 @@ unVerifyChecklist checklist plantId token =
         , expect =
             Http.expectWhatever
                 (GotApiResult << UnverifyChecklistResult checklist)
+        , timeout = Nothing
+        , tracker = Nothing
+        }
 
-        --Checklist.detailsApiDecoder
+
+addCustomItem : Checklist.Checklist -> String -> String -> Bool -> String -> String -> Cmd Msg
+addCustomItem checklist nextNo itemString isOk plantId token =
+    Http.request
+        { method = "POST"
+        , url =
+            url
+                [ "CheckList"
+                , "CustomItem"
+                ]
+                [ string "plantId" plantId
+                , apiVersion
+                ]
+        , headers = [ Http.header "Authorization" ("Bearer " ++ token) ]
+        , body =
+            Http.jsonBody
+                (E.object
+                    [ ( "CheckListId", E.int checklist.id )
+                    , ( "ItemNo", E.string nextNo )
+                    , ( "Text", E.string itemString )
+                    , ( "IsOk", E.bool isOk )
+                    ]
+                )
+        , expect =
+            Http.expectWhatever
+                (GotApiResult << AddCustomItemResult checklist)
         , timeout = Nothing
         , tracker = Nothing
         }
@@ -296,6 +428,9 @@ updateComment checklist comment plantId token =
                 , case checklist.group of
                     Checklist.CPCL ->
                         "Comm"
+
+                    Checklist.Preservation ->
+                        "Preservation"
 
                     _ ->
                         "MC"
@@ -347,8 +482,6 @@ updateMetaTableCell checklist checkItem tableRow cell plantId token =
         , expect =
             Http.expectWhatever
                 (GotApiResult << UpdateMetaTableCellResult checklist)
-
-        --Checklist.detailsApiDecoder
         , timeout = Nothing
         , tracker = Nothing
         }
