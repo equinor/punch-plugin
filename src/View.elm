@@ -191,7 +191,20 @@ renderDetails size model punch =
             , kv size "MC package" punch.mcPk ""
             , kv size "Location" punch.location ""
             ]
+        , dropDown size
+            CategoryDropDown
+            (case punch.status of
+                PA ->
+                    "PA"
+
+                _ ->
+                    "PB"
+            )
+            .categories
+            punch
+            model
         , dropDown size RaisedByDropDown punch.raisedByOrg .organizations punch model
+        , dropDown size ClearingByDropDown punch.clearingByOrg .organizations punch model
         ]
 
 
@@ -203,8 +216,14 @@ dropDown size dropDownType current field punch model =
                 NoDropDown ->
                     ""
 
+                CategoryDropDown ->
+                    "Category"
+
                 RaisedByDropDown ->
                     "Raised By"
+
+                ClearingByDropDown ->
+                    "Clearing By"
 
         header =
             el
@@ -249,12 +268,13 @@ selectionList size current punch webData =
 selectItem : Float -> String -> Punch -> SelectItem -> ( String, Element Msg )
 selectItem size current punch item =
     ( item.id |> String.fromInt
-    , el
+    , row
         [ width fill
         , padding 10
+        , spacing 10
         , mouseOver [ Background.color Palette.mistBlue ]
         , Background.color <|
-            if current == item.description then
+            if current == item.description || current == item.code then
                 Palette.lightGrey
 
             else
@@ -262,7 +282,7 @@ selectItem size current punch item =
         , pointer
         , onClick <| DropDownItemPressed punch item
         ]
-        (text item.description)
+        [ text item.code, text item.description ]
     )
 
 

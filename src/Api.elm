@@ -1,4 +1,4 @@
-module Api exposing (clientId, organizations, setRaisedBy, updateDescription)
+module Api exposing (categories, clientId, organizations, setCategory, setClearingBy, setRaisedBy, updateDescription)
 
 import Data.Punch as Punch exposing (Punch)
 import Http
@@ -73,6 +73,34 @@ updateDescription punch plantId token =
         }
 
 
+setCategory : Punch -> SelectItem -> String -> String -> Cmd Msg
+setCategory originalPunch selectItem plantId token =
+    Http.request
+        { method = "PUT"
+        , url =
+            url
+                [ "PunchListItem"
+                , "SetCategory"
+                ]
+                [ string "plantId" plantId
+                , apiVersion
+                ]
+        , headers = [ Http.header "Authorization" ("Bearer " ++ token) ]
+        , body =
+            Http.jsonBody
+                (E.object
+                    [ ( "PunchItemId", originalPunch.id |> String.toInt |> Maybe.withDefault 0 |> E.int )
+                    , ( "CategoryId", E.int selectItem.id )
+                    ]
+                )
+        , expect =
+            Http.expectWhatever
+                (GotApiResult << SetCategoryResult originalPunch)
+        , timeout = Nothing
+        , tracker = Nothing
+        }
+
+
 setRaisedBy : Punch -> SelectItem -> String -> String -> Cmd Msg
 setRaisedBy originalPunch selectItem plantId token =
     Http.request
@@ -101,6 +129,34 @@ setRaisedBy originalPunch selectItem plantId token =
         }
 
 
+setClearingBy : Punch -> SelectItem -> String -> String -> Cmd Msg
+setClearingBy originalPunch selectItem plantId token =
+    Http.request
+        { method = "PUT"
+        , url =
+            url
+                [ "PunchListItem"
+                , "SetClearingBy"
+                ]
+                [ string "plantId" plantId
+                , apiVersion
+                ]
+        , headers = [ Http.header "Authorization" ("Bearer " ++ token) ]
+        , body =
+            Http.jsonBody
+                (E.object
+                    [ ( "PunchItemId", originalPunch.id |> String.toInt |> Maybe.withDefault 0 |> E.int )
+                    , ( "ClearingByOrganizationId", E.int selectItem.id )
+                    ]
+                )
+        , expect =
+            Http.expectWhatever
+                (GotApiResult << SetClearingByResult originalPunch)
+        , timeout = Nothing
+        , tracker = Nothing
+        }
+
+
 organizations : String -> String -> Cmd Msg
 organizations plantId token =
     Http.request
@@ -118,6 +174,29 @@ organizations plantId token =
         , expect =
             Http.expectJson
                 (GotApiResult << GotOrganizations)
+                (D.list Types.selectItemDecoder)
+        , timeout = Nothing
+        , tracker = Nothing
+        }
+
+
+categories : String -> String -> Cmd Msg
+categories plantId token =
+    Http.request
+        { method = "GET"
+        , url =
+            url
+                [ "PunchListItem"
+                , "Categories"
+                ]
+                [ string "plantId" plantId
+                , apiVersion
+                ]
+        , headers = [ Http.header "Authorization" ("Bearer " ++ token) ]
+        , body = Http.emptyBody
+        , expect =
+            Http.expectJson
+                (GotApiResult << GotCategories)
                 (D.list Types.selectItemDecoder)
         , timeout = Nothing
         , tracker = Nothing

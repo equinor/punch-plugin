@@ -46,4 +46,6 @@ selectItemDecoder =
 
 type DropDown
     = NoDropDown
+    | CategoryDropDown
     | RaisedByDropDown
+    | ClearingByDropDown

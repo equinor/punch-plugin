@@ -5656,7 +5656,7 @@ var $elm$core$Platform$Cmd$batch = _Platform_batch;
 var $elm$core$Platform$Cmd$none = $elm$core$Platform$Cmd$batch(_List_Nil);
 var $author$project$Model$initialModel = function (flags) {
 	return _Utils_Tuple2(
-		{apiToken: '', dropDown: $author$project$Types$NoDropDown, errorMsg: '', highlight: $elm$core$Maybe$Nothing, organizations: $author$project$Types$NotLoaded, procosysPlantId: flags.procosysPlantId, punch: $elm$core$Dict$empty, requests: $elm$core$Dict$empty, selectedPunch: $elm$core$Maybe$Nothing},
+		{apiToken: '', categories: $author$project$Types$NotLoaded, dropDown: $author$project$Types$NoDropDown, errorMsg: '', highlight: $elm$core$Maybe$Nothing, organizations: $author$project$Types$NotLoaded, procosysPlantId: flags.procosysPlantId, punch: $elm$core$Dict$empty, requests: $elm$core$Dict$empty, selectedPunch: $elm$core$Maybe$Nothing},
 		$elm$core$Platform$Cmd$none);
 };
 var $mdgriffith$elm_ui$Internal$Style$classes = {above: 'a', active: 'atv', alignBottom: 'ab', alignCenterX: 'cx', alignCenterY: 'cy', alignContainerBottom: 'acb', alignContainerCenterX: 'accx', alignContainerCenterY: 'accy', alignContainerRight: 'acr', alignLeft: 'al', alignRight: 'ar', alignTop: 'at', alignedHorizontally: 'ah', alignedVertically: 'av', any: 's', behind: 'bh', below: 'b', bold: 'w7', borderDashed: 'bd', borderDotted: 'bdt', borderNone: 'bn', borderSolid: 'bs', capturePointerEvents: 'cpe', clip: 'cp', clipX: 'cpx', clipY: 'cpy', column: 'c', container: 'ctr', contentBottom: 'cb', contentCenterX: 'ccx', contentCenterY: 'ccy', contentLeft: 'cl', contentRight: 'cr', contentTop: 'ct', cursorPointer: 'cptr', cursorText: 'ctxt', focus: 'fcs', focusedWithin: 'focus-within', fullSize: 'fs', grid: 'g', hasBehind: 'hbh', heightContent: 'hc', heightExact: 'he', heightFill: 'hf', heightFillPortion: 'hfp', hover: 'hv', imageContainer: 'ic', inFront: 'fr', inputLabel: 'lbl', inputMultiline: 'iml', inputMultilineFiller: 'imlf', inputMultilineParent: 'imlp', inputMultilineWrapper: 'implw', inputText: 'it', italic: 'i', link: 'lnk', nearby: 'nb', noTextSelection: 'notxt', onLeft: 'ol', onRight: 'or', opaque: 'oq', overflowHidden: 'oh', page: 'pg', paragraph: 'p', passPointerEvents: 'ppe', root: 'ui', row: 'r', scrollbars: 'sb', scrollbarsX: 'sbx', scrollbarsY: 'sby', seButton: 'sbt', single: 'e', sizeByCapital: 'cap', spaceEvenly: 'sev', strike: 'sk', text: 't', textCenter: 'tc', textExtraBold: 'w8', textExtraLight: 'w2', textHeavy: 'w9', textJustify: 'tj', textJustifyAll: 'tja', textLeft: 'tl', textLight: 'w3', textMedium: 'w5', textNormalWeight: 'w4', textRight: 'tr', textSemiBold: 'w6', textThin: 'w1', textUnitalicized: 'tun', transition: 'ts', transparent: 'clr', underline: 'u', widthContent: 'wc', widthExact: 'we', widthFill: 'wf', widthFillPortion: 'wfp', wrapped: 'wrp'};
@@ -11573,8 +11573,8 @@ var $author$project$Types$Loading = {$: 'Loading'};
 var $author$project$Messages$GotApiResult = function (a) {
 	return {$: 'GotApiResult', a: a};
 };
-var $author$project$Messages$GotOrganizations = function (a) {
-	return {$: 'GotOrganizations', a: a};
+var $author$project$Messages$GotCategories = function (a) {
+	return {$: 'GotCategories', a: a};
 };
 var $elm$url$Url$Builder$QueryParameter = F2(
 	function (a, b) {
@@ -12271,6 +12271,54 @@ var $author$project$Api$url = F2(
 				A2($elm$core$List$cons, $author$project$Api$apiVersion, queryParams));
 		}
 	});
+var $author$project$Api$categories = F2(
+	function (plantId, token) {
+		return $elm$http$Http$request(
+			{
+				body: $elm$http$Http$emptyBody,
+				expect: A2(
+					$elm$http$Http$expectJson,
+					A2($elm$core$Basics$composeL, $author$project$Messages$GotApiResult, $author$project$Messages$GotCategories),
+					$elm$json$Json$Decode$list($author$project$Types$selectItemDecoder)),
+				headers: _List_fromArray(
+					[
+						A2($elm$http$Http$header, 'Authorization', 'Bearer ' + token)
+					]),
+				method: 'GET',
+				timeout: $elm$core$Maybe$Nothing,
+				tracker: $elm$core$Maybe$Nothing,
+				url: A2(
+					$author$project$Api$url,
+					_List_fromArray(
+						['PunchListItem', 'Categories']),
+					_List_fromArray(
+						[
+							A2($elm$url$Url$Builder$string, 'plantId', plantId),
+							$author$project$Api$apiVersion
+						]))
+			});
+	});
+var $author$project$Update$getCategories = function (_v0) {
+	var m = _v0.a;
+	var c = _v0.b;
+	var _v1 = m.categories;
+	if (_v1.$ === 'Loaded') {
+		return _Utils_Tuple2(m, c);
+	} else {
+		return A2(
+			$author$project$Update$apiRequest,
+			_List_fromArray(
+				[$author$project$Api$categories]),
+			_Utils_Tuple2(
+				_Utils_update(
+					m,
+					{categories: $author$project$Types$Loading}),
+				c));
+	}
+};
+var $author$project$Messages$GotOrganizations = function (a) {
+	return {$: 'GotOrganizations', a: a};
+};
 var $author$project$Api$organizations = F2(
 	function (plantId, token) {
 		return $elm$http$Http$request(
@@ -12380,7 +12428,57 @@ var $author$project$Update$handleApiResult = F2(
 							}),
 						c);
 				}
-			default:
+			case 'SetClearingByResult':
+				var originalPunch = apiResult.a;
+				var result = apiResult.b;
+				if (result.$ === 'Ok') {
+					return _Utils_Tuple2(m, c);
+				} else {
+					var err = result.a;
+					var updater = function (punch) {
+						return _Utils_update(
+							punch,
+							{clearingByOrg: originalPunch.clearingByOrg});
+					};
+					return _Utils_Tuple2(
+						_Utils_update(
+							m,
+							{
+								errorMsg: 'Error changing clearingByOrg',
+								punch: A3(
+									$elm$core$Dict$update,
+									originalPunch.id,
+									$elm$core$Maybe$map(updater),
+									m.punch)
+							}),
+						c);
+				}
+			case 'SetCategoryResult':
+				var originalPunch = apiResult.a;
+				var result = apiResult.b;
+				if (result.$ === 'Ok') {
+					return _Utils_Tuple2(m, c);
+				} else {
+					var err = result.a;
+					var updater = function (punch) {
+						return _Utils_update(
+							punch,
+							{status: originalPunch.status});
+					};
+					return _Utils_Tuple2(
+						_Utils_update(
+							m,
+							{
+								errorMsg: 'Error changing category',
+								punch: A3(
+									$elm$core$Dict$update,
+									originalPunch.id,
+									$elm$core$Maybe$map(updater),
+									m.punch)
+							}),
+						c);
+				}
+			case 'GotOrganizations':
 				var result = apiResult.a;
 				if (result.$ === 'Ok') {
 					var organizations = result.a;
@@ -12397,6 +12495,25 @@ var $author$project$Update$handleApiResult = F2(
 						_Utils_update(
 							m,
 							{errorMsg: 'Error getting organizations', organizations: $author$project$Types$DataError}),
+						c);
+				}
+			default:
+				var result = apiResult.a;
+				if (result.$ === 'Ok') {
+					var categories = result.a;
+					return _Utils_Tuple2(
+						_Utils_update(
+							m,
+							{
+								categories: $author$project$Types$Loaded(categories)
+							}),
+						c);
+				} else {
+					var err = result.a;
+					return _Utils_Tuple2(
+						_Utils_update(
+							m,
+							{categories: $author$project$Types$DataError, errorMsg: 'Error getting categories'}),
 						c);
 				}
 		}
@@ -12440,28 +12557,9 @@ var $author$project$Update$sendRequestsWaitingForToken = F2(
 				}
 			}());
 	});
-var $author$project$Update$setPunchListTo = F2(
-	function (punchList, _v0) {
-		var m = _v0.a;
-		var c = _v0.b;
-		return _Utils_Tuple2(
-			_Utils_update(
-				m,
-				{
-					punch: A3(
-						$elm$core$List$foldl,
-						F2(
-							function (punch, dict) {
-								return A3($elm$core$Dict$insert, punch.id, punch, dict);
-							}),
-						$elm$core$Dict$empty,
-						punchList)
-				}),
-			c);
-	});
-var $author$project$Messages$SetRaisedByResult = F2(
+var $author$project$Messages$SetCategoryResult = F2(
 	function (a, b) {
-		return {$: 'SetRaisedByResult', a: a, b: b};
+		return {$: 'SetCategoryResult', a: a, b: b};
 	});
 var $elm$http$Http$expectBytesResponse = F2(
 	function (toMsg, toResult) {
@@ -12486,6 +12584,117 @@ var $elm$http$Http$jsonBody = function (value) {
 		'application/json',
 		A2($elm$json$Json$Encode$encode, 0, value));
 };
+var $author$project$Api$setCategory = F4(
+	function (originalPunch, selectItem, plantId, token) {
+		return $elm$http$Http$request(
+			{
+				body: $elm$http$Http$jsonBody(
+					$elm$json$Json$Encode$object(
+						_List_fromArray(
+							[
+								_Utils_Tuple2(
+								'PunchItemId',
+								$elm$json$Json$Encode$int(
+									A2(
+										$elm$core$Maybe$withDefault,
+										0,
+										$elm$core$String$toInt(originalPunch.id)))),
+								_Utils_Tuple2(
+								'CategoryId',
+								$elm$json$Json$Encode$int(selectItem.id))
+							]))),
+				expect: $elm$http$Http$expectWhatever(
+					A2(
+						$elm$core$Basics$composeL,
+						$author$project$Messages$GotApiResult,
+						$author$project$Messages$SetCategoryResult(originalPunch))),
+				headers: _List_fromArray(
+					[
+						A2($elm$http$Http$header, 'Authorization', 'Bearer ' + token)
+					]),
+				method: 'PUT',
+				timeout: $elm$core$Maybe$Nothing,
+				tracker: $elm$core$Maybe$Nothing,
+				url: A2(
+					$author$project$Api$url,
+					_List_fromArray(
+						['PunchListItem', 'SetCategory']),
+					_List_fromArray(
+						[
+							A2($elm$url$Url$Builder$string, 'plantId', plantId),
+							$author$project$Api$apiVersion
+						]))
+			});
+	});
+var $author$project$Messages$SetClearingByResult = F2(
+	function (a, b) {
+		return {$: 'SetClearingByResult', a: a, b: b};
+	});
+var $author$project$Api$setClearingBy = F4(
+	function (originalPunch, selectItem, plantId, token) {
+		return $elm$http$Http$request(
+			{
+				body: $elm$http$Http$jsonBody(
+					$elm$json$Json$Encode$object(
+						_List_fromArray(
+							[
+								_Utils_Tuple2(
+								'PunchItemId',
+								$elm$json$Json$Encode$int(
+									A2(
+										$elm$core$Maybe$withDefault,
+										0,
+										$elm$core$String$toInt(originalPunch.id)))),
+								_Utils_Tuple2(
+								'ClearingByOrganizationId',
+								$elm$json$Json$Encode$int(selectItem.id))
+							]))),
+				expect: $elm$http$Http$expectWhatever(
+					A2(
+						$elm$core$Basics$composeL,
+						$author$project$Messages$GotApiResult,
+						$author$project$Messages$SetClearingByResult(originalPunch))),
+				headers: _List_fromArray(
+					[
+						A2($elm$http$Http$header, 'Authorization', 'Bearer ' + token)
+					]),
+				method: 'PUT',
+				timeout: $elm$core$Maybe$Nothing,
+				tracker: $elm$core$Maybe$Nothing,
+				url: A2(
+					$author$project$Api$url,
+					_List_fromArray(
+						['PunchListItem', 'SetClearingBy']),
+					_List_fromArray(
+						[
+							A2($elm$url$Url$Builder$string, 'plantId', plantId),
+							$author$project$Api$apiVersion
+						]))
+			});
+	});
+var $author$project$Update$setPunchListTo = F2(
+	function (punchList, _v0) {
+		var m = _v0.a;
+		var c = _v0.b;
+		return _Utils_Tuple2(
+			_Utils_update(
+				m,
+				{
+					punch: A3(
+						$elm$core$List$foldl,
+						F2(
+							function (punch, dict) {
+								return A3($elm$core$Dict$insert, punch.id, punch, dict);
+							}),
+						$elm$core$Dict$empty,
+						punchList)
+				}),
+			c);
+	});
+var $author$project$Messages$SetRaisedByResult = F2(
+	function (a, b) {
+		return {$: 'SetRaisedByResult', a: a, b: b};
+	});
 var $author$project$Api$setRaisedBy = F4(
 	function (originalPunch, selectItem, plantId, token) {
 		return $elm$http$Http$request(
@@ -12645,10 +12854,15 @@ var $author$project$Update$update = F2(
 						model,
 						{dropDown: $author$project$Types$NoDropDown}),
 					$elm$core$Platform$Cmd$none) : function () {
-					if (dropDown.$ === 'NoDropDown') {
-						return $elm$core$Basics$identity;
-					} else {
-						return $author$project$Update$getOrganizations;
+					switch (dropDown.$) {
+						case 'NoDropDown':
+							return $elm$core$Basics$identity;
+						case 'CategoryDropDown':
+							return $author$project$Update$getCategories;
+						case 'RaisedByDropDown':
+							return $author$project$Update$getOrganizations;
+						default:
+							return $author$project$Update$getOrganizations;
 					}
 				}()(
 					_Utils_Tuple2(
@@ -12661,24 +12875,48 @@ var $author$project$Update$update = F2(
 				var item = msg.b;
 				var updated = function () {
 					var _v3 = model.dropDown;
-					if (_v3.$ === 'NoDropDown') {
-						return punch;
-					} else {
-						return _Utils_update(
-							punch,
-							{raisedByOrg: item.description});
+					switch (_v3.$) {
+						case 'NoDropDown':
+							return punch;
+						case 'CategoryDropDown':
+							return _Utils_update(
+								punch,
+								{
+									status: (item.code === 'PA') ? $author$project$Types$PA : $author$project$Types$PB
+								});
+						case 'RaisedByDropDown':
+							return _Utils_update(
+								punch,
+								{raisedByOrg: item.description});
+						default:
+							return _Utils_update(
+								punch,
+								{clearingByOrg: item.description});
 					}
 				}();
 				return function () {
 					var _v2 = model.dropDown;
-					if (_v2.$ === 'NoDropDown') {
-						return $elm$core$Basics$identity;
-					} else {
-						return $author$project$Update$apiRequest(
-							_List_fromArray(
-								[
-									A2($author$project$Api$setRaisedBy, punch, item)
-								]));
+					switch (_v2.$) {
+						case 'NoDropDown':
+							return $elm$core$Basics$identity;
+						case 'CategoryDropDown':
+							return $author$project$Update$apiRequest(
+								_List_fromArray(
+									[
+										A2($author$project$Api$setCategory, punch, item)
+									]));
+						case 'RaisedByDropDown':
+							return $author$project$Update$apiRequest(
+								_List_fromArray(
+									[
+										A2($author$project$Api$setRaisedBy, punch, item)
+									]));
+						default:
+							return $author$project$Update$apiRequest(
+								_List_fromArray(
+									[
+										A2($author$project$Api$setClearingBy, punch, item)
+									]));
 					}
 				}()(
 					_Utils_Tuple2(
@@ -14481,6 +14719,8 @@ var $author$project$View$renderDescription = F3(
 					})
 				]));
 	});
+var $author$project$Types$CategoryDropDown = {$: 'CategoryDropDown'};
+var $author$project$Types$ClearingByDropDown = {$: 'ClearingByDropDown'};
 var $author$project$Types$RaisedByDropDown = {$: 'RaisedByDropDown'};
 var $author$project$Messages$DropDownPressed = function (a) {
 	return {$: 'DropDownPressed', a: a};
@@ -14633,29 +14873,52 @@ var $mdgriffith$elm_ui$Element$mouseOver = function (decs) {
 			$mdgriffith$elm_ui$Internal$Model$Hover,
 			$mdgriffith$elm_ui$Internal$Model$unwrapDecorations(decs)));
 };
+var $mdgriffith$elm_ui$Element$row = F2(
+	function (attrs, children) {
+		return A4(
+			$mdgriffith$elm_ui$Internal$Model$element,
+			$mdgriffith$elm_ui$Internal$Model$asRow,
+			$mdgriffith$elm_ui$Internal$Model$div,
+			A2(
+				$elm$core$List$cons,
+				$mdgriffith$elm_ui$Internal$Model$htmlClass($mdgriffith$elm_ui$Internal$Style$classes.contentLeft + (' ' + $mdgriffith$elm_ui$Internal$Style$classes.contentCenterY)),
+				A2(
+					$elm$core$List$cons,
+					$mdgriffith$elm_ui$Element$width($mdgriffith$elm_ui$Element$shrink),
+					A2(
+						$elm$core$List$cons,
+						$mdgriffith$elm_ui$Element$height($mdgriffith$elm_ui$Element$shrink),
+						attrs))),
+			$mdgriffith$elm_ui$Internal$Model$Unkeyed(children));
+	});
 var $author$project$Palette$white = A3($mdgriffith$elm_ui$Element$rgb, 1, 1, 1);
 var $author$project$View$selectItem = F4(
 	function (size, current, punch, item) {
 		return _Utils_Tuple2(
 			$elm$core$String$fromInt(item.id),
 			A2(
-				$mdgriffith$elm_ui$Element$el,
+				$mdgriffith$elm_ui$Element$row,
 				_List_fromArray(
 					[
 						$mdgriffith$elm_ui$Element$width($mdgriffith$elm_ui$Element$fill),
 						$mdgriffith$elm_ui$Element$padding(10),
+						$mdgriffith$elm_ui$Element$spacing(10),
 						$mdgriffith$elm_ui$Element$mouseOver(
 						_List_fromArray(
 							[
 								$mdgriffith$elm_ui$Element$Background$color($author$project$Palette$mistBlue)
 							])),
 						$mdgriffith$elm_ui$Element$Background$color(
-						_Utils_eq(current, item.description) ? $author$project$Palette$lightGrey : $author$project$Palette$white),
+						(_Utils_eq(current, item.description) || _Utils_eq(current, item.code)) ? $author$project$Palette$lightGrey : $author$project$Palette$white),
 						$mdgriffith$elm_ui$Element$pointer,
 						$author$project$View$onClick(
 						A2($author$project$Messages$DropDownItemPressed, punch, item))
 					]),
-				$mdgriffith$elm_ui$Element$text(item.description)));
+				_List_fromArray(
+					[
+						$mdgriffith$elm_ui$Element$text(item.code),
+						$mdgriffith$elm_ui$Element$text(item.description)
+					])));
 	});
 var $mdgriffith$elm_ui$Element$scrollbars = A2($mdgriffith$elm_ui$Internal$Model$Class, $mdgriffith$elm_ui$Internal$Flag$overflow, $mdgriffith$elm_ui$Internal$Style$classes.scrollbars);
 var $author$project$Component$SelectionList$selectionList = F2(
@@ -14759,10 +15022,15 @@ var $author$project$View$selectionList = F4(
 var $author$project$View$dropDown = F6(
 	function (size, dropDownType, current, field, punch, model) {
 		var name = function () {
-			if (dropDownType.$ === 'NoDropDown') {
-				return '';
-			} else {
-				return 'Raised By';
+			switch (dropDownType.$) {
+				case 'NoDropDown':
+					return '';
+				case 'CategoryDropDown':
+					return 'Category';
+				case 'RaisedByDropDown':
+					return 'Raised By';
+				default:
+					return 'Clearing By';
 			}
 		}();
 		var header = A2(
@@ -15111,32 +15379,41 @@ var $author$project$View$renderDetails = F3(
 					A6(
 					$author$project$View$dropDown,
 					size,
+					$author$project$Types$CategoryDropDown,
+					function () {
+						var _v0 = punch.status;
+						if (_v0.$ === 'PA') {
+							return 'PA';
+						} else {
+							return 'PB';
+						}
+					}(),
+					function ($) {
+						return $.categories;
+					},
+					punch,
+					model),
+					A6(
+					$author$project$View$dropDown,
+					size,
 					$author$project$Types$RaisedByDropDown,
 					punch.raisedByOrg,
 					function ($) {
 						return $.organizations;
 					},
 					punch,
+					model),
+					A6(
+					$author$project$View$dropDown,
+					size,
+					$author$project$Types$ClearingByDropDown,
+					punch.clearingByOrg,
+					function ($) {
+						return $.organizations;
+					},
+					punch,
 					model)
 				]));
-	});
-var $mdgriffith$elm_ui$Element$row = F2(
-	function (attrs, children) {
-		return A4(
-			$mdgriffith$elm_ui$Internal$Model$element,
-			$mdgriffith$elm_ui$Internal$Model$asRow,
-			$mdgriffith$elm_ui$Internal$Model$div,
-			A2(
-				$elm$core$List$cons,
-				$mdgriffith$elm_ui$Internal$Model$htmlClass($mdgriffith$elm_ui$Internal$Style$classes.contentLeft + (' ' + $mdgriffith$elm_ui$Internal$Style$classes.contentCenterY)),
-				A2(
-					$elm$core$List$cons,
-					$mdgriffith$elm_ui$Element$width($mdgriffith$elm_ui$Element$shrink),
-					A2(
-						$elm$core$List$cons,
-						$mdgriffith$elm_ui$Element$height($mdgriffith$elm_ui$Element$shrink),
-						attrs))),
-			$mdgriffith$elm_ui$Internal$Model$Unkeyed(children));
 	});
 var $author$project$Data$Common$statusToString = function (status) {
 	switch (status.$) {

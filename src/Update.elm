@@ -75,7 +75,13 @@ update msg model =
                             NoDropDown ->
                                 identity
 
+                            CategoryDropDown ->
+                                getCategories
+
                             RaisedByDropDown ->
+                                getOrganizations
+
+                            Types.ClearingByDropDown ->
                                 getOrganizations
                        )
 
@@ -86,8 +92,21 @@ update msg model =
                         NoDropDown ->
                             punch
 
+                        CategoryDropDown ->
+                            { punch
+                                | status =
+                                    if item.code == "PA" then
+                                        PA
+
+                                    else
+                                        PB
+                            }
+
                         RaisedByDropDown ->
                             { punch | raisedByOrg = item.description }
+
+                        ClearingByDropDown ->
+                            { punch | clearingByOrg = item.description }
             in
             ( { model
                 | punch = Dict.insert punch.id updated model.punch
@@ -99,8 +118,14 @@ update msg model =
                         NoDropDown ->
                             identity
 
+                        CategoryDropDown ->
+                            apiRequest [ Api.setCategory punch item ]
+
                         Types.RaisedByDropDown ->
                             apiRequest [ Api.setRaisedBy punch item ]
+
+                        Types.ClearingByDropDown ->
+                            apiRequest [ Api.setClearingBy punch item ]
                    )
 
 
@@ -113,6 +138,17 @@ getOrganizations ( m, c ) =
         _ ->
             ( { m | organizations = Loading }, c )
                 |> apiRequest [ Api.organizations ]
+
+
+getCategories : MC -> MC
+getCategories ( m, c ) =
+    case m.categories of
+        Loaded _ ->
+            ( m, c )
+
+        _ ->
+            ( { m | categories = Loading }, c )
+                |> apiRequest [ Api.categories ]
 
 
 setPunchListTo : List Punch -> MC -> MC
@@ -228,6 +264,42 @@ handleApiResult apiResult ( m, c ) =
                     , c
                     )
 
+        SetClearingByResult originalPunch result ->
+            case result of
+                Ok _ ->
+                    ( m, c )
+
+                Err err ->
+                    let
+                        updater punch =
+                            { punch | clearingByOrg = originalPunch.clearingByOrg }
+                    in
+                    ( { m
+                        | punch =
+                            Dict.update originalPunch.id (Maybe.map updater) m.punch
+                        , errorMsg = "Error changing clearingByOrg"
+                      }
+                    , c
+                    )
+
+        SetCategoryResult originalPunch result ->
+            case result of
+                Ok _ ->
+                    ( m, c )
+
+                Err err ->
+                    let
+                        updater punch =
+                            { punch | status = originalPunch.status }
+                    in
+                    ( { m
+                        | punch =
+                            Dict.update originalPunch.id (Maybe.map updater) m.punch
+                        , errorMsg = "Error changing category"
+                      }
+                    , c
+                    )
+
         GotOrganizations result ->
             case result of
                 Ok organizations ->
@@ -235,3 +307,11 @@ handleApiResult apiResult ( m, c ) =
 
                 Err err ->
                     ( { m | organizations = DataError, errorMsg = "Error getting organizations" }, c )
+
+        GotCategories result ->
+            case result of
+                Ok categories ->
+                    ( { m | categories = Loaded categories }, c )
+
+                Err err ->
+                    ( { m | categories = DataError, errorMsg = "Error getting categories" }, c )

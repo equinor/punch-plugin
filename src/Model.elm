@@ -22,6 +22,7 @@ type alias Model =
     , highlight : Maybe String
     , dropDown : DropDown
     , organizations : WebData (List SelectItem)
+    , categories : WebData (List SelectItem)
     }
 
 
@@ -36,6 +37,7 @@ initialModel flags =
       , highlight = Nothing
       , dropDown = NoDropDown
       , organizations = NotLoaded
+      , categories = NotLoaded
       }
     , Cmd.none
     )

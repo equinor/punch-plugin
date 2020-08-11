@@ -26,5 +26,8 @@ type Msg
 type ApiResult
     = GotPunchDetails String (Result Http.Error Punch)
     | GotOrganizations (Result Http.Error (List SelectItem))
+    | GotCategories (Result Http.Error (List SelectItem))
     | PunchDescriptionResult Punch (Result Http.Error ())
     | SetRaisedByResult Punch (Result Http.Error ())
+    | SetClearingByResult Punch (Result Http.Error ())
+    | SetCategoryResult Punch (Result Http.Error ())
