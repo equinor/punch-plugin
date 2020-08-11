@@ -1,4 +1,4 @@
-import { Elm } from '../build/mcPlugin.js'
+import { Elm } from '../build/checklistPlugin.js'
 import webComponent from './webComponent.js'
 
-webComponent.register('mc-plugin', Elm.Main)
+webComponent.register('checklist-plugin', Elm.Main)
