@@ -1,7 +1,7 @@
 module Update exposing (update)
 
 import Api
-import Data.Checklist exposing (Checklist)
+import Data.Punch exposing (Punch)
 import Dict exposing (Dict)
 import Http
 import Json.Encode as E
@@ -30,8 +30,8 @@ update msg model =
         GotToken tokenSuccess ->
             mc |> sendRequestsWaitingForToken tokenSuccess
 
-        GotChecklists checklists ->
-            mc |> setChecklistsTo checklists
+        GotPunchList punchList ->
+            mc |> setPunchListTo punchList
 
         GotApiResult apiResult ->
             mc |> handleApiResult apiResult
@@ -40,192 +40,28 @@ update msg model =
             mc
 
         -- User Interaction
-        ChecklistPressed checklist ->
-            if model.selectedChecklist == Just checklist.id then
-                mc |> unSelectChecklist
+        PunchItemPressed punch ->
+            if model.selectedPunch == Just punch.id then
+                mc |> unSelectPunch
 
             else
                 mc
-                    |> selectChecklist checklist
-                    |> getChecklistDetails checklist
-
-        NaCheckItemPressed checklist checkItem ->
-            let
-                apiCall =
-                    if checkItem.isNa then
-                        Api.clearCheckItem
-
-                    else
-                        Api.setCheckItemNa
-            in
-            mc
-                |> apiRequest [ apiCall checklist checkItem ]
-
-        OkCheckItemPressed checklist checkItem ->
-            let
-                apiCall =
-                    if checkItem.isOk then
-                        Api.clearCheckItem
-
-                    else
-                        Api.setCheckItemOk
-            in
-            mc
-                |> apiRequest [ apiCall checklist checkItem ]
-
-        SignChecklistButtonPressed checklist ->
-            mc
-                |> apiRequest [ Api.signChecklist checklist ]
-
-        UnsignChecklistButtonPressed checklist ->
-            mc
-                |> apiRequest [ Api.unSignChecklist checklist ]
-
-        VerifyChecklistButtonPressed checklist ->
-            mc
-                |> apiRequest [ Api.verifyChecklist checklist ]
-
-        UnverifyChecklistButtonPressed checklist ->
-            mc
-                |> apiRequest [ Api.unVerifyChecklist checklist ]
-
-        MetaTableCellLostFocus checklist checkItem tableRow cell ->
-            mc
-                |> apiRequest [ Api.updateMetaTableCell checklist checkItem tableRow cell ]
-
-        MetaTableCellInput checklist checkItem tableRow columnLabel str ->
-            let
-                updater cl =
-                    case cl.details of
-                        Loaded details ->
-                            { cl
-                                | details =
-                                    Loaded
-                                        { details
-                                            | items =
-                                                List.map
-                                                    (\item ->
-                                                        if item.id == checkItem.id then
-                                                            let
-                                                                oldTable =
-                                                                    item.metaTable
-                                                            in
-                                                            { item
-                                                                | metaTable =
-                                                                    { oldTable
-                                                                        | rows =
-                                                                            List.map
-                                                                                (\row ->
-                                                                                    if row.id == tableRow.id then
-                                                                                        { row
-                                                                                            | cells =
-                                                                                                List.map
-                                                                                                    (\cell ->
-                                                                                                        if cell.columnId == columnLabel.id then
-                                                                                                            { cell | value = str }
-
-                                                                                                        else
-                                                                                                            cell
-                                                                                                    )
-                                                                                                    row.cells
-                                                                                        }
-
-                                                                                    else
-                                                                                        row
-                                                                                )
-                                                                                oldTable.rows
-                                                                    }
-                                                            }
-
-                                                        else
-                                                            item
-                                                    )
-                                                    details.items
-                                        }
-                            }
-
-                        _ ->
-                            cl
-            in
-            ( { model
-                | checklists =
-                    Dict.update checklist.id (Maybe.map updater) model.checklists
-              }
-            , Cmd.none
-            )
-
-        CommentFieldInput checklist str ->
-            let
-                updater cl =
-                    case cl.details of
-                        Loaded details ->
-                            let
-                                oldChecklistDetails =
-                                    details.checklistDetails
-                            in
-                            { cl | details = Loaded { details | checklistDetails = { oldChecklistDetails | comment = str } } }
-
-                        _ ->
-                            cl
-            in
-            ( { model
-                | checklists =
-                    Dict.update checklist.id (Maybe.map updater) model.checklists
-              }
-            , Cmd.none
-            )
-
-        CommentFieldLostFocus checklist str ->
-            mc
-                |> apiRequest [ Api.updateComment checklist str ]
-
-        CustomCheckItemInput str ->
-            ( { model | customCheckItemField = str }, Cmd.none )
-
-        AddCustomCheckItemButtonPressed checklist ->
-            mc
-                |> apiRequest [ Api.nextCustomItemNo checklist ]
-
-        OkCustomCheckItemPressed checklist customItem ->
-            let
-                apiCall =
-                    if customItem.isOk then
-                        Api.clearCustomCheckItem
-
-                    else
-                        Api.setCustomCheckItemOk
-            in
-            mc
-                |> apiRequest [ apiCall checklist customItem ]
-
-        DeleteCustomCheckItemButtomPressed checklist customItem ->
-            mc
-                |> apiRequest [ Api.deleteCustomItem checklist customItem ]
+                    |> selectPunch punch
 
 
-setChecklistsTo : List Checklist -> MC -> MC
-setChecklistsTo checklists ( m, c ) =
-    ( { m | checklists = List.foldl (\checklist dict -> Dict.insert checklist.id checklist dict) Dict.empty checklists }, c )
+setPunchListTo : List Punch -> MC -> MC
+setPunchListTo punchList ( m, c ) =
+    ( { m | punch = List.foldl (\punch dict -> Dict.insert punch.id punch dict) Dict.empty punchList }, c )
 
 
-unSelectChecklist : MC -> MC
-unSelectChecklist ( m, c ) =
-    ( { m | selectedChecklist = Nothing }, c )
+unSelectPunch : MC -> MC
+unSelectPunch ( m, c ) =
+    ( { m | selectedPunch = Nothing }, c )
 
 
-selectChecklist : Checklist -> MC -> MC
-selectChecklist checklist ( m, c ) =
-    ( { m | selectedChecklist = Just checklist.id }, c )
-
-
-getChecklistDetails : Checklist -> MC -> MC
-getChecklistDetails checklist ( m, c ) =
-    let
-        updater cl =
-            { cl | details = Loading }
-    in
-    ( { m | checklists = Dict.update checklist.id (Maybe.map updater) m.checklists }, c )
-        |> apiRequest [ Api.checklistDetails checklist ]
+selectPunch : Punch -> MC -> MC
+selectPunch punch ( m, c ) =
+    ( { m | selectedPunch = Just punch.id }, c )
 
 
 apiRequest : List (String -> String -> Cmd Msg) -> MC -> MC
@@ -286,128 +122,13 @@ createEvent topic payload =
 handleApiResult : ApiResult -> MC -> MC
 handleApiResult apiResult ( m, c ) =
     case apiResult of
-        GotChecklistDetails id result ->
+        GotPunchDetails id result ->
             let
-                updater checklist =
-                    { checklist
-                        | details =
-                            case result of
-                                Ok details ->
-                                    Loaded details
-
-                                Err err ->
-                                    DataError
-                        , status =
-                            case result of
-                                Ok details ->
-                                    details.checklistDetails.status
-
-                                Err err ->
-                                    checklist.status
-                    }
+                updater punch =
+                    punch
             in
             ( { m
-                | checklists = Dict.update id (Maybe.map updater) m.checklists
-                , customCheckItemField = ""
+                | punch = Dict.update id (Maybe.map updater) m.punch
               }
             , c
             )
-
-        SetNaResult checklist result ->
-            case result of
-                Ok _ ->
-                    ( m, c ) |> apiRequest [ Api.checklistDetails checklist ]
-
-                Err err ->
-                    ( m, c )
-
-        SetOkResult checklist result ->
-            case result of
-                Ok _ ->
-                    ( m, c ) |> apiRequest [ Api.checklistDetails checklist ]
-
-                Err err ->
-                    ( m, c )
-
-        ClearResult checklist result ->
-            case result of
-                Ok _ ->
-                    ( m, c ) |> apiRequest [ Api.checklistDetails checklist ]
-
-                Err err ->
-                    ( m, c )
-
-        SignChecklistResult checklist result ->
-            case result of
-                Ok _ ->
-                    ( m, c ) |> apiRequest [ Api.checklistDetails checklist ]
-
-                Err err ->
-                    ( m, c )
-
-        UnsignChecklistResult checklist result ->
-            case result of
-                Ok _ ->
-                    ( m, c ) |> apiRequest [ Api.checklistDetails checklist ]
-
-                Err err ->
-                    ( m, c )
-
-        VerifyChecklistResult checklist result ->
-            case result of
-                Ok _ ->
-                    ( m, c ) |> apiRequest [ Api.checklistDetails checklist ]
-
-                Err err ->
-                    ( m, c )
-
-        UnverifyChecklistResult checklist result ->
-            case result of
-                Ok _ ->
-                    ( m, c ) |> apiRequest [ Api.checklistDetails checklist ]
-
-                Err err ->
-                    ( m, c )
-
-        UpdateMetaTableCellResult checklist result ->
-            case result of
-                Ok _ ->
-                    ( m, c ) |> apiRequest [ Api.checklistDetails checklist ]
-
-                Err err ->
-                    ( m, c )
-
-        CommentChecklistResult checklist result ->
-            case result of
-                Ok _ ->
-                    ( m, c ) |> apiRequest [ Api.checklistDetails checklist ]
-
-                Err _ ->
-                    ( m, c )
-
-        GotNextCustomItemNo checklist result ->
-            case result of
-                Ok nextNo ->
-                    ( m, c )
-                        |> apiRequest [ Api.addCustomItem checklist (String.replace "\"" "" nextNo) m.customCheckItemField False ]
-
-                Err err ->
-                    ( m, c )
-
-        AddCustomItemResult checklist result ->
-            case result of
-                Ok _ ->
-                    ( m, c )
-                        |> apiRequest [ Api.checklistDetails checklist ]
-
-                Err err ->
-                    ( m, c )
-
-        DeleteCustomItemResult checklist result ->
-            case result of
-                Ok _ ->
-                    ( m, c )
-                        |> apiRequest [ Api.checklistDetails checklist ]
-
-                Err err ->
-                    ( m, c )

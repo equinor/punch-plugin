@@ -1,7 +1,7 @@
 module Main exposing (..)
 
 import Browser
-import Data.Checklist as Checklist exposing (Checklist)
+import Data.Punch as Punch exposing (Punch)
 import Dict
 import Element exposing (..)
 import Element.Font as Font
@@ -19,11 +19,11 @@ import View
 
 view : Model -> Element Msg
 view model =
-    if Dict.isEmpty model.checklists then
-        text "No Checklists"
+    if Dict.isEmpty model.punch then
+        text "No Punch"
 
     else
-        View.renderChecklists 16 model.selectedChecklist model.errorMsg model.customCheckItemField (Dict.values model.checklists)
+        View.renderPunchList 16 model.selectedPunch model.errorMsg (Dict.values model.punch)
 
 
 main : Program Flags Model Msg
@@ -58,8 +58,8 @@ decoder topic =
         "token" ->
             D.map GotToken tokenDecoder
 
-        "checklists" ->
-            D.map GotChecklists (D.list Checklist.decoder)
+        "punchlist" ->
+            D.map GotPunchList (D.list Punch.decoder)
 
         _ ->
             D.fail "Unknown msg received from Js"

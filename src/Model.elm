@@ -1,6 +1,6 @@
 module Model exposing (Flags, Model, initialModel)
 
-import Data.Checklist as Checklist exposing (Checklist)
+import Data.Punch as Punch exposing (Punch)
 import Dict exposing (Dict)
 import Json.Decode as D
 import Messages exposing (Msg)
@@ -14,11 +14,10 @@ type alias Flags =
 type alias Model =
     { procosysPlantId : String
     , apiToken : String
-    , checklists : Dict Int Checklist
-    , selectedChecklist : Maybe Int
+    , punch : Dict Int Punch
+    , selectedPunch : Maybe Int
     , requests : Dict Int (List (String -> String -> Cmd Msg))
     , errorMsg : String
-    , customCheckItemField : String
     }
 
 
@@ -26,21 +25,20 @@ initialModel : Flags -> ( Model, Cmd Msg )
 initialModel flags =
     ( { procosysPlantId = flags.procosysPlantId
       , apiToken = ""
-      , checklists = Dict.empty
-      , selectedChecklist = Nothing
+      , punch = Dict.empty
+      , selectedPunch = Nothing
       , requests = Dict.empty
       , errorMsg = ""
-      , customCheckItemField = ""
       }
     , Cmd.none
     )
 
 
-decodeChecklists : String -> List Checklist
-decodeChecklists jsonString =
-    case D.decodeString (D.list Checklist.decoder) jsonString of
-        Ok checklists ->
-            checklists
+decodePunchList : String -> List Punch
+decodePunchList jsonString =
+    case D.decodeString (D.list Punch.decoder) jsonString of
+        Ok punch ->
+            punch
 
         Err err ->
             []
