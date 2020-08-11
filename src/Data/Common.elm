@@ -1,6 +1,8 @@
-module Data.Common exposing (androidAppUrl, colorFromStatus, hexColorFromStatus, iconSize, iosAppUrl, nullInt, nullString, pcsBaseUrl, removeLeadingZeros, scaled, scaledInt, sortByStatus, splitStringTwo, statusToString, worstStatus, worstStatusWithDefault)
+module Data.Common exposing (androidAppUrl, colorFromStatus, hexColorFromStatus, highlight, iconSize, iosAppUrl, kv, nullInt, nullString, pcsBaseUrl, removeLeadingZeros, scaled, scaledInt, sortByStatus, splitStringTwo, statusToString, worstStatus, worstStatusWithDefault)
 
 import Element exposing (..)
+import Element.Background as Background
+import Element.Border as Border
 import Element.Font as Font
 import Json.Decode as D
 import Json.Encode as E
@@ -226,3 +228,88 @@ scaledInt size =
 type SapFormat
     = HeaderText String
     | NormalText String
+
+
+highlight maybeHighlight txt =
+    case maybeHighlight of
+        Nothing ->
+            [ text txt ]
+
+        Just highLight ->
+            let
+                indexes =
+                    highLightIndexes txt (String.words highLight) []
+            in
+            applyHighLight txt indexes []
+
+
+highLightIndexes : String -> List String -> List ( Int, Int ) -> List ( Int, Int )
+highLightIndexes str searchTerms acc =
+    case searchTerms of
+        [] ->
+            List.reverse acc
+
+        first :: rest ->
+            case List.head (String.indexes (String.toUpper first) (String.toUpper str)) of
+                Just index ->
+                    highLightIndexes (String.dropLeft (index + String.length first) str) rest (( index, String.length first ) :: acc)
+
+                Nothing ->
+                    acc
+
+
+applyHighLight : String -> List ( Int, Int ) -> List (Element msg) -> List (Element msg)
+applyHighLight str indexes acc =
+    case indexes of
+        [] ->
+            text str
+                :: acc
+                |> List.reverse
+
+        ( start, length ) :: rest ->
+            let
+                normalPart =
+                    text (String.left start str)
+
+                highlightPart =
+                    el [ Background.color (rgba 1 1 0 0.5) ] (text (String.slice start (start + length) str))
+
+                nextStr =
+                    String.dropLeft (start + length) str
+            in
+            applyHighLight nextStr rest (highlightPart :: normalPart :: acc)
+
+
+kv size header value subValue =
+    let
+        dontRender =
+            value == ""
+    in
+    if dontRender then
+        none
+
+    else
+        column
+            [ Border.widthEach { top = 0, left = 0, right = 0, bottom = 1 }
+            , width fill
+            , Font.size <| round size
+
+            --, Border.dashed
+            , Border.color Palette.mistBlue
+            ]
+            [ el
+                [ Font.color Palette.mossGreen
+                , Font.bold
+                , Font.size <| scaledInt size -3
+                , width fill
+                ]
+                (text header)
+            , wrappedRow [ width fill ]
+                [ paragraph [] [ text value ]
+                , if subValue == "" then
+                    none
+
+                  else
+                    paragraph [ Font.size <| scaledInt size -2 ] [ text subValue ]
+                ]
+            ]

@@ -13,11 +13,11 @@ type alias Dict =
 
 
 type alias Punch =
-    { id : Int
+    { id : String
     , tag : String
     , tagDescription : String
     , description : String
-    , createdAt : String
+    , createdAt : Int
     , updatedAt : String
     , status : Status
     , commPk : String
@@ -38,11 +38,11 @@ type alias PunchLists =
 encoder : Punch -> E.Value
 encoder punch =
     E.object
-        [ ( "id", E.int punch.id )
+        [ ( "id", E.string punch.id )
         , ( "tag", E.string punch.tag )
         , ( "tagDescription", E.string punch.tagDescription )
         , ( "description", E.string punch.description )
-        , ( "createdAt", E.string punch.createdAt )
+        , ( "createdAt", E.int punch.createdAt )
         , ( "updatedAt", E.string punch.updatedAt )
         , ( "status", E.string <| Common.statusToString punch.status )
         , ( "commPk", E.string punch.commPk )
@@ -57,11 +57,11 @@ encoder punch =
 decoder : D.Decoder Punch
 decoder =
     D.succeed Punch
-        |> required "id" D.int
+        |> required "id" D.string
         |> required "tag" D.string
         |> required "tagDescription" D.string
         |> required "description" D.string
-        |> required "createdAt" D.string
+        |> required "createdAt" D.int
         |> required "updatedAt" D.string
         |> required "status" statusDecoder
         |> required "commPk" D.string
@@ -75,11 +75,11 @@ decoder =
 apiDecoder : D.Decoder Punch
 apiDecoder =
     D.succeed Punch
-        |> required "PunchListItemNo" D.int
+        |> required "PunchListItemNo" D.string
         |> required "CheckList__TagFormularType__Tag__TagNo" Common.nullString
         |> required "CheckList__TagFormularType__Tag__Description" Common.nullString
         |> required "Description" Common.nullString
-        |> required "CreatedAt" D.string
+        |> required "CreatedAt" D.int
         |> required "UpdatedAt" Common.nullString
         |> required "Status__Id" statusDecoder
         |> required "CheckList__TagFormularType__Tag__McPkg__CommPkg__CommPkgNo" Common.nullString

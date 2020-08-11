@@ -23,7 +23,7 @@ view model =
         text "No Punch"
 
     else
-        View.renderPunchList 16 model.selectedPunch model.errorMsg (Dict.values model.punch)
+        View.renderPunchList 16 model
 
 
 main : Program Flags Model Msg
@@ -43,6 +43,10 @@ handleJsMsg jsValue =
             msg
 
         Err err ->
+            let
+                _ =
+                    Debug.log "err" err
+            in
             DecodeError err
 
 

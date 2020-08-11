@@ -1,6 +1,7 @@
 module View exposing (renderPunchList)
 
-import Data.Common as Common exposing (scaledInt)
+import Component.SelectionList as SelectionList
+import Data.Common as Common exposing (kv, scaledInt)
 import Data.Punch as Punch exposing (Punch)
 import Dict
 import Element exposing (..)
@@ -16,14 +17,17 @@ import Html.Events as HE
 import Icon
 import Json.Decode as D
 import Messages exposing (Msg(..))
+import Model exposing (Model)
 import Palette
+import String.Extra
 import Types exposing (..)
 
 
-renderPunchList : Float -> Maybe Int -> String -> List Punch -> Element Msg
-renderPunchList size maybeSelected errorMsg punchList =
-    punchList
-        |> List.map (renderPunchListItem size maybeSelected errorMsg)
+renderPunchList : Float -> Model -> Element Msg
+renderPunchList size model =
+    model.punch
+        |> Dict.values
+        |> List.map (renderPunchListItem size model)
         |> Keyed.column
             [ width fill
             , height fill
@@ -43,8 +47,8 @@ spacer =
         none
 
 
-renderPunchListItem : Float -> Maybe Int -> String -> Punch -> ( String, Element Msg )
-renderPunchListItem size maybeSelected errorMsg item =
+renderPunchListItem : Float -> Model -> Punch -> ( String, Element Msg )
+renderPunchListItem size model item =
     let
         colors =
             case item.status of
@@ -61,7 +65,12 @@ renderPunchListItem size maybeSelected errorMsg item =
                     Palette.combination Palette.white Palette.grey
 
         isSelected =
-            maybeSelected == Just item.id
+            case model.selectedPunch of
+                Just selected ->
+                    selected.id == item.id
+
+                Nothing ->
+                    False
 
         color =
             Palette.white
@@ -87,10 +96,17 @@ renderPunchListItem size maybeSelected errorMsg item =
                 html <|
                     iconFromCategory ""
 
+        shortDescription =
+            item.description
+                |> String.lines
+                |> List.take 2
+                |> List.map (\rowText -> row [] (Common.highlight model.highlight rowText))
+                |> column [ width fill, clip ]
+
         tagNo =
             paragraph [ Font.size <| scaledInt size -1, width fill, Font.color Palette.mossGreen ] [ text item.tag ]
     in
-    ( String.fromInt item.id
+    ( item.id
     , column
         [ width fill
         , Background.color <|
@@ -107,25 +123,146 @@ renderPunchListItem size maybeSelected errorMsg item =
             , pointer
             ]
             [ icon
+            , shortDescription
             ]
         , if isSelected then
-            column [ width fill, height fill, Background.color Palette.white, onClick NoOp ]
-                [ {- renderChecklistItems size item details
-                     , renderCustomChecklistItems size item details customCheckItemField
-                     , renderCommentField size item details
-                     , signatures size item hasUnsignedItems details
-                     , if String.isEmpty errorMsg then
-                         none
+            column [ width fill, height fill, Background.color Palette.white, onClick NoOp, Border.rounded 4, padding 4 ]
+                [ if isSelected then
+                    renderDescription model.highlight size item
 
-                       else
-                         paragraph [ width fill, Background.color Palette.alphaYellow, padding 6 ] [ text errorMsg ]
-                  -}
-                  text "Loaded"
+                  else
+                    none
+
+                --, renderComments size item
+                , renderDetails size model item
+
+                --, renderSignatures size item
+                , if String.isEmpty model.errorMsg then
+                    none
+
+                  else
+                    paragraph [ width fill, Background.color Palette.alphaYellow, padding 6 ] [ text model.errorMsg ]
                 ]
 
           else
             none
         ]
+    )
+
+
+renderDescription : Maybe String -> Float -> Punch -> Element Msg
+renderDescription maybeHighlight size punch =
+    column [ width fill ]
+        [ el [ Font.color Palette.mossGreen, Font.size <| scaledInt size -3, Font.bold ] <| text "Punch description:"
+
+        {- , punch.description
+           |> String.lines
+           |> List.map
+               (\txt ->
+                   if txt == "" then
+                       text " "
+
+                   else
+                       paragraph [] (Common.highlight maybeHighlight txt)
+               )
+           |> column [ width fill ]
+        -}
+        , Input.multiline
+            [ width fill
+            , onLoseFocus <| DescriptionFieldLostFocus punch
+            ]
+            { label = Input.labelHidden ""
+            , onChange = DescriptionFieldInput punch
+            , placeholder = Just <| Input.placeholder [] (text "No Description")
+            , spellcheck = True
+            , text = punch.description
+            }
+        ]
+
+
+renderDetails : Float -> Model -> Punch -> Element Msg
+renderDetails size model punch =
+    column [ width fill ]
+        [ column [ spacing 6 ]
+            [ kv size "No" punch.id ""
+            , kv size "Tag" punch.tag ""
+            , kv size "Type" punch.typeDescription ""
+            , kv size "Commissioning package" punch.commPk ""
+            , kv size "MC package" punch.mcPk ""
+            , kv size "Location" punch.location ""
+            ]
+        , dropDown size RaisedByDropDown punch.raisedByOrg .organizations punch model
+        ]
+
+
+dropDown : Float -> DropDown -> String -> (Model -> WebData (List SelectItem)) -> Punch -> Model -> Element Msg
+dropDown size dropDownType current field punch model =
+    let
+        name =
+            case dropDownType of
+                NoDropDown ->
+                    ""
+
+                RaisedByDropDown ->
+                    "Raised By"
+
+        header =
+            el
+                [ Font.color Palette.mossGreen
+                , Font.bold
+                , Font.size <| scaledInt size -3
+                , width fill
+                ]
+                (text name)
+    in
+    if model.dropDown == dropDownType then
+        column
+            [ Border.width 1
+            , Border.rounded 4
+            , width fill
+            , height (fill |> maximum 500)
+            ]
+            [ header
+            , selectionList size current punch (field model)
+            ]
+
+    else
+        column
+            [ width fill
+            , scrollbarY
+            , Border.width 1
+            , padding 10
+            , Border.rounded 4
+            , pointer
+            , onClick <| DropDownPressed dropDownType
+            ]
+            [ header
+            , text current
+            ]
+
+
+selectionList : Float -> String -> Punch -> WebData (List SelectItem) -> Element Msg
+selectionList size current punch webData =
+    SelectionList.webDataSelectionList (SelectionList.selectionList (selectItem size current punch)) webData
+
+
+selectItem : Float -> String -> Punch -> SelectItem -> ( String, Element Msg )
+selectItem size current punch item =
+    ( item.id |> String.fromInt
+    , el
+        [ width fill
+        , padding 10
+        , mouseOver [ Background.color Palette.mistBlue ]
+        , Background.color <|
+            if current == item.description then
+                Palette.lightGrey
+
+            else
+                Palette.white
+        , pointer
+        , onClick <| DropDownItemPressed punch item
+        ]
+        (text item.description)
     )
 
 

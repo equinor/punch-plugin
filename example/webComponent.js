@@ -47,14 +47,10 @@ const webComponent = {
 
                     const flags = mapFlags(props)
                     context.flags = flags
-
                     const parentDiv = this.attachShadow({ mode: 'open' });
-
                     const elmDiv = document.createElement('div')
-
                     parentDiv.innerHTML = ''
                     parentDiv.appendChild(elmDiv)
-
                     this._app =
                         ElmComponent.init({
                             flags,
@@ -82,11 +78,11 @@ const webComponent = {
                 onDetached()
             }
 
-            set checklists(checklists) {
+            set punchlist(punchList) {
                 if (this.hasOwnProperty("_app")) {
-                    this._app.ports.fromJs.send({ topic: "checklists", payload: checklists })
+                    this._app.ports.fromJs.send({ topic: "punchlist", payload: punchList })
                 } else {
-                    this._queue.push({ topic: "checklists", payload: checklists })
+                    this._queue.push({ topic: "punchlist", payload: punchList })
                 }
             }
         }

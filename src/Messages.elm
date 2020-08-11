@@ -8,6 +8,7 @@ import Types exposing (..)
 
 type Msg
     = NoOp
+    | NeverHappens
       -- Data Handling
     | GotPunchList (List Punch)
     | GotToken TokenSuccess
@@ -15,7 +16,15 @@ type Msg
       -- Screen Interaction
     | PunchItemPressed Punch
     | GotApiResult ApiResult
+      -- Form
+    | DescriptionFieldLostFocus Punch
+    | DescriptionFieldInput Punch String
+    | DropDownPressed DropDown
+    | DropDownItemPressed Punch SelectItem
 
 
 type ApiResult
-    = GotPunchDetails Int (Result Http.Error Punch)
+    = GotPunchDetails String (Result Http.Error Punch)
+    | GotOrganizations (Result Http.Error (List SelectItem))
+    | PunchDescriptionResult Punch (Result Http.Error ())
+    | SetRaisedByResult Punch (Result Http.Error ())

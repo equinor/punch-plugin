@@ -4,6 +4,7 @@ import Data.Punch as Punch exposing (Punch)
 import Dict exposing (Dict)
 import Json.Decode as D
 import Messages exposing (Msg)
+import Types exposing (..)
 
 
 type alias Flags =
@@ -14,10 +15,13 @@ type alias Flags =
 type alias Model =
     { procosysPlantId : String
     , apiToken : String
-    , punch : Dict Int Punch
-    , selectedPunch : Maybe Int
+    , punch : Dict String Punch
+    , selectedPunch : Maybe Punch
     , requests : Dict Int (List (String -> String -> Cmd Msg))
     , errorMsg : String
+    , highlight : Maybe String
+    , dropDown : DropDown
+    , organizations : WebData (List SelectItem)
     }
 
 
@@ -29,6 +33,9 @@ initialModel flags =
       , selectedPunch = Nothing
       , requests = Dict.empty
       , errorMsg = ""
+      , highlight = Nothing
+      , dropDown = NoDropDown
+      , organizations = NotLoaded
       }
     , Cmd.none
     )

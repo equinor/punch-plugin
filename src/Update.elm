@@ -41,12 +41,78 @@ update msg model =
 
         -- User Interaction
         PunchItemPressed punch ->
-            if model.selectedPunch == Just punch.id then
+            if model.selectedPunch == Just punch then
                 mc |> unSelectPunch
 
             else
                 mc
                     |> selectPunch punch
+
+        NeverHappens ->
+            ( model, createEvent "" E.null )
+
+        -- Form
+        DescriptionFieldLostFocus punch ->
+            mc
+                |> apiRequest [ Api.updateDescription punch ]
+
+        DescriptionFieldInput punch str ->
+            let
+                updater p =
+                    { p | description = str }
+            in
+            ( { model | punch = Dict.update punch.id (Maybe.map updater) model.punch }
+            , Cmd.none
+            )
+
+        DropDownPressed dropDown ->
+            if model.dropDown == dropDown then
+                ( { model | dropDown = NoDropDown }, Cmd.none )
+
+            else
+                ( { model | dropDown = dropDown }, Cmd.none )
+                    |> (case dropDown of
+                            NoDropDown ->
+                                identity
+
+                            RaisedByDropDown ->
+                                getOrganizations
+                       )
+
+        DropDownItemPressed punch item ->
+            let
+                updated =
+                    case model.dropDown of
+                        NoDropDown ->
+                            punch
+
+                        RaisedByDropDown ->
+                            { punch | raisedByOrg = item.description }
+            in
+            ( { model
+                | punch = Dict.insert punch.id updated model.punch
+                , dropDown = NoDropDown
+              }
+            , Cmd.none
+            )
+                |> (case model.dropDown of
+                        NoDropDown ->
+                            identity
+
+                        Types.RaisedByDropDown ->
+                            apiRequest [ Api.setRaisedBy punch item ]
+                   )
+
+
+getOrganizations : MC -> MC
+getOrganizations ( m, c ) =
+    case m.organizations of
+        Loaded _ ->
+            ( m, c )
+
+        _ ->
+            ( { m | organizations = Loading }, c )
+                |> apiRequest [ Api.organizations ]
 
 
 setPunchListTo : List Punch -> MC -> MC
@@ -61,7 +127,7 @@ unSelectPunch ( m, c ) =
 
 selectPunch : Punch -> MC -> MC
 selectPunch punch ( m, c ) =
-    ( { m | selectedPunch = Just punch.id }, c )
+    ( { m | selectedPunch = Just punch }, c )
 
 
 apiRequest : List (String -> String -> Cmd Msg) -> MC -> MC
@@ -76,7 +142,10 @@ apiRequest requests ( m, c ) =
         nextRef =
             highestRefNo + 1
     in
-    ( { m | requests = Dict.insert nextRef requests m.requests }
+    ( { m
+        | requests = Dict.insert nextRef requests m.requests
+        , errorMsg = ""
+      }
     , Cmd.batch
         [ c
         , createEvent "getToken"
@@ -132,3 +201,37 @@ handleApiResult apiResult ( m, c ) =
               }
             , c
             )
+
+        PunchDescriptionResult punch result ->
+            case result of
+                Ok _ ->
+                    ( m, c )
+
+                Err err ->
+                    ( { m | errorMsg = "Error changing description" }, c )
+
+        SetRaisedByResult originalPunch result ->
+            case result of
+                Ok _ ->
+                    ( m, c )
+
+                Err err ->
+                    let
+                        updater punch =
+                            { punch | raisedByOrg = originalPunch.raisedByOrg }
+                    in
+                    ( { m
+                        | punch =
+                            Dict.update originalPunch.id (Maybe.map updater) m.punch
+                        , errorMsg = "Error changing raisedByOrg"
+                      }
+                    , c
+                    )
+
+        GotOrganizations result ->
+            case result of
+                Ok organizations ->
+                    ( { m | organizations = Loaded organizations }, c )
+
+                Err err ->
+                    ( { m | organizations = DataError, errorMsg = "Error getting organizations" }, c )
