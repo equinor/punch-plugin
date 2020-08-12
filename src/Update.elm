@@ -42,10 +42,13 @@ update msg model =
         -- User Interaction
         PunchItemPressed punch ->
             if model.selectedPunch == Just punch then
-                mc |> unSelectPunch
+                mc
+                    |> closeDropDowns
+                    |> unSelectPunch
 
             else
                 mc
+                    |> closeDropDowns
                     |> selectPunch punch
 
         NeverHappens ->
@@ -53,8 +56,17 @@ update msg model =
 
         -- Form
         DescriptionFieldLostFocus punch ->
-            mc
-                |> apiRequest [ Api.updateDescription punch ]
+            case model.selectedPunch of
+                Nothing ->
+                    mc
+
+                Just selected ->
+                    if punch.description == selected.description then
+                        mc
+
+                    else
+                        mc
+                            |> apiRequest [ Api.updateDescription punch ]
 
         DescriptionFieldInput punch str ->
             let
@@ -164,6 +176,11 @@ unSelectPunch ( m, c ) =
 selectPunch : Punch -> MC -> MC
 selectPunch punch ( m, c ) =
     ( { m | selectedPunch = Just punch }, c )
+
+
+closeDropDowns : MC -> MC
+closeDropDowns ( m, c ) =
+    ( { m | dropDown = NoDropDown }, c )
 
 
 apiRequest : List (String -> String -> Cmd Msg) -> MC -> MC

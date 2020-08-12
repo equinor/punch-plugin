@@ -11569,6 +11569,15 @@ var $author$project$Update$apiRequest = F2(
 								])))
 					])));
 	});
+var $author$project$Update$closeDropDowns = function (_v0) {
+	var m = _v0.a;
+	var c = _v0.b;
+	return _Utils_Tuple2(
+		_Utils_update(
+			m,
+			{dropDown: $author$project$Types$NoDropDown}),
+		c);
+};
 var $author$project$Types$Loading = {$: 'Loading'};
 var $author$project$Messages$GotApiResult = function (a) {
 	return {$: 'GotApiResult', a: a};
@@ -12814,20 +12823,30 @@ var $author$project$Update$update = F2(
 				var punch = msg.a;
 				return _Utils_eq(
 					model.selectedPunch,
-					$elm$core$Maybe$Just(punch)) ? $author$project$Update$unSelectPunch(mc) : A2($author$project$Update$selectPunch, punch, mc);
+					$elm$core$Maybe$Just(punch)) ? $author$project$Update$unSelectPunch(
+					$author$project$Update$closeDropDowns(mc)) : A2(
+					$author$project$Update$selectPunch,
+					punch,
+					$author$project$Update$closeDropDowns(mc));
 			case 'NeverHappens':
 				return _Utils_Tuple2(
 					model,
 					A2($author$project$Update$createEvent, '', $elm$json$Json$Encode$null));
 			case 'DescriptionFieldLostFocus':
 				var punch = msg.a;
-				return A2(
-					$author$project$Update$apiRequest,
-					_List_fromArray(
-						[
-							$author$project$Api$updateDescription(punch)
-						]),
-					mc);
+				var _v1 = model.selectedPunch;
+				if (_v1.$ === 'Nothing') {
+					return mc;
+				} else {
+					var selected = _v1.a;
+					return _Utils_eq(punch.description, selected.description) ? mc : A2(
+						$author$project$Update$apiRequest,
+						_List_fromArray(
+							[
+								$author$project$Api$updateDescription(punch)
+							]),
+						mc);
+				}
 			case 'DescriptionFieldInput':
 				var punch = msg.a;
 				var str = msg.b;
@@ -12874,8 +12893,8 @@ var $author$project$Update$update = F2(
 				var punch = msg.a;
 				var item = msg.b;
 				var updated = function () {
-					var _v3 = model.dropDown;
-					switch (_v3.$) {
+					var _v4 = model.dropDown;
+					switch (_v4.$) {
 						case 'NoDropDown':
 							return punch;
 						case 'CategoryDropDown':
@@ -12895,8 +12914,8 @@ var $author$project$Update$update = F2(
 					}
 				}();
 				return function () {
-					var _v2 = model.dropDown;
-					switch (_v2.$) {
+					var _v3 = model.dropDown;
+					switch (_v3.$) {
 						case 'NoDropDown':
 							return $elm$core$Basics$identity;
 						case 'CategoryDropDown':
