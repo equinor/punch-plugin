@@ -3,11 +3,7 @@ module Punch.Types exposing (..)
 import Json.Decode as D
 
 
-type WebData a
-    = NotLoaded
-    | Loading
-    | DataError
-    | Loaded a
+
 
 
 

@@ -12,6 +12,7 @@ import Equinor.Data.Procosys.Status as Status
 import Iso8601
 
 type alias Dict =
+
     CoreDict.Dict String (List Punch)
 
 type alias Status = Status.Status
@@ -49,6 +50,7 @@ filterByTimeFrame time zone timeFrame punchList =
             Date.fromPosix zone time
     in
     punchList
+    
         |> List.filter
             (\punch ->
                 Date.diff

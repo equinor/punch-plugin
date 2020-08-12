@@ -1,16 +1,17 @@
 module Punch.Update exposing (update)
 
-import Api
+import Punch.Api as Api
 import Punch exposing (Punch)
 import Dict exposing (Dict)
 import Http
 import Json.Encode as E
-import Messages exposing (..)
-import Model exposing (Model)
-import Ports
+import Punch.Messages exposing (..)
+import Punch.Model exposing (Model)
+import Punch.Ports as Ports
 import Svg.Attributes exposing (z)
-import Types exposing (..)
-
+import Punch.Types as Types exposing (..)
+import Equinor.Types exposing (..)
+import Equinor.Data.Procosys.Status as Status exposing (Status(..))
 
 type alias MC =
     ( Model, Cmd Msg )
@@ -144,22 +145,22 @@ update msg model =
 getOrganizations : MC -> MC
 getOrganizations ( m, c ) =
     case m.organizations of
-        Loaded _ ->
+        Loaded _ _ ->
             ( m, c )
 
         _ ->
-            ( { m | organizations = Loading }, c )
+            ( { m | organizations = Loading "" Nothing}, c )
                 |> apiRequest [ Api.organizations ]
 
 
 getCategories : MC -> MC
 getCategories ( m, c ) =
     case m.categories of
-        Loaded _ ->
+        Loaded _ _ ->
             ( m, c )
 
         _ ->
-            ( { m | categories = Loading }, c )
+            ( { m | categories = Loading "" Nothing }, c )
                 |> apiRequest [ Api.categories ]
 
 
@@ -320,15 +321,15 @@ handleApiResult apiResult ( m, c ) =
         GotOrganizations result ->
             case result of
                 Ok organizations ->
-                    ( { m | organizations = Loaded organizations }, c )
+                    ( { m | organizations = Loaded "" organizations }, c )
 
                 Err err ->
-                    ( { m | organizations = DataError, errorMsg = "Error getting organizations" }, c )
+                    ( { m | organizations = DataError "" Nothing, errorMsg = "Error getting organizations" }, c )
 
         GotCategories result ->
             case result of
                 Ok categories ->
-                    ( { m | categories = Loaded categories }, c )
+                    ( { m | categories = Loaded "" categories }, c )
 
                 Err err ->
-                    ( { m | categories = DataError, errorMsg = "Error getting categories" }, c )
+                    ( { m | categories = DataError "" Nothing, errorMsg = "Error getting categories" }, c )

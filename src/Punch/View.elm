@@ -2,7 +2,7 @@ module Punch.View exposing (renderPunchList)
 
 
 import Equinor.Component.SelectionList as SelectionList
-import Data.Common as Common exposing (kv, scaledInt)
+
 import Punch exposing (Punch)
 import Dict
 import Element exposing (..)
@@ -15,13 +15,15 @@ import Element.Keyed as Keyed
 import Html as H
 import Html.Attributes as HA
 import Html.Events as HE
+import Equinor.Data.Procosys.Status as Status exposing (Status(..))
 import Equinor.Icon as Icon
 import Json.Decode as D
-import Messages exposing (Msg(..))
-import Model exposing (Model)
-import Equinor.Palette as Palette
+import Punch.Messages exposing (Msg(..))
+import Punch.Model exposing (Model)
+import Equinor.Palette as Palette  exposing (kv, scaledInt)
 import String.Extra
-import Types exposing (..)
+import Punch.Types as Types exposing (..)
+import Equinor.Types exposing (..)
 
 
 renderPunchList : Float -> Model -> Element Msg
@@ -84,7 +86,7 @@ renderPunchListItem size model item =
                     , Font.size (scaledInt size -4)
                     ]
                 )
-                (item.status |> Common.statusToString |> text)
+                (item.status |> Status.toString |> text)
 
         icon =
             el
@@ -101,7 +103,7 @@ renderPunchListItem size model item =
             item.description
                 |> String.lines
                 |> List.take 2
-                |> List.map (\rowText -> row [] (Common.highlight model.highlight rowText))
+                |> List.map (\rowText -> row [] (Palette.highlight model.highlight rowText))
                 |> column [ width fill, clip ]
 
         tagNo =

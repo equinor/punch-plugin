@@ -4,8 +4,8 @@ import Punch exposing (Punch)
 import Http
 import Json.Decode as D
 import Json.Encode as E
-import Messages exposing (..)
-import Types exposing (..)
+import Punch.Messages exposing (..)
+import Punch.Types  as Types exposing (..)
 import Url.Builder exposing (QueryParameter, int, string)
 
 

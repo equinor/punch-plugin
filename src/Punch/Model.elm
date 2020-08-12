@@ -3,13 +3,14 @@ module Punch.Model exposing (Flags, Model, initialModel)
 import Punch exposing (Punch)
 import Dict exposing (Dict)
 import Json.Decode as D
-import Messages exposing (Msg)
-import Types exposing (..)
-
+import Punch.Messages exposing (Msg)
+import Punch.Types exposing (..)
+import Equinor.Types exposing (..)
 
 type alias Flags =
     { procosysPlantId : String
     }
+
 
 
 type alias Model =

@@ -8,8 +8,8 @@ import Element.Font as Font
 import Html exposing (Html)
 import Json.Decode as D
 import Json.Encode as E
-import Messages exposing (Msg(..))
-import Model exposing (Flags, Model)
+import Punch.Messages exposing (Msg(..))
+import Punch.Model as Model exposing (Flags, Model)
 import Equinor.Palette as Palette
 
 import Punch.Ports as Ports

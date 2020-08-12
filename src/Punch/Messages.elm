@@ -3,7 +3,7 @@ module Punch.Messages exposing (ApiResult(..), Msg(..))
 import Punch exposing (Punch)
 import Http
 import Json.Decode as D
-import Types exposing (..)
+import Punch.Types exposing (..)
 
 
 type Msg
