@@ -1,6 +1,6 @@
 module Api exposing (categories, clientId, organizations, setCategory, setClearingBy, setRaisedBy, updateDescription)
 
-import Data.Punch as Punch exposing (Punch)
+import Punch exposing (Punch)
 import Http
 import Json.Decode as D
 import Json.Encode as E

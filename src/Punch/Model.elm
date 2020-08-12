@@ -1,6 +1,6 @@
 module Model exposing (Flags, Model, initialModel)
 
-import Data.Punch as Punch exposing (Punch)
+import Punch exposing (Punch)
 import Dict exposing (Dict)
 import Json.Decode as D
 import Messages exposing (Msg)

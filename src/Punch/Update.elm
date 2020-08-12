@@ -1,7 +1,7 @@
 module Update exposing (update)
 
 import Api
-import Data.Punch exposing (Punch)
+import Punch exposing (Punch)
 import Dict exposing (Dict)
 import Http
 import Json.Encode as E

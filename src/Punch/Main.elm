@@ -1,7 +1,7 @@
-module Main exposing (..)
+module PunchMain exposing (..)
 
 import Browser
-import Data.Punch as Punch exposing (Punch)
+import Punch exposing (Punch)
 import Dict
 import Element exposing (..)
 import Element.Font as Font
@@ -10,7 +10,8 @@ import Json.Decode as D
 import Json.Encode as E
 import Messages exposing (Msg(..))
 import Model exposing (Flags, Model)
-import Palette
+import Equinor.Palette as Palette
+
 import Ports
 import Types exposing (..)
 import Update exposing (update)

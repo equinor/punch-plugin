@@ -1,8 +1,8 @@
 module View exposing (renderPunchList)
 
-import Component.SelectionList as SelectionList
+import Equinor.Component.SelectionList as SelectionList
 import Data.Common as Common exposing (kv, scaledInt)
-import Data.Punch as Punch exposing (Punch)
+import Punch exposing (Punch)
 import Dict
 import Element exposing (..)
 import Element.Background as Background
@@ -14,11 +14,11 @@ import Element.Keyed as Keyed
 import Html as H
 import Html.Attributes as HA
 import Html.Events as HE
-import Icon
+import Equinor.Icon as Icon
 import Json.Decode as D
 import Messages exposing (Msg(..))
 import Model exposing (Model)
-import Palette
+import Equinor.Palette as Palette
 import String.Extra
 import Types exposing (..)
 

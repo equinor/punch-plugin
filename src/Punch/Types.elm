@@ -1,4 +1,4 @@
-module Types exposing (..)
+module Punch.Types exposing (..)
 
 import Json.Decode as D
 
@@ -10,11 +10,7 @@ type WebData a
     | Loaded a
 
 
-type Status
-    = OK
-    | PB
-    | PA
-    | OS
+
 
 
 type alias TokenSuccess =

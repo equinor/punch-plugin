@@ -1,6 +1,6 @@
 module Messages exposing (ApiResult(..), Msg(..))
 
-import Data.Punch as Punch exposing (Punch)
+import Punch exposing (Punch)
 import Http
 import Json.Decode as D
 import Types exposing (..)
