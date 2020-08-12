@@ -793,6 +793,43 @@ var _List_sortWith = F2(function(f, xs)
 
 
 
+var _Bitwise_and = F2(function(a, b)
+{
+	return a & b;
+});
+
+var _Bitwise_or = F2(function(a, b)
+{
+	return a | b;
+});
+
+var _Bitwise_xor = F2(function(a, b)
+{
+	return a ^ b;
+});
+
+function _Bitwise_complement(a)
+{
+	return ~a;
+};
+
+var _Bitwise_shiftLeftBy = F2(function(offset, a)
+{
+	return a << offset;
+});
+
+var _Bitwise_shiftRightBy = F2(function(offset, a)
+{
+	return a >> offset;
+});
+
+var _Bitwise_shiftRightZfBy = F2(function(offset, a)
+{
+	return a >>> offset;
+});
+
+
+
 // MATH
 
 var _Basics_add = F2(function(a, b) { return a + b; });
@@ -1641,43 +1678,6 @@ function _Json_addEntry(func)
 }
 
 var _Json_encodeNull = _Json_wrap(null);
-
-
-
-var _Bitwise_and = F2(function(a, b)
-{
-	return a & b;
-});
-
-var _Bitwise_or = F2(function(a, b)
-{
-	return a | b;
-});
-
-var _Bitwise_xor = F2(function(a, b)
-{
-	return a ^ b;
-});
-
-function _Bitwise_complement(a)
-{
-	return ~a;
-};
-
-var _Bitwise_shiftLeftBy = F2(function(offset, a)
-{
-	return a << offset;
-});
-
-var _Bitwise_shiftRightBy = F2(function(offset, a)
-{
-	return a >> offset;
-});
-
-var _Bitwise_shiftRightZfBy = F2(function(offset, a)
-{
-	return a >>> offset;
-});
 
 
 
@@ -4584,7 +4584,108 @@ function _Http_track(router, xhr, tracker)
 			size: event.lengthComputable ? $elm$core$Maybe$Just(event.total) : $elm$core$Maybe$Nothing
 		}))));
 	});
-}var $elm$core$List$cons = _List_cons;
+}
+
+// CREATE
+
+var _Regex_never = /.^/;
+
+var _Regex_fromStringWith = F2(function(options, string)
+{
+	var flags = 'g';
+	if (options.multiline) { flags += 'm'; }
+	if (options.caseInsensitive) { flags += 'i'; }
+
+	try
+	{
+		return $elm$core$Maybe$Just(new RegExp(string, flags));
+	}
+	catch(error)
+	{
+		return $elm$core$Maybe$Nothing;
+	}
+});
+
+
+// USE
+
+var _Regex_contains = F2(function(re, string)
+{
+	return string.match(re) !== null;
+});
+
+
+var _Regex_findAtMost = F3(function(n, re, str)
+{
+	var out = [];
+	var number = 0;
+	var string = str;
+	var lastIndex = re.lastIndex;
+	var prevLastIndex = -1;
+	var result;
+	while (number++ < n && (result = re.exec(string)))
+	{
+		if (prevLastIndex == re.lastIndex) break;
+		var i = result.length - 1;
+		var subs = new Array(i);
+		while (i > 0)
+		{
+			var submatch = result[i];
+			subs[--i] = submatch
+				? $elm$core$Maybe$Just(submatch)
+				: $elm$core$Maybe$Nothing;
+		}
+		out.push(A4($elm$regex$Regex$Match, result[0], result.index, number, _List_fromArray(subs)));
+		prevLastIndex = re.lastIndex;
+	}
+	re.lastIndex = lastIndex;
+	return _List_fromArray(out);
+});
+
+
+var _Regex_replaceAtMost = F4(function(n, re, replacer, string)
+{
+	var count = 0;
+	function jsReplacer(match)
+	{
+		if (count++ >= n)
+		{
+			return match;
+		}
+		var i = arguments.length - 3;
+		var submatches = new Array(i);
+		while (i > 0)
+		{
+			var submatch = arguments[i];
+			submatches[--i] = submatch
+				? $elm$core$Maybe$Just(submatch)
+				: $elm$core$Maybe$Nothing;
+		}
+		return replacer(A4($elm$regex$Regex$Match, match, arguments[arguments.length - 2], count, _List_fromArray(submatches)));
+	}
+	return string.replace(re, jsReplacer);
+});
+
+var _Regex_splitAtMost = F3(function(n, re, str)
+{
+	var string = str;
+	var out = [];
+	var start = re.lastIndex;
+	var restoreLastIndex = re.lastIndex;
+	while (n--)
+	{
+		var result = re.exec(string);
+		if (!result) break;
+		out.push(string.slice(start, result.index));
+		start = re.lastIndex;
+	}
+	out.push(string.slice(start));
+	re.lastIndex = restoreLastIndex;
+	return _List_fromArray(out);
+});
+
+var _Regex_infinity = Infinity;
+var $elm$core$List$cons = _List_cons;
 var $elm$core$Elm$JsArray$foldr = _JsArray_foldr;
 var $elm$core$Array$foldr = F3(
 	function (func, baseCase, _v0) {
@@ -4664,6 +4765,66 @@ var $elm$core$Set$toList = function (_v0) {
 var $elm$core$Basics$EQ = {$: 'EQ'};
 var $elm$core$Basics$GT = {$: 'GT'};
 var $elm$core$Basics$LT = {$: 'LT'};
+var $mdgriffith$elm_ui$Internal$Model$Colored = F3(
+	function (a, b, c) {
+		return {$: 'Colored', a: a, b: b, c: c};
+	});
+var $mdgriffith$elm_ui$Internal$Model$StyleClass = F2(
+	function (a, b) {
+		return {$: 'StyleClass', a: a, b: b};
+	});
+var $elm$core$Basics$append = _Utils_append;
+var $mdgriffith$elm_ui$Internal$Flag$Flag = function (a) {
+	return {$: 'Flag', a: a};
+};
+var $mdgriffith$elm_ui$Internal$Flag$Second = function (a) {
+	return {$: 'Second', a: a};
+};
+var $elm$core$Basics$gt = _Utils_gt;
+var $elm$core$Bitwise$shiftLeftBy = _Bitwise_shiftLeftBy;
+var $elm$core$Basics$sub = _Basics_sub;
+var $mdgriffith$elm_ui$Internal$Flag$flag = function (i) {
+	return (i > 31) ? $mdgriffith$elm_ui$Internal$Flag$Second(1 << (i - 32)) : $mdgriffith$elm_ui$Internal$Flag$Flag(1 << i);
+};
+var $mdgriffith$elm_ui$Internal$Flag$fontColor = $mdgriffith$elm_ui$Internal$Flag$flag(14);
+var $elm$core$Maybe$Just = function (a) {
+	return {$: 'Just', a: a};
+};
+var $elm$core$Maybe$Nothing = {$: 'Nothing'};
+var $elm$core$String$fromInt = _String_fromNumber;
+var $elm$core$Basics$mul = _Basics_mul;
+var $elm$core$Basics$round = _Basics_round;
+var $mdgriffith$elm_ui$Internal$Model$floatClass = function (x) {
+	return $elm$core$String$fromInt(
+		$elm$core$Basics$round(x * 255));
+};
+var $mdgriffith$elm_ui$Internal$Model$formatColorClass = function (_v0) {
+	var red = _v0.a;
+	var green = _v0.b;
+	var blue = _v0.c;
+	var alpha = _v0.d;
+	return $mdgriffith$elm_ui$Internal$Model$floatClass(red) + ('-' + ($mdgriffith$elm_ui$Internal$Model$floatClass(green) + ('-' + ($mdgriffith$elm_ui$Internal$Model$floatClass(blue) + ('-' + $mdgriffith$elm_ui$Internal$Model$floatClass(alpha))))));
+};
+var $mdgriffith$elm_ui$Element$Font$color = function (fontColor) {
+	return A2(
+		$mdgriffith$elm_ui$Internal$Model$StyleClass,
+		$mdgriffith$elm_ui$Internal$Flag$fontColor,
+		A3(
+			$mdgriffith$elm_ui$Internal$Model$Colored,
+			'fc-' + $mdgriffith$elm_ui$Internal$Model$formatColorClass(fontColor),
+			'color',
+			fontColor));
+};
+var $elm$core$Basics$composeR = F3(
+	function (f, g, x) {
+		return g(
+			f(x));
+	});
+var $author$project$Punch$Model$Flags = F3(
+	function (procosysPlantId, context, textToHighlight) {
+		return {context: context, procosysPlantId: procosysPlantId, textToHighlight: textToHighlight};
+	});
+var $author$project$Punch$Types$NoContext = {$: 'NoContext'};
 var $elm$core$Result$Err = function (a) {
 	return {$: 'Err', a: a};
 };
@@ -4687,15 +4848,9 @@ var $elm$json$Json$Decode$OneOf = function (a) {
 };
 var $elm$core$Basics$False = {$: 'False'};
 var $elm$core$Basics$add = _Basics_add;
-var $elm$core$Maybe$Just = function (a) {
-	return {$: 'Just', a: a};
-};
-var $elm$core$Maybe$Nothing = {$: 'Nothing'};
 var $elm$core$String$all = _String_all;
 var $elm$core$Basics$and = _Basics_and;
-var $elm$core$Basics$append = _Utils_append;
 var $elm$json$Json$Encode$encode = _Json_encode;
-var $elm$core$String$fromInt = _String_fromNumber;
 var $elm$core$String$join = F2(
 	function (sep, chunks) {
 		return A2(
@@ -4745,7 +4900,6 @@ var $elm$core$List$length = function (xs) {
 };
 var $elm$core$List$map2 = _List_map2;
 var $elm$core$Basics$le = _Utils_le;
-var $elm$core$Basics$sub = _Basics_sub;
 var $elm$core$List$rangeHelp = F3(
 	function (lo, hi, list) {
 		rangeHelp:
@@ -4936,12 +5090,10 @@ var $elm$core$Basics$apR = F2(
 var $elm$core$Basics$eq = _Utils_equal;
 var $elm$core$Basics$floor = _Basics_floor;
 var $elm$core$Elm$JsArray$length = _JsArray_length;
-var $elm$core$Basics$gt = _Utils_gt;
 var $elm$core$Basics$max = F2(
 	function (x, y) {
 		return (_Utils_cmp(x, y) > 0) ? x : y;
 	});
-var $elm$core$Basics$mul = _Basics_mul;
 var $elm$core$Array$SubTree = function (a) {
 	return {$: 'SubTree', a: a};
 };
@@ -5059,51 +5211,62 @@ var $elm$core$Result$isOk = function (result) {
 		return false;
 	}
 };
+var $elm$json$Json$Decode$decodeValue = _Json_run;
+var $author$project$Punch$Types$CommContext = {$: 'CommContext'};
+var $author$project$Punch$Types$McContext = {$: 'McContext'};
+var $author$project$Punch$Types$TagContext = {$: 'TagContext'};
 var $elm$json$Json$Decode$andThen = _Json_andThen;
-var $mdgriffith$elm_ui$Internal$Model$Colored = F3(
-	function (a, b, c) {
-		return {$: 'Colored', a: a, b: b, c: c};
-	});
-var $mdgriffith$elm_ui$Internal$Model$StyleClass = F2(
-	function (a, b) {
-		return {$: 'StyleClass', a: a, b: b};
-	});
-var $mdgriffith$elm_ui$Internal$Flag$Flag = function (a) {
-	return {$: 'Flag', a: a};
-};
-var $mdgriffith$elm_ui$Internal$Flag$Second = function (a) {
-	return {$: 'Second', a: a};
-};
-var $elm$core$Bitwise$shiftLeftBy = _Bitwise_shiftLeftBy;
-var $mdgriffith$elm_ui$Internal$Flag$flag = function (i) {
-	return (i > 31) ? $mdgriffith$elm_ui$Internal$Flag$Second(1 << (i - 32)) : $mdgriffith$elm_ui$Internal$Flag$Flag(1 << i);
-};
-var $mdgriffith$elm_ui$Internal$Flag$fontColor = $mdgriffith$elm_ui$Internal$Flag$flag(14);
-var $elm$core$Basics$round = _Basics_round;
-var $mdgriffith$elm_ui$Internal$Model$floatClass = function (x) {
-	return $elm$core$String$fromInt(
-		$elm$core$Basics$round(x * 255));
-};
-var $mdgriffith$elm_ui$Internal$Model$formatColorClass = function (_v0) {
-	var red = _v0.a;
-	var green = _v0.b;
-	var blue = _v0.c;
-	var alpha = _v0.d;
-	return $mdgriffith$elm_ui$Internal$Model$floatClass(red) + ('-' + ($mdgriffith$elm_ui$Internal$Model$floatClass(green) + ('-' + ($mdgriffith$elm_ui$Internal$Model$floatClass(blue) + ('-' + $mdgriffith$elm_ui$Internal$Model$floatClass(alpha))))));
-};
-var $mdgriffith$elm_ui$Element$Font$color = function (fontColor) {
-	return A2(
-		$mdgriffith$elm_ui$Internal$Model$StyleClass,
-		$mdgriffith$elm_ui$Internal$Flag$fontColor,
-		A3(
-			$mdgriffith$elm_ui$Internal$Model$Colored,
-			'fc-' + $mdgriffith$elm_ui$Internal$Model$formatColorClass(fontColor),
-			'color',
-			fontColor));
-};
+var $elm$json$Json$Decode$field = _Json_decodeField;
 var $elm$json$Json$Decode$map = _Json_map1;
-var $elm$json$Json$Decode$map2 = _Json_map2;
+var $elm$json$Json$Decode$oneOf = _Json_oneOf;
 var $elm$json$Json$Decode$succeed = _Json_succeed;
+var $elm$json$Json$Decode$maybe = function (decoder) {
+	return $elm$json$Json$Decode$oneOf(
+		_List_fromArray(
+			[
+				A2($elm$json$Json$Decode$map, $elm$core$Maybe$Just, decoder),
+				$elm$json$Json$Decode$succeed($elm$core$Maybe$Nothing)
+			]));
+};
+var $elm$json$Json$Decode$string = _Json_decodeString;
+var $author$project$Punch$Model$contextDecoder = A2(
+	$elm$json$Json$Decode$andThen,
+	function (maybeStr) {
+		if (maybeStr.$ === 'Just') {
+			var str = maybeStr.a;
+			switch (str) {
+				case 'tag':
+					return $elm$json$Json$Decode$succeed($author$project$Punch$Types$TagContext);
+				case 'mc':
+					return $elm$json$Json$Decode$succeed($author$project$Punch$Types$McContext);
+				case 'comm':
+					return $elm$json$Json$Decode$succeed($author$project$Punch$Types$CommContext);
+				default:
+					return $elm$json$Json$Decode$succeed($author$project$Punch$Types$NoContext);
+			}
+		} else {
+			return $elm$json$Json$Decode$succeed($author$project$Punch$Types$NoContext);
+		}
+	},
+	$elm$json$Json$Decode$maybe(
+		A2($elm$json$Json$Decode$field, 'context', $elm$json$Json$Decode$string)));
+var $elm$json$Json$Decode$map3 = _Json_map3;
+var $author$project$Punch$Model$flagsDecoder = A4(
+	$elm$json$Json$Decode$map3,
+	$author$project$Punch$Model$Flags,
+	A2($elm$json$Json$Decode$field, 'procosysPlantId', $elm$json$Json$Decode$string),
+	$author$project$Punch$Model$contextDecoder,
+	A2($elm$json$Json$Decode$field, 'textToHighlight', $elm$json$Json$Decode$string));
+var $author$project$Punch$Model$decodeFlags = function (val) {
+	var _v0 = A2($elm$json$Json$Decode$decodeValue, $author$project$Punch$Model$flagsDecoder, val);
+	if (_v0.$ === 'Ok') {
+		var flags = _v0.a;
+		return flags;
+	} else {
+		return A3($author$project$Punch$Model$Flags, '', $author$project$Punch$Types$NoContext, '');
+	}
+};
+var $elm$json$Json$Decode$map2 = _Json_map2;
 var $elm$virtual_dom$VirtualDom$toHandlerInt = function (handler) {
 	switch (handler.$) {
 		case 'Normal':
@@ -5415,7 +5578,6 @@ var $elm$core$Task$perform = F2(
 				A2($elm$core$Task$map, toMessage, task)));
 	});
 var $elm$browser$Browser$element = _Browser_element;
-var $elm$json$Json$Decode$field = _Json_decodeField;
 var $mdgriffith$elm_ui$Internal$Model$Fill = function (a) {
 	return {$: 'Fill', a: a};
 };
@@ -5425,7 +5587,6 @@ var $author$project$Punch$Ports$fromJs = _Platform_incomingPort('fromJs', $elm$j
 var $author$project$Punch$Messages$DecodeError = function (a) {
 	return {$: 'DecodeError', a: a};
 };
-var $elm$json$Json$Decode$decodeValue = _Json_run;
 var $author$project$Punch$Messages$GotPunchList = function (a) {
 	return {$: 'GotPunchList', a: a};
 };
@@ -5460,11 +5621,6 @@ var $author$project$Punch$Punch = function (id) {
 	};
 };
 var $author$project$Equinor$Data$Procosys$Status$OS = {$: 'OS'};
-var $elm$core$Basics$composeR = F3(
-	function (f, g, x) {
-		return g(
-			f(x));
-	});
 var $author$project$Equinor$Data$Procosys$Status$OK = {$: 'OK'};
 var $author$project$Equinor$Data$Procosys$Status$PA = {$: 'PA'};
 var $author$project$Equinor$Data$Procosys$Status$PB = {$: 'PB'};
@@ -5481,8 +5637,6 @@ var $author$project$Equinor$Data$Procosys$Status$fromString = function (str) {
 	}
 };
 var $elm$json$Json$Decode$null = _Json_decodeNull;
-var $elm$json$Json$Decode$oneOf = _Json_oneOf;
-var $elm$json$Json$Decode$string = _Json_decodeString;
 var $author$project$Equinor$Data$Procosys$Status$decoder = $elm$json$Json$Decode$oneOf(
 	_List_fromArray(
 		[
@@ -5671,7 +5825,7 @@ var $elm$core$Platform$Cmd$batch = _Platform_batch;
 var $elm$core$Platform$Cmd$none = $elm$core$Platform$Cmd$batch(_List_Nil);
 var $author$project$Punch$Model$initialModel = function (flags) {
 	return _Utils_Tuple2(
-		{apiToken: '', categories: $author$project$Equinor$Types$NotLoaded, dropDown: $author$project$Punch$Types$NoDropDown, errorMsg: '', highlight: $elm$core$Maybe$Nothing, organizations: $author$project$Equinor$Types$NotLoaded, procosysPlantId: flags.procosysPlantId, punch: $elm$core$Dict$empty, requests: $elm$core$Dict$empty, selectedPunch: $elm$core$Maybe$Nothing},
+		{apiToken: '', categories: $author$project$Equinor$Types$NotLoaded, context: flags.context, dropDown: $author$project$Punch$Types$NoDropDown, errorMsg: '', highlight: flags.textToHighlight, organizations: $author$project$Equinor$Types$NotLoaded, procosysPlantId: flags.procosysPlantId, punch: $elm$core$Dict$empty, requests: $elm$core$Dict$empty, selectedPunch: $elm$core$Maybe$Nothing},
 		$elm$core$Platform$Cmd$none);
 };
 var $mdgriffith$elm_ui$Internal$Style$classes = {above: 'a', active: 'atv', alignBottom: 'ab', alignCenterX: 'cx', alignCenterY: 'cy', alignContainerBottom: 'acb', alignContainerCenterX: 'accx', alignContainerCenterY: 'accy', alignContainerRight: 'acr', alignLeft: 'al', alignRight: 'ar', alignTop: 'at', alignedHorizontally: 'ah', alignedVertically: 'av', any: 's', behind: 'bh', below: 'b', bold: 'w7', borderDashed: 'bd', borderDotted: 'bdt', borderNone: 'bn', borderSolid: 'bs', capturePointerEvents: 'cpe', clip: 'cp', clipX: 'cpx', clipY: 'cpy', column: 'c', container: 'ctr', contentBottom: 'cb', contentCenterX: 'ccx', contentCenterY: 'ccy', contentLeft: 'cl', contentRight: 'cr', contentTop: 'ct', cursorPointer: 'cptr', cursorText: 'ctxt', focus: 'fcs', focusedWithin: 'focus-within', fullSize: 'fs', grid: 'g', hasBehind: 'hbh', heightContent: 'hc', heightExact: 'he', heightFill: 'hf', heightFillPortion: 'hfp', hover: 'hv', imageContainer: 'ic', inFront: 'fr', inputLabel: 'lbl', inputMultiline: 'iml', inputMultilineFiller: 'imlf', inputMultilineParent: 'imlp', inputMultilineWrapper: 'implw', inputText: 'it', italic: 'i', link: 'lnk', nearby: 'nb', noTextSelection: 'notxt', onLeft: 'ol', onRight: 'or', opaque: 'oq', overflowHidden: 'oh', page: 'pg', paragraph: 'p', passPointerEvents: 'ppe', root: 'ui', row: 'r', scrollbars: 'sb', scrollbarsX: 'sbx', scrollbarsY: 'sby', seButton: 'sbt', single: 'e', sizeByCapital: 'cap', spaceEvenly: 'sev', strike: 'sk', text: 't', textCenter: 'tc', textExtraBold: 'w8', textExtraLight: 'w2', textHeavy: 'w9', textJustify: 'tj', textJustifyAll: 'tja', textLeft: 'tl', textLight: 'w3', textMedium: 'w5', textNormalWeight: 'w4', textRight: 'tr', textSemiBold: 'w6', textThin: 'w1', textUnitalicized: 'tun', transition: 'ts', transparent: 'clr', underline: 'u', widthContent: 'wc', widthExact: 'we', widthFill: 'wf', widthFillPortion: 'wfp', wrapped: 'wrp'};
@@ -12243,7 +12397,6 @@ var $author$project$Punch$Types$SelectItem = F3(
 	function (id, code, description) {
 		return {code: code, description: description, id: id};
 	});
-var $elm$json$Json$Decode$map3 = _Json_map3;
 var $author$project$Punch$Types$selectItemDecoder = A4(
 	$elm$json$Json$Decode$map3,
 	$author$project$Punch$Types$SelectItem,
@@ -13024,6 +13177,7 @@ var $mdgriffith$elm_ui$Element$rgba255 = F4(
 	});
 var $author$project$Equinor$Palette$alphaMossGreen = A4($mdgriffith$elm_ui$Element$rgba255, 0, 112, 121, 0.7);
 var $author$project$Equinor$Palette$alphaYellow = A4($mdgriffith$elm_ui$Element$rgba255, 251, 202, 54, 1);
+var $author$project$Equinor$Palette$blue = A3($mdgriffith$elm_ui$Element$rgb255, 95, 192, 220);
 var $mdgriffith$elm_ui$Internal$Model$Class = F2(
 	function (a, b) {
 		return {$: 'Class', a: a, b: b};
@@ -13075,6 +13229,7 @@ var $mdgriffith$elm_ui$Element$el = F2(
 				_List_fromArray(
 					[child])));
 	});
+var $author$project$Equinor$Palette$green = A3($mdgriffith$elm_ui$Element$rgb255, 75, 183, 72);
 var $author$project$Equinor$Palette$grey = A3($mdgriffith$elm_ui$Element$rgb255, 217, 217, 217);
 var $mdgriffith$elm_ui$Element$rgba = $mdgriffith$elm_ui$Internal$Model$Rgba;
 var $mdgriffith$elm_ui$Internal$Model$Text = function (a) {
@@ -13171,18 +13326,17 @@ var $author$project$Equinor$Palette$highLightIndexes = F3(
 		}
 	});
 var $author$project$Equinor$Palette$highlight = F2(
-	function (maybeHighlight, txt) {
-		if (maybeHighlight.$ === 'Nothing') {
+	function (textToHighlight, txt) {
+		if ($elm$core$String$isEmpty(textToHighlight)) {
 			return _List_fromArray(
 				[
 					$mdgriffith$elm_ui$Element$text(txt)
 				]);
 		} else {
-			var highLight = maybeHighlight.a;
 			var indexes = A3(
 				$author$project$Equinor$Palette$highLightIndexes,
 				txt,
-				$elm$core$String$words(highLight),
+				$elm$core$String$words(textToHighlight),
 				_List_Nil);
 			return A3($author$project$Equinor$Palette$applyHighLight, txt, indexes, _List_Nil);
 		}
@@ -14734,7 +14888,7 @@ var $author$project$Equinor$Palette$scaledInt = function (size) {
 		$elm$core$Basics$round);
 };
 var $author$project$Punch$View$renderDescription = F3(
-	function (maybeHighlight, size, punch) {
+	function (textToHighlight, size, punch) {
 		return A2(
 			$mdgriffith$elm_ui$Element$column,
 			_List_fromArray(
@@ -15610,6 +15764,66 @@ var $author$project$Equinor$Data$Procosys$Status$toString = function (status) {
 			return 'OK';
 	}
 };
+var $elm$regex$Regex$Match = F4(
+	function (match, index, number, submatches) {
+		return {index: index, match: match, number: number, submatches: submatches};
+	});
+var $elm$regex$Regex$fromStringWith = _Regex_fromStringWith;
+var $elm$regex$Regex$fromString = function (string) {
+	return A2(
+		$elm$regex$Regex$fromStringWith,
+		{caseInsensitive: false, multiline: false},
+		string);
+};
+var $elm$regex$Regex$never = _Regex_never;
+var $elm_community$string_extra$String$Extra$regexFromString = A2(
+	$elm$core$Basics$composeR,
+	$elm$regex$Regex$fromString,
+	$elm$core$Maybe$withDefault($elm$regex$Regex$never));
+var $elm$regex$Regex$replace = _Regex_replaceAtMost(_Regex_infinity);
+var $elm$core$String$cons = _String_cons;
+var $elm_community$string_extra$String$Extra$changeCase = F2(
+	function (mutator, word) {
+		return A2(
+			$elm$core$Maybe$withDefault,
+			'',
+			A2(
+				$elm$core$Maybe$map,
+				function (_v0) {
+					var head = _v0.a;
+					var tail = _v0.b;
+					return A2(
+						$elm$core$String$cons,
+						mutator(head),
+						tail);
+				},
+				$elm$core$String$uncons(word)));
+	});
+var $elm$core$Char$toUpper = _Char_toUpper;
+var $elm_community$string_extra$String$Extra$toSentenceCase = function (word) {
+	return A2($elm_community$string_extra$String$Extra$changeCase, $elm$core$Char$toUpper, word);
+};
+var $elm_community$string_extra$String$Extra$toTitleCase = function (ws) {
+	var uppercaseMatch = A2(
+		$elm$regex$Regex$replace,
+		$elm_community$string_extra$String$Extra$regexFromString('\\w+'),
+		A2(
+			$elm$core$Basics$composeR,
+			function ($) {
+				return $.match;
+			},
+			$elm_community$string_extra$String$Extra$toSentenceCase));
+	return A3(
+		$elm$regex$Regex$replace,
+		$elm_community$string_extra$String$Extra$regexFromString('^([a-z])|\\s+([a-z])'),
+		A2(
+			$elm$core$Basics$composeR,
+			function ($) {
+				return $.match;
+			},
+			uppercaseMatch),
+		ws);
+};
 var $author$project$Equinor$Palette$yellow = A3($mdgriffith$elm_ui$Element$rgb255, 251, 202, 54);
 var $author$project$Punch$View$renderPunchListItem = F3(
 	function (size, model, item) {
@@ -15626,6 +15840,39 @@ var $author$project$Punch$View$renderPunchListItem = F3(
 				[
 					$mdgriffith$elm_ui$Element$text(item.tag)
 				]));
+		var tagBeskrivelse = function (p) {
+			return A2(
+				$mdgriffith$elm_ui$Element$row,
+				_List_fromArray(
+					[
+						$mdgriffith$elm_ui$Element$width($mdgriffith$elm_ui$Element$fill),
+						$mdgriffith$elm_ui$Element$clip
+					]),
+				_List_fromArray(
+					[
+						A2(
+						$mdgriffith$elm_ui$Element$el,
+						_List_fromArray(
+							[
+								$mdgriffith$elm_ui$Element$width(
+								$mdgriffith$elm_ui$Element$px(20)),
+								$mdgriffith$elm_ui$Element$height(
+								$mdgriffith$elm_ui$Element$px(20))
+							]),
+						$mdgriffith$elm_ui$Element$html(
+							A2($author$project$Equinor$Icon$tag, '', 'none'))),
+						A2(
+						$mdgriffith$elm_ui$Element$el,
+						_List_fromArray(
+							[
+								$mdgriffith$elm_ui$Element$Font$size(
+								A2($author$project$Equinor$Palette$scaledInt, size, -3)),
+								$mdgriffith$elm_ui$Element$width($mdgriffith$elm_ui$Element$fill),
+								$mdgriffith$elm_ui$Element$clip
+							]),
+						$mdgriffith$elm_ui$Element$text(p.tagDescription))
+					]));
+		};
 		var shortDescription = A2(
 			$mdgriffith$elm_ui$Element$column,
 			_List_fromArray(
@@ -15646,17 +15893,17 @@ var $author$project$Punch$View$renderPunchListItem = F3(
 					2,
 					$elm$core$String$lines(item.description))));
 		var isSelected = function () {
-			var _v1 = model.selectedPunch;
-			if (_v1.$ === 'Just') {
-				var selected = _v1.a;
+			var _v2 = model.selectedPunch;
+			if (_v2.$ === 'Just') {
+				var selected = _v2.a;
 				return _Utils_eq(selected.id, item.id);
 			} else {
 				return false;
 			}
 		}();
 		var colors = function () {
-			var _v0 = item.status;
-			switch (_v0.$) {
+			var _v1 = item.status;
+			switch (_v1.$) {
 				case 'PA':
 					return A2($author$project$Equinor$Palette$combination, $author$project$Equinor$Palette$white, $author$project$Equinor$Palette$red);
 				case 'PB':
@@ -15692,6 +15939,74 @@ var $author$project$Punch$View$renderPunchListItem = F3(
 				]),
 			$mdgriffith$elm_ui$Element$html(
 				$author$project$Punch$View$iconFromCategory('')));
+		var toppLinje = A2(
+			$mdgriffith$elm_ui$Element$row,
+			_List_fromArray(
+				[
+					$mdgriffith$elm_ui$Element$spacing(10),
+					$mdgriffith$elm_ui$Element$Font$size(
+					A2($author$project$Equinor$Palette$scaledInt, size, -3)),
+					$mdgriffith$elm_ui$Element$width($mdgriffith$elm_ui$Element$fill)
+				]),
+			_List_fromArray(
+				[
+					A2(
+					$mdgriffith$elm_ui$Element$row,
+					_List_Nil,
+					_List_fromArray(
+						[
+							A2(
+							$mdgriffith$elm_ui$Element$el,
+							colors(
+								_List_fromArray(
+									[
+										A2($mdgriffith$elm_ui$Element$paddingXY, 2, 1),
+										$mdgriffith$elm_ui$Element$Border$rounded(4)
+									])),
+							$mdgriffith$elm_ui$Element$text(
+								$author$project$Equinor$Data$Procosys$Status$toString(item.status))),
+							A2(
+							$mdgriffith$elm_ui$Element$el,
+							A3(
+								$author$project$Equinor$Palette$combination,
+								$author$project$Equinor$Palette$white,
+								$author$project$Equinor$Palette$blue,
+								_List_fromArray(
+									[
+										A2($mdgriffith$elm_ui$Element$paddingXY, 2, 1),
+										$mdgriffith$elm_ui$Element$Border$rounded(4)
+									])),
+							$mdgriffith$elm_ui$Element$text(
+								A2($elm$core$String$left, 2, item.commPk))),
+							A2(
+							$mdgriffith$elm_ui$Element$el,
+							A3(
+								$author$project$Equinor$Palette$combination,
+								$author$project$Equinor$Palette$white,
+								$author$project$Equinor$Palette$green,
+								_List_fromArray(
+									[
+										A2($mdgriffith$elm_ui$Element$paddingXY, 2, 1),
+										$mdgriffith$elm_ui$Element$Border$rounded(4)
+									])),
+							$mdgriffith$elm_ui$Element$text(item.location))
+						])),
+					A2(
+					$mdgriffith$elm_ui$Element$el,
+					_List_fromArray(
+						[
+							$mdgriffith$elm_ui$Element$width($mdgriffith$elm_ui$Element$fill),
+							$mdgriffith$elm_ui$Element$clip
+						]),
+					$mdgriffith$elm_ui$Element$text(item.typeDescription)),
+					A2(
+					$mdgriffith$elm_ui$Element$el,
+					_List_Nil,
+					$mdgriffith$elm_ui$Element$text(
+						$elm_community$string_extra$String$Extra$toTitleCase(
+							$elm$core$String$toLower(
+								A2($elm$core$String$left, 3, item.raisedByOrg) + (' -> ' + A2($elm$core$String$left, 3, item.clearingByOrg))))))
+				]));
 		var color = $author$project$Equinor$Palette$white;
 		return _Utils_Tuple2(
 			item.id,
@@ -15708,7 +16023,7 @@ var $author$project$Punch$View$renderPunchListItem = F3(
 				_List_fromArray(
 					[
 						A2(
-						$mdgriffith$elm_ui$Element$row,
+						$mdgriffith$elm_ui$Element$column,
 						_List_fromArray(
 							[
 								$mdgriffith$elm_ui$Element$width($mdgriffith$elm_ui$Element$fill),
@@ -15717,7 +16032,18 @@ var $author$project$Punch$View$renderPunchListItem = F3(
 								$mdgriffith$elm_ui$Element$pointer
 							]),
 						_List_fromArray(
-							[icon, shortDescription])),
+							[
+								toppLinje,
+								shortDescription,
+								function () {
+								var _v0 = model.context;
+								if (_v0.$ === 'TagContext') {
+									return $mdgriffith$elm_ui$Element$none;
+								} else {
+									return tagBeskrivelse(item);
+								}
+							}()
+							])),
 						isSelected ? A2(
 						$mdgriffith$elm_ui$Element$column,
 						_List_fromArray(
@@ -15780,7 +16106,7 @@ var $author$project$Punch$Main$view = function (model) {
 };
 var $author$project$Punch$Main$main = $elm$browser$Browser$element(
 	{
-		init: $author$project$Punch$Model$initialModel,
+		init: A2($elm$core$Basics$composeR, $author$project$Punch$Model$decodeFlags, $author$project$Punch$Model$initialModel),
 		subscriptions: function (model) {
 			return $author$project$Punch$Ports$fromJs($author$project$Punch$Main$handleJsMsg);
 		},
@@ -15798,11 +16124,4 @@ var $author$project$Punch$Main$main = $elm$browser$Browser$element(
 				$author$project$Punch$Main$view(model));
 		}
 	});
-_Platform_export({'Punch':{'Main':{'init':$author$project$Punch$Main$main(
-	A2(
-		$elm$json$Json$Decode$andThen,
-		function (procosysPlantId) {
-			return $elm$json$Json$Decode$succeed(
-				{procosysPlantId: procosysPlantId});
-		},
-		A2($elm$json$Json$Decode$field, 'procosysPlantId', $elm$json$Json$Decode$string)))(0)}}});}(this));
+_Platform_export({'Punch':{'Main':{'init':$author$project$Punch$Main$main($elm$json$Json$Decode$value)(0)}}});}(this));

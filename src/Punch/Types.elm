@@ -3,10 +3,11 @@ module Punch.Types exposing (..)
 import Json.Decode as D
 
 
-
-
-
-
+type Context
+    = NoContext
+    | TagContext
+    | McContext
+    | CommContext
 
 
 type alias TokenSuccess =

@@ -1,9 +1,5 @@
 module Punch.View exposing (renderPunchList)
 
-
-import Equinor.Component.SelectionList as SelectionList
-
-import Punch exposing (Punch)
 import Dict
 import Element exposing (..)
 import Element.Background as Background
@@ -12,18 +8,20 @@ import Element.Events exposing (onLoseFocus)
 import Element.Font as Font
 import Element.Input as Input
 import Element.Keyed as Keyed
+import Equinor.Component.SelectionList as SelectionList
+import Equinor.Data.Procosys.Status as Status exposing (Status(..))
+import Equinor.Icon as Icon
+import Equinor.Palette as Palette exposing (kv, scaledInt)
+import Equinor.Types exposing (..)
 import Html as H
 import Html.Attributes as HA
 import Html.Events as HE
-import Equinor.Data.Procosys.Status as Status exposing (Status(..))
-import Equinor.Icon as Icon
 import Json.Decode as D
+import Punch exposing (Punch)
 import Punch.Messages exposing (Msg(..))
 import Punch.Model exposing (Model)
-import Equinor.Palette as Palette  exposing (kv, scaledInt)
-import String.Extra
 import Punch.Types as Types exposing (..)
-import Equinor.Types exposing (..)
+import String.Extra
 
 
 renderPunchList : Float -> Model -> Element Msg
@@ -99,6 +97,24 @@ renderPunchListItem size model item =
                 html <|
                     iconFromCategory ""
 
+        toppLinje =
+            row [ spacing 10, Font.size <| scaledInt size -3, width fill ]
+                [ row []
+                    [ el (colors [ paddingXY 2 1, Border.rounded 4 ]) (item.status |> Status.toString |> text)
+                    , el (Palette.combination Palette.white Palette.blue [ paddingXY 2 1, Border.rounded 4 ]) (String.left 2 item.commPk |> text)
+                    , el (Palette.combination Palette.white Palette.green [ paddingXY 2 1, Border.rounded 4 ]) (item.location |> text)
+                    ]
+                , el [ width fill, clip ] (text item.typeDescription)
+                , el []
+                    (String.left 3 item.raisedByOrg
+                        ++ " -> "
+                        ++ String.left 3 item.clearingByOrg
+                        |> String.toLower
+                        |> String.Extra.toTitleCase
+                        |> text
+                    )
+                ]
+
         shortDescription =
             item.description
                 |> String.lines
@@ -108,6 +124,18 @@ renderPunchListItem size model item =
 
         tagNo =
             paragraph [ Font.size <| scaledInt size -1, width fill, Font.color Palette.mossGreen ] [ text item.tag ]
+
+        tagBeskrivelse p =
+            row [ width fill, clip ]
+                [ el
+                    [ width (px 20)
+                    , height (px 20)
+                    ]
+                  <|
+                    html <|
+                        Icon.tag "" "none"
+                , el [ Font.size <| scaledInt size -3, width fill, clip ] (text p.tagDescription)
+                ]
     in
     ( item.id
     , column
@@ -120,13 +148,19 @@ renderPunchListItem size model item =
                 Palette.white
         , padding (round <| size / 2)
         ]
-        [ row
+        [ column
             [ width fill
             , onClick <| PunchItemPressed item
             , pointer
             ]
-            [ icon
+            [ toppLinje
             , shortDescription
+            , case model.context of
+                TagContext ->
+                    none
+
+                _ ->
+                    tagBeskrivelse item
             ]
         , if isSelected then
             column [ width fill, height fill, Background.color Palette.white, onClick NoOp, Border.rounded 4, padding 4 ]
@@ -153,8 +187,8 @@ renderPunchListItem size model item =
     )
 
 
-renderDescription : Maybe String -> Float -> Punch -> Element Msg
-renderDescription maybeHighlight size punch =
+renderDescription : String -> Float -> Punch -> Element Msg
+renderDescription textToHighlight size punch =
     column [ width fill ]
         [ el [ Font.color Palette.mossGreen, Font.size <| scaledInt size -3, Font.bold ] <| text "Punch description:"
 

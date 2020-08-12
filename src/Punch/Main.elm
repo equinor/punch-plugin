@@ -1,17 +1,16 @@
 module Punch.Main exposing (..)
 
 import Browser
-import Punch exposing (Punch)
 import Dict
 import Element exposing (..)
 import Element.Font as Font
+import Equinor.Palette as Palette
 import Html exposing (Html)
 import Json.Decode as D
 import Json.Encode as E
+import Punch exposing (Punch)
 import Punch.Messages exposing (Msg(..))
 import Punch.Model as Model exposing (Flags, Model)
-import Equinor.Palette as Palette
-
 import Punch.Ports as Ports
 import Punch.Types exposing (..)
 import Punch.Update exposing (update)
@@ -27,10 +26,10 @@ view model =
         View.renderPunchList 16 model
 
 
-main : Program Flags Model Msg
+main : Program D.Value Model Msg
 main =
     Browser.element
-        { init = Model.initialModel
+        { init = Model.decodeFlags >> Model.initialModel
         , update = update
         , subscriptions = \model -> Ports.fromJs handleJsMsg
         , view = \model -> layout [ width fill, height fill, Font.color Palette.slateBlue, Font.size 14 ] (view model)
