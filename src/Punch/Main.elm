@@ -1,4 +1,4 @@
-module PunchMain exposing (..)
+module Punch.Main exposing (..)
 
 import Browser
 import Punch exposing (Punch)
@@ -12,10 +12,10 @@ import Messages exposing (Msg(..))
 import Model exposing (Flags, Model)
 import Equinor.Palette as Palette
 
-import Ports
-import Types exposing (..)
-import Update exposing (update)
-import View
+import Punch.Ports as Ports
+import Punch.Types exposing (..)
+import Punch.Update exposing (update)
+import Punch.View as View
 
 
 view : Model -> Element Msg

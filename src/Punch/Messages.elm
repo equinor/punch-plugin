@@ -1,4 +1,4 @@
-module Messages exposing (ApiResult(..), Msg(..))
+module Punch.Messages exposing (ApiResult(..), Msg(..))
 
 import Punch exposing (Punch)
 import Http

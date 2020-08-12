@@ -1,4 +1,4 @@
-port module Ports exposing (fromJs, toJs)
+port module Punch.Ports exposing (fromJs, toJs)
 
 import Json.Encode as E
 

@@ -1,4 +1,4 @@
-module Api exposing (categories, clientId, organizations, setCategory, setClearingBy, setRaisedBy, updateDescription)
+module Punch.Api exposing (categories, clientId, organizations, setCategory, setClearingBy, setRaisedBy, updateDescription)
 
 import Punch exposing (Punch)
 import Http

@@ -1,4 +1,4 @@
-module Model exposing (Flags, Model, initialModel)
+module Punch.Model exposing (Flags, Model, initialModel)
 
 import Punch exposing (Punch)
 import Dict exposing (Dict)

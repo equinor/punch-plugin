@@ -1,4 +1,4 @@
-module Update exposing (update)
+module Punch.Update exposing (update)
 
 import Api
 import Punch exposing (Punch)
