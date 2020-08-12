@@ -42,3 +42,4 @@ type DropDown
     | CategoryDropDown
     | RaisedByDropDown
     | ClearingByDropDown
+    | TypeDropDown

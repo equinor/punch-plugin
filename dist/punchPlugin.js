@@ -5825,7 +5825,7 @@ var $elm$core$Platform$Cmd$batch = _Platform_batch;
 var $elm$core$Platform$Cmd$none = $elm$core$Platform$Cmd$batch(_List_Nil);
 var $author$project$Punch$Model$initialModel = function (flags) {
 	return _Utils_Tuple2(
-		{apiToken: '', categories: $author$project$Equinor$Types$NotLoaded, context: flags.context, dropDown: $author$project$Punch$Types$NoDropDown, errorMsg: '', highlight: flags.textToHighlight, organizations: $author$project$Equinor$Types$NotLoaded, procosysPlantId: flags.procosysPlantId, punch: $elm$core$Dict$empty, requests: $elm$core$Dict$empty, selectedPunch: $elm$core$Maybe$Nothing},
+		{apiToken: '', categories: $author$project$Equinor$Types$NotLoaded, context: flags.context, dropDown: $author$project$Punch$Types$NoDropDown, errorMsg: '', highlight: flags.textToHighlight, organizations: $author$project$Equinor$Types$NotLoaded, procosysPlantId: flags.procosysPlantId, punch: $elm$core$Dict$empty, requests: $elm$core$Dict$empty, selectedPunch: $elm$core$Maybe$Nothing, types: $author$project$Equinor$Types$NotLoaded},
 		$elm$core$Platform$Cmd$none);
 };
 var $mdgriffith$elm_ui$Internal$Style$classes = {above: 'a', active: 'atv', alignBottom: 'ab', alignCenterX: 'cx', alignCenterY: 'cy', alignContainerBottom: 'acb', alignContainerCenterX: 'accx', alignContainerCenterY: 'accy', alignContainerRight: 'acr', alignLeft: 'al', alignRight: 'ar', alignTop: 'at', alignedHorizontally: 'ah', alignedVertically: 'av', any: 's', behind: 'bh', below: 'b', bold: 'w7', borderDashed: 'bd', borderDotted: 'bdt', borderNone: 'bn', borderSolid: 'bs', capturePointerEvents: 'cpe', clip: 'cp', clipX: 'cpx', clipY: 'cpy', column: 'c', container: 'ctr', contentBottom: 'cb', contentCenterX: 'ccx', contentCenterY: 'ccy', contentLeft: 'cl', contentRight: 'cr', contentTop: 'ct', cursorPointer: 'cptr', cursorText: 'ctxt', focus: 'fcs', focusedWithin: 'focus-within', fullSize: 'fs', grid: 'g', hasBehind: 'hbh', heightContent: 'hc', heightExact: 'he', heightFill: 'hf', heightFillPortion: 'hfp', hover: 'hv', imageContainer: 'ic', inFront: 'fr', inputLabel: 'lbl', inputMultiline: 'iml', inputMultilineFiller: 'imlf', inputMultilineParent: 'imlp', inputMultilineWrapper: 'implw', inputText: 'it', italic: 'i', link: 'lnk', nearby: 'nb', noTextSelection: 'notxt', onLeft: 'ol', onRight: 'or', opaque: 'oq', overflowHidden: 'oh', page: 'pg', paragraph: 'p', passPointerEvents: 'ppe', root: 'ui', row: 'r', scrollbars: 'sb', scrollbarsX: 'sbx', scrollbarsY: 'sby', seButton: 'sbt', single: 'e', sizeByCapital: 'cap', spaceEvenly: 'sev', strike: 'sk', text: 't', textCenter: 'tc', textExtraBold: 'w8', textExtraLight: 'w2', textHeavy: 'w9', textJustify: 'tj', textJustifyAll: 'tja', textLeft: 'tl', textLight: 'w3', textMedium: 'w5', textNormalWeight: 'w4', textRight: 'tr', textSemiBold: 'w6', textThin: 'w1', textUnitalicized: 'tun', transition: 'ts', transparent: 'clr', underline: 'u', widthContent: 'wc', widthExact: 'we', widthFill: 'wf', widthFillPortion: 'wfp', wrapped: 'wrp'};
@@ -12538,6 +12538,56 @@ var $author$project$Punch$Update$getOrganizations = function (_v0) {
 				c));
 	}
 };
+var $author$project$Punch$Messages$GotTypes = function (a) {
+	return {$: 'GotTypes', a: a};
+};
+var $author$project$Punch$Api$types = F2(
+	function (plantId, token) {
+		return $elm$http$Http$request(
+			{
+				body: $elm$http$Http$emptyBody,
+				expect: A2(
+					$elm$http$Http$expectJson,
+					A2($elm$core$Basics$composeL, $author$project$Punch$Messages$GotApiResult, $author$project$Punch$Messages$GotTypes),
+					$elm$json$Json$Decode$list($author$project$Punch$Types$selectItemDecoder)),
+				headers: _List_fromArray(
+					[
+						A2($elm$http$Http$header, 'Authorization', 'Bearer ' + token)
+					]),
+				method: 'GET',
+				timeout: $elm$core$Maybe$Nothing,
+				tracker: $elm$core$Maybe$Nothing,
+				url: A2(
+					$author$project$Punch$Api$url,
+					_List_fromArray(
+						['PunchListItem', 'Types']),
+					_List_fromArray(
+						[
+							A2($elm$url$Url$Builder$string, 'plantId', plantId),
+							$author$project$Punch$Api$apiVersion
+						]))
+			});
+	});
+var $author$project$Punch$Update$getTypes = function (_v0) {
+	var m = _v0.a;
+	var c = _v0.b;
+	var _v1 = m.types;
+	if (_v1.$ === 'Loaded') {
+		return _Utils_Tuple2(m, c);
+	} else {
+		return A2(
+			$author$project$Punch$Update$apiRequest,
+			_List_fromArray(
+				[$author$project$Punch$Api$types]),
+			_Utils_Tuple2(
+				_Utils_update(
+					m,
+					{
+						types: A2($author$project$Equinor$Types$Loading, '', $elm$core$Maybe$Nothing)
+					}),
+				c));
+	}
+};
 var $author$project$Equinor$Types$DataError = F2(
 	function (a, b) {
 		return {$: 'DataError', a: a, b: b};
@@ -12631,6 +12681,31 @@ var $author$project$Punch$Update$handleApiResult = F2(
 							}),
 						c);
 				}
+			case 'SetTypeResult':
+				var originalPunch = apiResult.a;
+				var result = apiResult.b;
+				if (result.$ === 'Ok') {
+					return _Utils_Tuple2(m, c);
+				} else {
+					var err = result.a;
+					var updater = function (punch) {
+						return _Utils_update(
+							punch,
+							{typeDescription: originalPunch.typeDescription});
+					};
+					return _Utils_Tuple2(
+						_Utils_update(
+							m,
+							{
+								errorMsg: 'Error changing type',
+								punch: A3(
+									$elm$core$Dict$update,
+									originalPunch.id,
+									$elm$core$Maybe$map(updater),
+									m.punch)
+							}),
+						c);
+				}
 			case 'SetCategoryResult':
 				var originalPunch = apiResult.a;
 				var result = apiResult.b;
@@ -12678,7 +12753,7 @@ var $author$project$Punch$Update$handleApiResult = F2(
 							}),
 						c);
 				}
-			default:
+			case 'GotCategories':
 				var result = apiResult.a;
 				if (result.$ === 'Ok') {
 					var categories = result.a;
@@ -12697,6 +12772,28 @@ var $author$project$Punch$Update$handleApiResult = F2(
 							{
 								categories: A2($author$project$Equinor$Types$DataError, '', $elm$core$Maybe$Nothing),
 								errorMsg: 'Error getting categories'
+							}),
+						c);
+				}
+			default:
+				var result = apiResult.a;
+				if (result.$ === 'Ok') {
+					var types = result.a;
+					return _Utils_Tuple2(
+						_Utils_update(
+							m,
+							{
+								types: A2($author$project$Equinor$Types$Loaded, '', types)
+							}),
+						c);
+				} else {
+					var err = result.a;
+					return _Utils_Tuple2(
+						_Utils_update(
+							m,
+							{
+								errorMsg: 'Error getting types',
+								types: A2($author$project$Equinor$Types$DataError, '', $elm$core$Maybe$Nothing)
 							}),
 						c);
 				}
@@ -12921,6 +13018,52 @@ var $author$project$Punch$Api$setRaisedBy = F4(
 						]))
 			});
 	});
+var $author$project$Punch$Messages$SetTypeResult = F2(
+	function (a, b) {
+		return {$: 'SetTypeResult', a: a, b: b};
+	});
+var $author$project$Punch$Api$setType = F4(
+	function (originalPunch, selectItem, plantId, token) {
+		return $elm$http$Http$request(
+			{
+				body: $elm$http$Http$jsonBody(
+					$elm$json$Json$Encode$object(
+						_List_fromArray(
+							[
+								_Utils_Tuple2(
+								'PunchItemId',
+								$elm$json$Json$Encode$int(
+									A2(
+										$elm$core$Maybe$withDefault,
+										0,
+										$elm$core$String$toInt(originalPunch.id)))),
+								_Utils_Tuple2(
+								'TypeId',
+								$elm$json$Json$Encode$int(selectItem.id))
+							]))),
+				expect: $elm$http$Http$expectWhatever(
+					A2(
+						$elm$core$Basics$composeL,
+						$author$project$Punch$Messages$GotApiResult,
+						$author$project$Punch$Messages$SetTypeResult(originalPunch))),
+				headers: _List_fromArray(
+					[
+						A2($elm$http$Http$header, 'Authorization', 'Bearer ' + token)
+					]),
+				method: 'PUT',
+				timeout: $elm$core$Maybe$Nothing,
+				tracker: $elm$core$Maybe$Nothing,
+				url: A2(
+					$author$project$Punch$Api$url,
+					_List_fromArray(
+						['PunchListItem', 'SetType']),
+					_List_fromArray(
+						[
+							A2($elm$url$Url$Builder$string, 'plantId', plantId),
+							$author$project$Punch$Api$apiVersion
+						]))
+			});
+	});
 var $author$project$Punch$Update$unSelectPunch = function (_v0) {
 	var m = _v0.a;
 	var c = _v0.b;
@@ -13055,8 +13198,10 @@ var $author$project$Punch$Update$update = F2(
 							return $author$project$Punch$Update$getCategories;
 						case 'RaisedByDropDown':
 							return $author$project$Punch$Update$getOrganizations;
-						default:
+						case 'ClearingByDropDown':
 							return $author$project$Punch$Update$getOrganizations;
+						default:
+							return $author$project$Punch$Update$getTypes;
 					}
 				}()(
 					_Utils_Tuple2(
@@ -13082,10 +13227,14 @@ var $author$project$Punch$Update$update = F2(
 							return _Utils_update(
 								punch,
 								{raisedByOrg: item.description});
-						default:
+						case 'ClearingByDropDown':
 							return _Utils_update(
 								punch,
 								{clearingByOrg: item.description});
+						default:
+							return _Utils_update(
+								punch,
+								{typeDescription: item.description});
 					}
 				}();
 				return function () {
@@ -13105,11 +13254,17 @@ var $author$project$Punch$Update$update = F2(
 									[
 										A2($author$project$Punch$Api$setRaisedBy, punch, item)
 									]));
-						default:
+						case 'ClearingByDropDown':
 							return $author$project$Punch$Update$apiRequest(
 								_List_fromArray(
 									[
 										A2($author$project$Punch$Api$setClearingBy, punch, item)
+									]));
+						default:
+							return $author$project$Punch$Update$apiRequest(
+								_List_fromArray(
+									[
+										A2($author$project$Punch$Api$setType, punch, item)
 									]));
 					}
 				}()(
@@ -14931,6 +15086,7 @@ var $author$project$Punch$View$renderDescription = F3(
 var $author$project$Punch$Types$CategoryDropDown = {$: 'CategoryDropDown'};
 var $author$project$Punch$Types$ClearingByDropDown = {$: 'ClearingByDropDown'};
 var $author$project$Punch$Types$RaisedByDropDown = {$: 'RaisedByDropDown'};
+var $author$project$Punch$Types$TypeDropDown = {$: 'TypeDropDown'};
 var $author$project$Punch$Messages$DropDownPressed = function (a) {
 	return {$: 'DropDownPressed', a: a};
 };
@@ -15240,8 +15396,10 @@ var $author$project$Punch$View$dropDown = F6(
 					return 'Category';
 				case 'RaisedByDropDown':
 					return 'Raised By';
-				default:
+				case 'ClearingByDropDown':
 					return 'Clearing By';
+				default:
+					return 'Type';
 			}
 		}();
 		var header = A2(
@@ -15621,6 +15779,16 @@ var $author$project$Punch$View$renderDetails = F3(
 					punch.clearingByOrg,
 					function ($) {
 						return $.organizations;
+					},
+					punch,
+					model),
+					A6(
+					$author$project$Punch$View$dropDown,
+					size,
+					$author$project$Punch$Types$TypeDropDown,
+					punch.typeDescription,
+					function ($) {
+						return $.types;
 					},
 					punch,
 					model)

@@ -1,17 +1,18 @@
 module Punch.Update exposing (update)
 
-import Punch.Api as Api
-import Punch exposing (Punch)
 import Dict exposing (Dict)
+import Equinor.Data.Procosys.Status as Status exposing (Status(..))
+import Equinor.Types exposing (..)
 import Http
 import Json.Encode as E
+import Punch exposing (Punch)
+import Punch.Api as Api
 import Punch.Messages exposing (..)
 import Punch.Model exposing (Model)
 import Punch.Ports as Ports
-import Svg.Attributes exposing (z)
 import Punch.Types as Types exposing (..)
-import Equinor.Types exposing (..)
-import Equinor.Data.Procosys.Status as Status exposing (Status(..))
+import Svg.Attributes exposing (z)
+
 
 type alias MC =
     ( Model, Cmd Msg )
@@ -96,6 +97,9 @@ update msg model =
 
                             Types.ClearingByDropDown ->
                                 getOrganizations
+
+                            Types.TypeDropDown ->
+                                getTypes
                        )
 
         DropDownItemPressed punch item ->
@@ -120,6 +124,9 @@ update msg model =
 
                         ClearingByDropDown ->
                             { punch | clearingByOrg = item.description }
+
+                        TypeDropDown ->
+                            { punch | typeDescription = item.description }
             in
             ( { model
                 | punch = Dict.insert punch.id updated model.punch
@@ -139,6 +146,9 @@ update msg model =
 
                         Types.ClearingByDropDown ->
                             apiRequest [ Api.setClearingBy punch item ]
+
+                        Types.TypeDropDown ->
+                            apiRequest [ Api.setType punch item ]
                    )
 
 
@@ -149,8 +159,19 @@ getOrganizations ( m, c ) =
             ( m, c )
 
         _ ->
-            ( { m | organizations = Loading "" Nothing}, c )
+            ( { m | organizations = Loading "" Nothing }, c )
                 |> apiRequest [ Api.organizations ]
+
+
+getTypes : MC -> MC
+getTypes ( m, c ) =
+    case m.types of
+        Loaded _ _ ->
+            ( m, c )
+
+        _ ->
+            ( { m | types = Loading "" Nothing }, c )
+                |> apiRequest [ Api.types ]
 
 
 getCategories : MC -> MC
@@ -300,6 +321,24 @@ handleApiResult apiResult ( m, c ) =
                     , c
                     )
 
+        SetTypeResult originalPunch result ->
+            case result of
+                Ok _ ->
+                    ( m, c )
+
+                Err err ->
+                    let
+                        updater punch =
+                            { punch | typeDescription = originalPunch.typeDescription }
+                    in
+                    ( { m
+                        | punch =
+                            Dict.update originalPunch.id (Maybe.map updater) m.punch
+                        , errorMsg = "Error changing type"
+                      }
+                    , c
+                    )
+
         SetCategoryResult originalPunch result ->
             case result of
                 Ok _ ->
@@ -333,3 +372,11 @@ handleApiResult apiResult ( m, c ) =
 
                 Err err ->
                     ( { m | categories = DataError "" Nothing, errorMsg = "Error getting categories" }, c )
+
+        GotTypes result ->
+            case result of
+                Ok types ->
+                    ( { m | types = Loaded "" types }, c )
+
+                Err err ->
+                    ( { m | types = DataError "" Nothing, errorMsg = "Error getting types" }, c )

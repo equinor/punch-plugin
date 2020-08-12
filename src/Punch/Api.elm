@@ -1,11 +1,11 @@
-module Punch.Api exposing (categories, clientId, organizations, setCategory, setClearingBy, setRaisedBy, updateDescription)
+module Punch.Api exposing (categories, clientId, organizations, setCategory, setClearingBy, setRaisedBy, setType, types, updateDescription)
 
-import Punch exposing (Punch)
 import Http
 import Json.Decode as D
 import Json.Encode as E
+import Punch exposing (Punch)
 import Punch.Messages exposing (..)
-import Punch.Types  as Types exposing (..)
+import Punch.Types as Types exposing (..)
 import Url.Builder exposing (QueryParameter, int, string)
 
 
@@ -96,6 +96,34 @@ setCategory originalPunch selectItem plantId token =
         , expect =
             Http.expectWhatever
                 (GotApiResult << SetCategoryResult originalPunch)
+        , timeout = Nothing
+        , tracker = Nothing
+        }
+
+
+setType : Punch -> SelectItem -> String -> String -> Cmd Msg
+setType originalPunch selectItem plantId token =
+    Http.request
+        { method = "PUT"
+        , url =
+            url
+                [ "PunchListItem"
+                , "SetType"
+                ]
+                [ string "plantId" plantId
+                , apiVersion
+                ]
+        , headers = [ Http.header "Authorization" ("Bearer " ++ token) ]
+        , body =
+            Http.jsonBody
+                (E.object
+                    [ ( "PunchItemId", originalPunch.id |> String.toInt |> Maybe.withDefault 0 |> E.int )
+                    , ( "TypeId", E.int selectItem.id )
+                    ]
+                )
+        , expect =
+            Http.expectWhatever
+                (GotApiResult << SetTypeResult originalPunch)
         , timeout = Nothing
         , tracker = Nothing
         }
@@ -197,6 +225,29 @@ categories plantId token =
         , expect =
             Http.expectJson
                 (GotApiResult << GotCategories)
+                (D.list Types.selectItemDecoder)
+        , timeout = Nothing
+        , tracker = Nothing
+        }
+
+
+types : String -> String -> Cmd Msg
+types plantId token =
+    Http.request
+        { method = "GET"
+        , url =
+            url
+                [ "PunchListItem"
+                , "Types"
+                ]
+                [ string "plantId" plantId
+                , apiVersion
+                ]
+        , headers = [ Http.header "Authorization" ("Bearer " ++ token) ]
+        , body = Http.emptyBody
+        , expect =
+            Http.expectJson
+                (GotApiResult << GotTypes)
                 (D.list Types.selectItemDecoder)
         , timeout = Nothing
         , tracker = Nothing

@@ -70,6 +70,7 @@ type alias Model =
     , dropDown : DropDown
     , organizations : WebData (List SelectItem)
     , categories : WebData (List SelectItem)
+    , types : WebData (List SelectItem)
     }
 
 
@@ -86,6 +87,7 @@ initialModel flags =
       , dropDown = NoDropDown
       , organizations = NotLoaded
       , categories = NotLoaded
+      , types = NotLoaded
       }
     , Cmd.none
     )

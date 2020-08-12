@@ -242,6 +242,7 @@ renderDetails size model punch =
             model
         , dropDown size RaisedByDropDown punch.raisedByOrg .organizations punch model
         , dropDown size ClearingByDropDown punch.clearingByOrg .organizations punch model
+        , dropDown size TypeDropDown punch.typeDescription .types punch model
         ]
 
 
@@ -261,6 +262,9 @@ dropDown size dropDownType current field punch model =
 
                 ClearingByDropDown ->
                     "Clearing By"
+
+                TypeDropDown ->
+                    "Type"
 
         header =
             el

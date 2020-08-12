@@ -1,8 +1,8 @@
 module Punch.Messages exposing (ApiResult(..), Msg(..))
 
-import Punch exposing (Punch)
 import Http
 import Json.Decode as D
+import Punch exposing (Punch)
 import Punch.Types exposing (..)
 
 
@@ -27,7 +27,9 @@ type ApiResult
     = GotPunchDetails String (Result Http.Error Punch)
     | GotOrganizations (Result Http.Error (List SelectItem))
     | GotCategories (Result Http.Error (List SelectItem))
+    | GotTypes (Result Http.Error (List SelectItem))
     | PunchDescriptionResult Punch (Result Http.Error ())
     | SetRaisedByResult Punch (Result Http.Error ())
     | SetClearingByResult Punch (Result Http.Error ())
     | SetCategoryResult Punch (Result Http.Error ())
+    | SetTypeResult Punch (Result Http.Error ())
