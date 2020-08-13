@@ -154,11 +154,11 @@ renderPunchListItem size model item =
 
             else
                 Palette.white
-        , padding (round <| size / 2)
         ]
         [ column
             [ width fill
             , onClick <| PunchItemPressed item
+            , padding (round <| size / 2)
             , pointer
             ]
             [ toppLinje
@@ -171,22 +171,32 @@ renderPunchListItem size model item =
                     tagBeskrivelse item
             ]
         , if isSelected then
-            column [ width fill, height fill, Background.color Palette.white, onClick NoOp, Border.rounded 4, padding 4, spacing 6 ]
-                [ if isSelected then
-                    renderDescription model.highlight size readOnly item
+            el [ width fill, padding (round <| size / 2) ] <|
+                column
+                    [ paddingXY (round <| size / 2) 0
+                    , width fill
+                    , height fill
+                    , Background.color Palette.white
+                    , onClick NoOp
+                    , Border.rounded 4
+                    , padding 4
+                    , spacing 6
+                    ]
+                    [ if isSelected then
+                        renderDescription model.highlight size readOnly item
 
-                  else
-                    none
+                      else
+                        none
 
-                --, renderComments size item
-                , renderDetails size model readOnly item
-                , renderSignatures size item
-                , if String.isEmpty model.errorMsg then
-                    none
+                    --, renderComments size item
+                    , renderDetails size model readOnly item
+                    , renderSignatures size item
+                    , if String.isEmpty model.errorMsg then
+                        none
 
-                  else
-                    paragraph [ width fill, Background.color Palette.alphaYellow, padding 6 ] [ text model.errorMsg ]
-                ]
+                      else
+                        paragraph [ width fill, Background.color Palette.alphaYellow, padding 6 ] [ text model.errorMsg ]
+                    ]
 
           else
             none
@@ -231,14 +241,19 @@ renderDetails size model readOnly punch =
         dd =
             dropDown size readOnly punch model
     in
-    column [ width fill, spacing 2 ]
+    column [ width fill, spacing 2, padding 4 ]
         [ column [ spacing 6 ]
             [ kv size "No" (String.fromInt punch.id) ""
-            , kv size "Tag" punch.tag ""
-            , kv size "Type" punch.typeDescription ""
-            , kv size "Commissioning package" punch.commPk ""
-            , kv size "MC package" punch.mcPk ""
-            , kv size "Location" punch.location ""
+            , if model.context == TagContext then
+                none
+
+              else
+                kv size "Tag" punch.tag ""
+
+            --, kv size "Type" punch.typeDescription ""
+            --, kv size "Commissioning package" punch.commPk ""
+            --, kv size "MC package" punch.mcPk ""
+            --, kv size "Location" punch.location ""
             ]
         , dd
             CategoryDropDown
@@ -299,15 +314,35 @@ dropDown size readOnly punch model dropDownType current field =
             , Border.rounded 4
             , padding 10
             , width fill
-            , height (fill |> maximum 500)
-            , spacing 6
+
+            --, height (fill |> maximum 500)
+            , spacing 10
             ]
-            [ row [ width fill ] [ header, el [ alignRight, padding 6, Border.rounded 4, Border.width 1, pointer, onClick CloseDropDownButtonPressed ] (text "X") ]
+            [ row
+                [ width fill
+                , pointer
+                , onClick CloseDropDownButtonPressed
+                , Border.widthEach { top = 0, left = 0, right = 0, bottom = 1 }
+                , Border.color Palette.mistBlue
+                , Element.paddingEach { top = 0, left = 0, right = 0, bottom = 10 }
+                ]
+                [ column [ width fill ]
+                    [ header
+                    , text current
+                    ]
+                , Icon.arrow_up
+                    |> html
+                    |> el
+                        [ width (px <| round <| size)
+                        , height (px <| round <| size)
+                        , Font.color Palette.blue
+                        ]
+                ]
             , selectionList size current punch (field model)
             ]
 
     else
-        column
+        row
             [ width fill
             , scrollbarY
             , Border.width 1
@@ -317,8 +352,17 @@ dropDown size readOnly punch model dropDownType current field =
             , pointer
             , onClick <| DropDownPressed dropDownType
             ]
-            [ header
-            , text current
+            [ column [ width fill ]
+                [ header
+                , text current
+                ]
+            , Icon.arrow_down
+                |> html
+                |> el
+                    [ width (px <| round <| size)
+                    , height (px <| round <| size)
+                    , Font.color Palette.blue
+                    ]
             ]
 
 

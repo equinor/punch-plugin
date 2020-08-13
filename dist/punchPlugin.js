@@ -5815,7 +5815,6 @@ var $author$project$Punch$Main$jsValueDecoder = A2(
 			$author$project$Punch$Main$decoder(topic));
 	},
 	A2($elm$json$Json$Decode$field, 'topic', $elm$json$Json$Decode$string));
-var $elm$core$Debug$log = _Debug_log;
 var $author$project$Punch$Main$handleJsMsg = function (jsValue) {
 	var _v0 = A2($elm$json$Json$Decode$decodeValue, $author$project$Punch$Main$jsValueDecoder, jsValue);
 	if (_v0.$ === 'Ok') {
@@ -5823,7 +5822,6 @@ var $author$project$Punch$Main$handleJsMsg = function (jsValue) {
 		return msg;
 	} else {
 		var err = _v0.a;
-		var _v1 = A2($elm$core$Debug$log, 'err', err);
 		return $author$project$Punch$Messages$DecodeError(err);
 	}
 };
@@ -12826,7 +12824,6 @@ var $author$project$Punch$Update$handleApiResult = F2(
 									return A2($author$project$Equinor$Types$Loaded, '', apiPunch);
 								} else {
 									var err = result.a;
-									var _v3 = A2($elm$core$Debug$log, 'err', err);
 									return A2($author$project$Equinor$Types$DataError, '', $elm$core$Maybe$Nothing);
 								}
 							}()
@@ -13222,25 +13219,6 @@ var $author$project$Punch$Api$setClearingBy = F4(
 						]))
 			});
 	});
-var $author$project$Punch$Update$setPunchListTo = F2(
-	function (punchList, _v0) {
-		var m = _v0.a;
-		var c = _v0.b;
-		return _Utils_Tuple2(
-			_Utils_update(
-				m,
-				{
-					punch: A3(
-						$elm$core$List$foldl,
-						F2(
-							function (punch, dict) {
-								return A3($elm$core$Dict$insert, punch.id, punch, dict);
-							}),
-						$elm$core$Dict$empty,
-						punchList)
-				}),
-			c);
-	});
 var $author$project$Punch$Messages$SetRaisedByResult = F2(
 	function (a, b) {
 		return {$: 'SetRaisedByResult', a: a, b: b};
@@ -13528,7 +13506,26 @@ var $author$project$Punch$Update$update = F2(
 				return A2($author$project$Punch$Update$sendRequestsWaitingForToken, tokenSuccess, mc);
 			case 'GotPunchList':
 				var punchList = msg.a;
-				return A2($author$project$Punch$Update$setPunchListTo, punchList, mc);
+				var nextDict = A3(
+					$elm$core$List$foldl,
+					F2(
+						function (p, dict) {
+							return A3(
+								$elm$core$Dict$insert,
+								p.id,
+								A2(
+									$elm$core$Maybe$withDefault,
+									p,
+									A2($elm$core$Dict$get, p.id, model.punch)),
+								dict);
+						}),
+					$elm$core$Dict$empty,
+					punchList);
+				return _Utils_Tuple2(
+					_Utils_update(
+						model,
+						{punch: nextDict}),
+					$elm$core$Platform$Cmd$none);
 			case 'GotApiResult':
 				var apiResult = msg.a;
 				return A2($author$project$Punch$Update$handleApiResult, apiResult, mc);
@@ -15557,11 +15554,44 @@ var $author$project$Punch$Messages$CloseDropDownButtonPressed = {$: 'CloseDropDo
 var $author$project$Punch$Messages$DropDownPressed = function (a) {
 	return {$: 'DropDownPressed', a: a};
 };
-var $mdgriffith$elm_ui$Internal$Model$AlignX = function (a) {
-	return {$: 'AlignX', a: a};
-};
-var $mdgriffith$elm_ui$Internal$Model$Right = {$: 'Right'};
-var $mdgriffith$elm_ui$Element$alignRight = $mdgriffith$elm_ui$Internal$Model$AlignX($mdgriffith$elm_ui$Internal$Model$Right);
+var $author$project$Equinor$Icon$arrow_down = A2(
+	$elm$svg$Svg$svg,
+	_List_fromArray(
+		[
+			$elm$svg$Svg$Attributes$viewBox('0 0 96 96'),
+			$elm$svg$Svg$Attributes$fill('currentColor'),
+			$elm$svg$Svg$Attributes$style('-webkit-transform: translate(0px,2px)'),
+			$elm$svg$Svg$Attributes$style('transform: translate(0px,2px)')
+		]),
+	_List_fromArray(
+		[
+			A2(
+			$elm$svg$Svg$path,
+			_List_fromArray(
+				[
+					$elm$svg$Svg$Attributes$d('M17.4,13h61.2c3.1,0,5.8,1.6,7.4,4.3c1.5,2.7,1.5,5.8,0,8.5l-30.6,53C53.8,81.4,51.1,83,48,83c-3.1,0-5.8-1.6-7.4-4.3L10,25.7c-1.5-2.7-1.5-5.8,0-8.5S14.3,13,17.4,13z M51,76.3l30.6-53c0.6-1.1,0.6-2.4,0-3.5c-0.6-1.1-1.8-1.8-3-1.8H17.4c-1.3,0-2.4,0.7-3,1.8s-0.6,2.4,0,3.5l30.6,53c0.6,1.1,1.8,1.8,3,1.8C49.3,78,50.4,77.4,51,76.3L51,76.3z')
+				]),
+			_List_Nil)
+		]));
+var $author$project$Equinor$Icon$arrow_up = A2(
+	$elm$svg$Svg$svg,
+	_List_fromArray(
+		[
+			$elm$svg$Svg$Attributes$viewBox('0 0 96 96'),
+			$elm$svg$Svg$Attributes$fill('currentColor'),
+			$elm$svg$Svg$Attributes$style('-webkit-transform: translate(0px,-2px)'),
+			$elm$svg$Svg$Attributes$style('transform: translate(0px,-2px)')
+		]),
+	_List_fromArray(
+		[
+			A2(
+			$elm$svg$Svg$path,
+			_List_fromArray(
+				[
+					$elm$svg$Svg$Attributes$d('M78.6,83H17.4c-3.1,0-5.8-1.6-7.4-4.3c-1.5-2.7-1.5-5.8,0-8.5l30.6-53c1.5-2.7,4.3-4.3,7.4-4.3c3.1,0,5.8,1.6,7.4,4.3l30.6,53c1.5,2.7,1.5,5.8,0,8.5S81.7,83,78.6,83z M45,19.7l-30.6,53c-0.6,1.1-0.6,2.4,0,3.5c0.6,1.1,1.8,1.8,3,1.8h61.2c1.3,0,2.4-0.7,3-1.8s0.6-2.4,0-3.5L51,19.7c-0.6-1.1-1.8-1.8-3-1.8C46.7,18,45.6,18.6,45,19.7L45,19.7z')
+				]),
+			_List_Nil)
+		]));
 var $mdgriffith$elm_ui$Element$Border$widthXY = F2(
 	function (x, y) {
 		return A2(
@@ -15831,14 +15861,6 @@ var $author$project$Equinor$Palette$kv = F4(
 						]))
 				]));
 	});
-var $mdgriffith$elm_ui$Internal$Model$Max = F2(
-	function (a, b) {
-		return {$: 'Max', a: a, b: b};
-	});
-var $mdgriffith$elm_ui$Element$maximum = F2(
-	function (i, l) {
-		return A2($mdgriffith$elm_ui$Internal$Model$Max, i, l);
-	});
 var $mdgriffith$elm_ui$Element$row = F2(
 	function (attrs, children) {
 		return A4(
@@ -15868,6 +15890,9 @@ var $mdgriffith$elm_ui$Internal$Model$PseudoSelector = F2(
 		return {$: 'PseudoSelector', a: a, b: b};
 	});
 var $mdgriffith$elm_ui$Internal$Flag$hover = $mdgriffith$elm_ui$Internal$Flag$flag(33);
+var $mdgriffith$elm_ui$Internal$Model$AlignX = function (a) {
+	return {$: 'AlignX', a: a};
+};
 var $mdgriffith$elm_ui$Internal$Model$AlignY = function (a) {
 	return {$: 'AlignY', a: a};
 };
@@ -16196,9 +16221,7 @@ var $author$project$Punch$View$dropDown = F7(
 					$mdgriffith$elm_ui$Element$Border$rounded(4),
 					$mdgriffith$elm_ui$Element$padding(10),
 					$mdgriffith$elm_ui$Element$width($mdgriffith$elm_ui$Element$fill),
-					$mdgriffith$elm_ui$Element$height(
-					A2($mdgriffith$elm_ui$Element$maximum, 500, $mdgriffith$elm_ui$Element$fill)),
-					$mdgriffith$elm_ui$Element$spacing(6)
+					$mdgriffith$elm_ui$Element$spacing(10)
 				]),
 			_List_fromArray(
 				[
@@ -16206,23 +16229,41 @@ var $author$project$Punch$View$dropDown = F7(
 					$mdgriffith$elm_ui$Element$row,
 					_List_fromArray(
 						[
-							$mdgriffith$elm_ui$Element$width($mdgriffith$elm_ui$Element$fill)
+							$mdgriffith$elm_ui$Element$width($mdgriffith$elm_ui$Element$fill),
+							$mdgriffith$elm_ui$Element$pointer,
+							$author$project$Punch$View$onClick($author$project$Punch$Messages$CloseDropDownButtonPressed),
+							$mdgriffith$elm_ui$Element$Border$widthEach(
+							{bottom: 1, left: 0, right: 0, top: 0}),
+							$mdgriffith$elm_ui$Element$Border$color($author$project$Equinor$Palette$mistBlue),
+							$mdgriffith$elm_ui$Element$paddingEach(
+							{bottom: 10, left: 0, right: 0, top: 0})
 						]),
 					_List_fromArray(
 						[
-							header,
+							A2(
+							$mdgriffith$elm_ui$Element$column,
+							_List_fromArray(
+								[
+									$mdgriffith$elm_ui$Element$width($mdgriffith$elm_ui$Element$fill)
+								]),
+							_List_fromArray(
+								[
+									header,
+									$mdgriffith$elm_ui$Element$text(current)
+								])),
 							A2(
 							$mdgriffith$elm_ui$Element$el,
 							_List_fromArray(
 								[
-									$mdgriffith$elm_ui$Element$alignRight,
-									$mdgriffith$elm_ui$Element$padding(6),
-									$mdgriffith$elm_ui$Element$Border$rounded(4),
-									$mdgriffith$elm_ui$Element$Border$width(1),
-									$mdgriffith$elm_ui$Element$pointer,
-									$author$project$Punch$View$onClick($author$project$Punch$Messages$CloseDropDownButtonPressed)
+									$mdgriffith$elm_ui$Element$width(
+									$mdgriffith$elm_ui$Element$px(
+										$elm$core$Basics$round(size))),
+									$mdgriffith$elm_ui$Element$height(
+									$mdgriffith$elm_ui$Element$px(
+										$elm$core$Basics$round(size))),
+									$mdgriffith$elm_ui$Element$Font$color($author$project$Equinor$Palette$blue)
 								]),
-							$mdgriffith$elm_ui$Element$text('X'))
+							$mdgriffith$elm_ui$Element$html($author$project$Equinor$Icon$arrow_up))
 						])),
 					A4(
 					$author$project$Punch$View$selectionList,
@@ -16231,7 +16272,7 @@ var $author$project$Punch$View$dropDown = F7(
 					punch,
 					field(model))
 				])) : A2(
-			$mdgriffith$elm_ui$Element$column,
+			$mdgriffith$elm_ui$Element$row,
 			_List_fromArray(
 				[
 					$mdgriffith$elm_ui$Element$width($mdgriffith$elm_ui$Element$fill),
@@ -16246,8 +16287,30 @@ var $author$project$Punch$View$dropDown = F7(
 				]),
 			_List_fromArray(
 				[
-					header,
-					$mdgriffith$elm_ui$Element$text(current)
+					A2(
+					$mdgriffith$elm_ui$Element$column,
+					_List_fromArray(
+						[
+							$mdgriffith$elm_ui$Element$width($mdgriffith$elm_ui$Element$fill)
+						]),
+					_List_fromArray(
+						[
+							header,
+							$mdgriffith$elm_ui$Element$text(current)
+						])),
+					A2(
+					$mdgriffith$elm_ui$Element$el,
+					_List_fromArray(
+						[
+							$mdgriffith$elm_ui$Element$width(
+							$mdgriffith$elm_ui$Element$px(
+								$elm$core$Basics$round(size))),
+							$mdgriffith$elm_ui$Element$height(
+							$mdgriffith$elm_ui$Element$px(
+								$elm$core$Basics$round(size))),
+							$mdgriffith$elm_ui$Element$Font$color($author$project$Equinor$Palette$blue)
+						]),
+					$mdgriffith$elm_ui$Element$html($author$project$Equinor$Icon$arrow_down))
 				])));
 	});
 var $author$project$Punch$View$renderDetails = F4(
@@ -16258,7 +16321,8 @@ var $author$project$Punch$View$renderDetails = F4(
 			_List_fromArray(
 				[
 					$mdgriffith$elm_ui$Element$width($mdgriffith$elm_ui$Element$fill),
-					$mdgriffith$elm_ui$Element$spacing(2)
+					$mdgriffith$elm_ui$Element$spacing(2),
+					$mdgriffith$elm_ui$Element$padding(4)
 				]),
 			_List_fromArray(
 				[
@@ -16276,11 +16340,7 @@ var $author$project$Punch$View$renderDetails = F4(
 							'No',
 							$elm$core$String$fromInt(punch.id),
 							''),
-							A4($author$project$Equinor$Palette$kv, size, 'Tag', punch.tag, ''),
-							A4($author$project$Equinor$Palette$kv, size, 'Type', punch.typeDescription, ''),
-							A4($author$project$Equinor$Palette$kv, size, 'Commissioning package', punch.commPk, ''),
-							A4($author$project$Equinor$Palette$kv, size, 'MC package', punch.mcPk, ''),
-							A4($author$project$Equinor$Palette$kv, size, 'Location', punch.location, '')
+							_Utils_eq(model.context, $author$project$Punch$Types$TagContext) ? $mdgriffith$elm_ui$Element$none : A4($author$project$Equinor$Palette$kv, size, 'Tag', punch.tag, '')
 						])),
 					A3(
 					dd,
@@ -16338,6 +16398,8 @@ var $author$project$Punch$Messages$UnverifyPunchButtonPressed = function (a) {
 var $author$project$Punch$Messages$VerifyPunchButtonPressed = function (a) {
 	return {$: 'VerifyPunchButtonPressed', a: a};
 };
+var $mdgriffith$elm_ui$Internal$Model$Right = {$: 'Right'};
+var $mdgriffith$elm_ui$Element$alignRight = $mdgriffith$elm_ui$Internal$Model$AlignX($mdgriffith$elm_ui$Internal$Model$Right);
 var $elm$html$Html$Attributes$title = $elm$html$Html$Attributes$stringProperty('title');
 var $author$project$Punch$View$signButton = F4(
 	function (size, name, maybeDisabled, msg) {
@@ -16956,9 +17018,7 @@ var $author$project$Punch$View$renderPunchListItem = F3(
 					[
 						$mdgriffith$elm_ui$Element$width($mdgriffith$elm_ui$Element$fill),
 						$mdgriffith$elm_ui$Element$Background$color(
-						isSelected ? $author$project$Equinor$Palette$mistBlue : $author$project$Equinor$Palette$white),
-						$mdgriffith$elm_ui$Element$padding(
-						$elm$core$Basics$round(size / 2))
+						isSelected ? $author$project$Equinor$Palette$mistBlue : $author$project$Equinor$Palette$white)
 					]),
 				_List_fromArray(
 					[
@@ -16969,6 +17029,8 @@ var $author$project$Punch$View$renderPunchListItem = F3(
 								$mdgriffith$elm_ui$Element$width($mdgriffith$elm_ui$Element$fill),
 								$author$project$Punch$View$onClick(
 								$author$project$Punch$Messages$PunchItemPressed(item)),
+								$mdgriffith$elm_ui$Element$padding(
+								$elm$core$Basics$round(size / 2)),
 								$mdgriffith$elm_ui$Element$pointer
 							]),
 						_List_fromArray(
@@ -16985,35 +17047,47 @@ var $author$project$Punch$View$renderPunchListItem = F3(
 							}()
 							])),
 						isSelected ? A2(
-						$mdgriffith$elm_ui$Element$column,
+						$mdgriffith$elm_ui$Element$el,
 						_List_fromArray(
 							[
 								$mdgriffith$elm_ui$Element$width($mdgriffith$elm_ui$Element$fill),
-								$mdgriffith$elm_ui$Element$height($mdgriffith$elm_ui$Element$fill),
-								$mdgriffith$elm_ui$Element$Background$color($author$project$Equinor$Palette$white),
-								$author$project$Punch$View$onClick($author$project$Punch$Messages$NoOp),
-								$mdgriffith$elm_ui$Element$Border$rounded(4),
-								$mdgriffith$elm_ui$Element$padding(4),
-								$mdgriffith$elm_ui$Element$spacing(6)
+								$mdgriffith$elm_ui$Element$padding(
+								$elm$core$Basics$round(size / 2))
 							]),
-						_List_fromArray(
-							[
-								isSelected ? A4($author$project$Punch$View$renderDescription, model.highlight, size, readOnly, item) : $mdgriffith$elm_ui$Element$none,
-								A4($author$project$Punch$View$renderDetails, size, model, readOnly, item),
-								A2($author$project$Punch$View$renderSignatures, size, item),
-								$elm$core$String$isEmpty(model.errorMsg) ? $mdgriffith$elm_ui$Element$none : A2(
-								$mdgriffith$elm_ui$Element$paragraph,
-								_List_fromArray(
-									[
-										$mdgriffith$elm_ui$Element$width($mdgriffith$elm_ui$Element$fill),
-										$mdgriffith$elm_ui$Element$Background$color($author$project$Equinor$Palette$alphaYellow),
-										$mdgriffith$elm_ui$Element$padding(6)
-									]),
-								_List_fromArray(
-									[
-										$mdgriffith$elm_ui$Element$text(model.errorMsg)
-									]))
-							])) : $mdgriffith$elm_ui$Element$none
+						A2(
+							$mdgriffith$elm_ui$Element$column,
+							_List_fromArray(
+								[
+									A2(
+									$mdgriffith$elm_ui$Element$paddingXY,
+									$elm$core$Basics$round(size / 2),
+									0),
+									$mdgriffith$elm_ui$Element$width($mdgriffith$elm_ui$Element$fill),
+									$mdgriffith$elm_ui$Element$height($mdgriffith$elm_ui$Element$fill),
+									$mdgriffith$elm_ui$Element$Background$color($author$project$Equinor$Palette$white),
+									$author$project$Punch$View$onClick($author$project$Punch$Messages$NoOp),
+									$mdgriffith$elm_ui$Element$Border$rounded(4),
+									$mdgriffith$elm_ui$Element$padding(4),
+									$mdgriffith$elm_ui$Element$spacing(6)
+								]),
+							_List_fromArray(
+								[
+									isSelected ? A4($author$project$Punch$View$renderDescription, model.highlight, size, readOnly, item) : $mdgriffith$elm_ui$Element$none,
+									A4($author$project$Punch$View$renderDetails, size, model, readOnly, item),
+									A2($author$project$Punch$View$renderSignatures, size, item),
+									$elm$core$String$isEmpty(model.errorMsg) ? $mdgriffith$elm_ui$Element$none : A2(
+									$mdgriffith$elm_ui$Element$paragraph,
+									_List_fromArray(
+										[
+											$mdgriffith$elm_ui$Element$width($mdgriffith$elm_ui$Element$fill),
+											$mdgriffith$elm_ui$Element$Background$color($author$project$Equinor$Palette$alphaYellow),
+											$mdgriffith$elm_ui$Element$padding(6)
+										]),
+									_List_fromArray(
+										[
+											$mdgriffith$elm_ui$Element$text(model.errorMsg)
+										]))
+								]))) : $mdgriffith$elm_ui$Element$none
 					])));
 	});
 var $elm$core$Dict$values = function (dict) {

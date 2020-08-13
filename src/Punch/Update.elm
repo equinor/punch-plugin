@@ -33,7 +33,18 @@ update msg model =
             mc |> sendRequestsWaitingForToken tokenSuccess
 
         GotPunchList punchList ->
-            mc |> setPunchListTo punchList
+            let
+                nextDict =
+                    List.foldl
+                        (\p dict ->
+                            Dict.insert p.id
+                                (Dict.get p.id model.punch |> Maybe.withDefault p)
+                                dict
+                        )
+                        Dict.empty
+                        punchList
+            in
+            ( { model | punch = nextDict }, Cmd.none )
 
         GotApiResult apiResult ->
             mc |> handleApiResult apiResult
@@ -317,10 +328,6 @@ handleApiResult apiResult ( m, c ) =
                                     Loaded "" apiPunch
 
                                 Err err ->
-                                    let
-                                        _ =
-                                            Debug.log "err" err
-                                    in
                                     DataError "" Nothing
                     }
             in

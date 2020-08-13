@@ -43,10 +43,6 @@ handleJsMsg jsValue =
             msg
 
         Err err ->
-            let
-                _ =
-                    Debug.log "err" err
-            in
             DecodeError err
 
 
