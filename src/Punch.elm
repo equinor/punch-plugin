@@ -1,26 +1,27 @@
-module Punch exposing (Dict, Punch, PunchLists, Status,apiDecoder, decoder, encoder, filterByTimeFrame, sort)
-
+module Punch exposing (ApiPunch, Dict, Punch, PunchLists, Status, apiDecoder, decoder, encoder, filterByTimeFrame, sort, webApiDecoder)
 
 import Date exposing (Date)
 import Dict as CoreDict
-import Json.Decode as D
-import Json.Decode.Pipeline exposing (custom, optional, required)
-import Json.Encode as E
-import Time exposing (Posix)
-import Punch.Types exposing (..)
-import Equinor.Data.Procosys.Status as Status 
+import Equinor.Data.Procosys.Status as Status
+import Equinor.Types exposing (..)
 import Iso8601
+import Json.Decode as D
+import Json.Decode.Pipeline exposing (custom, hardcoded, optional, required)
+import Json.Encode as E
+import Punch.Types exposing (..)
+import Time exposing (Posix)
+
 
 type alias Dict =
-
     CoreDict.Dict String (List Punch)
 
-type alias Status = Status.Status
 
+type alias Status =
+    Status.Status
 
 
 type alias Punch =
-    { id : String
+    { id : Int
     , tag : String
     , tagDescription : String
     , description : String
@@ -33,7 +34,34 @@ type alias Punch =
     , clearingByOrg : String
     , location : String
     , typeDescription : String
+    , sortingDescription : String
+    , apiPunch : WebData ApiPunch
     }
+
+
+type alias ApiPunch =
+    { clearedAt : String
+    , clearedByFirstName : String
+    , clearedByLastName : String
+    , verifiedAt : String
+    , verifiedByFirstName : String
+    , verifiedByLastName : String
+    , isRestrictedForUser : Bool
+    , statusControlledBySwcr : Bool
+    }
+
+
+webApiDecoder : D.Decoder ApiPunch
+webApiDecoder =
+    D.succeed ApiPunch
+        |> required "ClearedAt" nullString
+        |> required "ClearedByFirstName" nullString
+        |> required "ClearedByLastName" nullString
+        |> required "VerifiedAt" nullString
+        |> required "VerifiedByFirstName" nullString
+        |> required "VerifiedByLastName" nullString
+        |> required "IsRestrictedForUser" D.bool
+        |> required "StatusControlledBySwcr" D.bool
 
 
 type alias PunchLists =
@@ -50,7 +78,6 @@ filterByTimeFrame time zone timeFrame punchList =
             Date.fromPosix zone time
     in
     punchList
-    
         |> List.filter
             (\punch ->
                 Date.diff
@@ -64,7 +91,7 @@ filterByTimeFrame time zone timeFrame punchList =
 encoder : Punch -> E.Value
 encoder punch =
     E.object
-        [ ( "id", E.string punch.id )
+        [ ( "id", E.int punch.id )
         , ( "tag", E.string punch.tag )
         , ( "tagDescription", E.string punch.tagDescription )
         , ( "description", E.string punch.description )
@@ -77,13 +104,14 @@ encoder punch =
         , ( "clearingByOrg", E.string punch.clearingByOrg )
         , ( "location", E.string punch.location )
         , ( "typeDescription", E.string punch.typeDescription )
+        , ( "sortingDescription", E.string punch.sortingDescription )
         ]
 
 
 decoder : D.Decoder Punch
 decoder =
     D.succeed Punch
-        |> required "id" D.string
+        |> required "id" D.int
         |> required "tag" D.string
         |> required "tagDescription" D.string
         |> required "description" D.string
@@ -96,12 +124,14 @@ decoder =
         |> optional "clearingByOrg" D.string ""
         |> optional "location" D.string ""
         |> optional "typeDescription" D.string ""
+        |> optional "sortingDescription" D.string ""
+        |> hardcoded NotLoaded
 
 
 apiDecoder : D.Decoder Punch
 apiDecoder =
     D.succeed Punch
-        |> required "PunchListItemNo" (D.int |> D.andThen (D.succeed << String.fromInt))
+        |> required "PunchListItemNo" D.int
         |> required "CheckList__TagFormularType__Tag__TagNo" nullString
         |> required "CheckList__TagFormularType__Tag__Description" nullString
         |> required "Description" nullString
@@ -119,6 +149,8 @@ apiDecoder =
                 ]
             )
         |> required "PunchListType__Description" nullString
+        |> required "PunchListSorting__Description" nullString
+        |> hardcoded NotLoaded
 
 
 sort : List Punch -> List Punch
@@ -126,10 +158,12 @@ sort punchList =
     punchList
         |> List.sortBy (\x -> ( x.commPk, x.mcPk, x.tag ))
 
+
 timeDecoder : D.Decoder Posix
 timeDecoder =
     D.int
         |> D.andThen (D.succeed << Time.millisToPosix)
+
 
 nullString : D.Decoder String
 nullString =
@@ -145,6 +179,7 @@ nullInt =
         [ D.int
         , D.null 0
         ]
+
 
 apiTimeDecoder : D.Decoder Posix
 apiTimeDecoder =

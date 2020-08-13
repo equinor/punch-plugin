@@ -21,15 +21,25 @@ type Msg
     | DescriptionFieldInput Punch String
     | DropDownPressed DropDown
     | DropDownItemPressed Punch SelectItem
+    | ClearPunchButtonPressed Punch
+    | UnclearPunchButtonPressed Punch
+    | VerifyPunchButtonPressed Punch
+    | UnverifyPunchButtonPressed Punch
 
 
 type ApiResult
-    = GotPunchDetails String (Result Http.Error Punch)
+    = GotPunchDetails Punch (Result Http.Error Punch.ApiPunch)
     | GotOrganizations (Result Http.Error (List SelectItem))
     | GotCategories (Result Http.Error (List SelectItem))
     | GotTypes (Result Http.Error (List SelectItem))
+    | GotSorts (Result Http.Error (List SelectItem))
     | PunchDescriptionResult Punch (Result Http.Error ())
     | SetRaisedByResult Punch (Result Http.Error ())
     | SetClearingByResult Punch (Result Http.Error ())
     | SetCategoryResult Punch (Result Http.Error ())
     | SetTypeResult Punch (Result Http.Error ())
+    | SetSortingResult Punch (Result Http.Error ())
+    | ClearResult Punch (Result Http.Error ())
+    | UnclearResult Punch (Result Http.Error ())
+    | VerifyResult Punch (Result Http.Error ())
+    | UnverifyResult Punch (Result Http.Error ())

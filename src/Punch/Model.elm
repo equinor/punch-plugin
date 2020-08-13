@@ -61,7 +61,7 @@ flagsDecoder =
 type alias Model =
     { procosysPlantId : String
     , apiToken : String
-    , punch : Dict String Punch
+    , punch : Dict Int Punch
     , context : Context
     , selectedPunch : Maybe Punch
     , requests : Dict Int (List (String -> String -> Cmd Msg))
@@ -71,6 +71,7 @@ type alias Model =
     , organizations : WebData (List SelectItem)
     , categories : WebData (List SelectItem)
     , types : WebData (List SelectItem)
+    , sorts : WebData (List SelectItem)
     }
 
 
@@ -88,6 +89,7 @@ initialModel flags =
       , organizations = NotLoaded
       , categories = NotLoaded
       , types = NotLoaded
+      , sorts = NotLoaded
       }
     , Cmd.none
     )

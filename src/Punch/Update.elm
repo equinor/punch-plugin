@@ -52,6 +52,7 @@ update msg model =
                 mc
                     |> closeDropDowns
                     |> selectPunch punch
+                    |> getDetails punch
 
         NeverHappens ->
             ( model, createEvent "" E.null )
@@ -100,6 +101,9 @@ update msg model =
 
                             Types.TypeDropDown ->
                                 getTypes
+
+                            Types.SortingDropDown ->
+                                getSorts
                        )
 
         DropDownItemPressed punch item ->
@@ -127,6 +131,9 @@ update msg model =
 
                         TypeDropDown ->
                             { punch | typeDescription = item.description }
+
+                        SortingDropDown ->
+                            { punch | sortingDescription = item.description }
             in
             ( { model
                 | punch = Dict.insert punch.id updated model.punch
@@ -149,7 +156,22 @@ update msg model =
 
                         Types.TypeDropDown ->
                             apiRequest [ Api.setType punch item ]
+
+                        Types.SortingDropDown ->
+                            apiRequest [ Api.setSorting punch item ]
                    )
+
+        ClearPunchButtonPressed punch ->
+            mc |> apiRequest [ Api.clear punch ]
+
+        UnclearPunchButtonPressed punch ->
+            mc |> apiRequest [ Api.unClear punch ]
+
+        VerifyPunchButtonPressed punch ->
+            mc |> apiRequest [ Api.verify punch ]
+
+        UnverifyPunchButtonPressed punch ->
+            mc |> apiRequest [ Api.unVerify punch ]
 
 
 getOrganizations : MC -> MC
@@ -174,6 +196,17 @@ getTypes ( m, c ) =
                 |> apiRequest [ Api.types ]
 
 
+getSorts : MC -> MC
+getSorts ( m, c ) =
+    case m.sorts of
+        Loaded _ _ ->
+            ( m, c )
+
+        _ ->
+            ( { m | sorts = Loading "" Nothing }, c )
+                |> apiRequest [ Api.sorts ]
+
+
 getCategories : MC -> MC
 getCategories ( m, c ) =
     case m.categories of
@@ -183,6 +216,11 @@ getCategories ( m, c ) =
         _ ->
             ( { m | categories = Loading "" Nothing }, c )
                 |> apiRequest [ Api.categories ]
+
+
+getDetails : Punch -> MC -> MC
+getDetails punch =
+    apiRequest [ Api.details punch ]
 
 
 setPunchListTo : List Punch -> MC -> MC
@@ -266,14 +304,21 @@ createEvent topic payload =
 handleApiResult : ApiResult -> MC -> MC
 handleApiResult apiResult ( m, c ) =
     case apiResult of
-        GotPunchDetails id result ->
+        GotPunchDetails oldPunch result ->
             let
                 updater punch =
-                    punch
+                    { punch
+                        | apiPunch =
+                            case result of
+                                Ok apiPunch ->
+                                    Loaded "" apiPunch
+
+                                Err err ->
+                                    let _ = Debug.log "err" err in
+                                    DataError "" Nothing
+                    }
             in
-            ( { m
-                | punch = Dict.update id (Maybe.map updater) m.punch
-              }
+            ( { m | punch = Dict.update oldPunch.id (Maybe.map updater) m.punch }
             , c
             )
 
@@ -339,6 +384,24 @@ handleApiResult apiResult ( m, c ) =
                     , c
                     )
 
+        SetSortingResult originalPunch result ->
+            case result of
+                Ok _ ->
+                    ( m, c )
+
+                Err err ->
+                    let
+                        updater punch =
+                            { punch | sortingDescription = originalPunch.sortingDescription }
+                    in
+                    ( { m
+                        | punch =
+                            Dict.update originalPunch.id (Maybe.map updater) m.punch
+                        , errorMsg = "Error changing sorting"
+                      }
+                    , c
+                    )
+
         SetCategoryResult originalPunch result ->
             case result of
                 Ok _ ->
@@ -380,3 +443,23 @@ handleApiResult apiResult ( m, c ) =
 
                 Err err ->
                     ( { m | types = DataError "" Nothing, errorMsg = "Error getting types" }, c )
+
+        GotSorts result ->
+            case result of
+                Ok sorts ->
+                    ( { m | sorts = Loaded "" sorts }, c )
+
+                Err err ->
+                    ( { m | sorts = DataError "" Nothing, errorMsg = "Error getting sorts" }, c )
+
+        ClearResult punch result ->
+            ( m, c ) |> getDetails punch
+
+        UnclearResult punch result ->
+            ( m, c ) |> getDetails punch
+
+        VerifyResult punch result ->
+            ( m, c ) |> getDetails punch
+
+        UnverifyResult punch result ->
+            ( m, c ) |> getDetails punch

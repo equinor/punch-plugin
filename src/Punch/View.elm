@@ -51,6 +51,14 @@ spacer =
 renderPunchListItem : Float -> Model -> Punch -> ( String, Element Msg )
 renderPunchListItem size model item =
     let
+        readOnly =
+            case item.apiPunch of
+                Loaded _ x ->
+                    x.isRestrictedForUser
+
+                _ ->
+                    True
+
         colors =
             case item.status of
                 PA ->
@@ -137,7 +145,7 @@ renderPunchListItem size model item =
                 , el [ Font.size <| scaledInt size -3, width fill, clip ] (text p.tagDescription)
                 ]
     in
-    ( item.id
+    ( String.fromInt item.id
     , column
         [ width fill
         , Background.color <|
@@ -165,15 +173,14 @@ renderPunchListItem size model item =
         , if isSelected then
             column [ width fill, height fill, Background.color Palette.white, onClick NoOp, Border.rounded 4, padding 4 ]
                 [ if isSelected then
-                    renderDescription model.highlight size item
+                    renderDescription model.highlight size readOnly item
 
                   else
                     none
 
                 --, renderComments size item
-                , renderDetails size model item
-
-                --, renderSignatures size item
+                , renderDetails size model readOnly item
+                , renderSignatures size item
                 , if String.isEmpty model.errorMsg then
                     none
 
@@ -187,48 +194,53 @@ renderPunchListItem size model item =
     )
 
 
-renderDescription : String -> Float -> Punch -> Element Msg
-renderDescription textToHighlight size punch =
+renderDescription : String -> Float -> Bool -> Punch -> Element Msg
+renderDescription textToHighlight size readOnly punch =
     column [ width fill ]
         [ el [ Font.color Palette.mossGreen, Font.size <| scaledInt size -3, Font.bold ] <| text "Punch description:"
+        , if readOnly then
+            punch.description
+                |> String.lines
+                |> List.map
+                    (\txt ->
+                        if txt == "" then
+                            text " "
 
-        {- , punch.description
-           |> String.lines
-           |> List.map
-               (\txt ->
-                   if txt == "" then
-                       text " "
+                        else
+                            paragraph [] (Palette.highlight textToHighlight txt)
+                    )
+                |> column [ width fill ]
 
-                   else
-                       paragraph [] (Common.highlight maybeHighlight txt)
-               )
-           |> column [ width fill ]
-        -}
-        , Input.multiline
-            [ width fill
-            , onLoseFocus <| DescriptionFieldLostFocus punch
-            ]
-            { label = Input.labelHidden ""
-            , onChange = DescriptionFieldInput punch
-            , placeholder = Just <| Input.placeholder [] (text "No Description")
-            , spellcheck = True
-            , text = punch.description
-            }
+          else
+            Input.multiline
+                [ width fill
+                , onLoseFocus <| DescriptionFieldLostFocus punch
+                ]
+                { label = Input.labelHidden ""
+                , onChange = DescriptionFieldInput punch
+                , placeholder = Just <| Input.placeholder [] (text "No Description")
+                , spellcheck = True
+                , text = punch.description
+                }
         ]
 
 
-renderDetails : Float -> Model -> Punch -> Element Msg
-renderDetails size model punch =
+renderDetails : Float -> Model -> Bool -> Punch -> Element Msg
+renderDetails size model readOnly punch =
+    let
+        dd =
+            dropDown size readOnly punch model
+    in
     column [ width fill ]
         [ column [ spacing 6 ]
-            [ kv size "No" punch.id ""
+            [ kv size "No" (String.fromInt punch.id) ""
             , kv size "Tag" punch.tag ""
             , kv size "Type" punch.typeDescription ""
             , kv size "Commissioning package" punch.commPk ""
             , kv size "MC package" punch.mcPk ""
             , kv size "Location" punch.location ""
             ]
-        , dropDown size
+        , dd
             CategoryDropDown
             (case punch.status of
                 PA ->
@@ -238,16 +250,15 @@ renderDetails size model punch =
                     "PB"
             )
             .categories
-            punch
-            model
-        , dropDown size RaisedByDropDown punch.raisedByOrg .organizations punch model
-        , dropDown size ClearingByDropDown punch.clearingByOrg .organizations punch model
-        , dropDown size TypeDropDown punch.typeDescription .types punch model
+        , dd RaisedByDropDown punch.raisedByOrg .organizations
+        , dd ClearingByDropDown punch.clearingByOrg .organizations
+        , dd TypeDropDown punch.typeDescription .types
+        , dd SortingDropDown punch.sortingDescription .sorts
         ]
 
 
-dropDown : Float -> DropDown -> String -> (Model -> WebData (List SelectItem)) -> Punch -> Model -> Element Msg
-dropDown size dropDownType current field punch model =
+dropDown : Float -> Bool -> Punch -> Model -> DropDown -> String -> (Model -> WebData (List SelectItem)) -> Element Msg
+dropDown size readOnly punch model dropDownType current field =
     let
         name =
             case dropDownType of
@@ -266,6 +277,9 @@ dropDown size dropDownType current field punch model =
                 TypeDropDown ->
                     "Type"
 
+                SortingDropDown ->
+                    "Sorting"
+
         header =
             el
                 [ Font.color Palette.mossGreen
@@ -275,7 +289,10 @@ dropDown size dropDownType current field punch model =
                 ]
                 (text name)
     in
-    if model.dropDown == dropDownType then
+    if readOnly then
+        kv size name current ""
+
+    else if model.dropDown == dropDownType then
         column
             [ Border.width 1
             , Border.rounded 4
@@ -325,39 +342,6 @@ selectItem size current punch item =
         ]
         [ text item.code, text item.description ]
     )
-
-
-signButton : Float -> String -> Maybe String -> Msg -> Element Msg
-signButton size name maybeDisabled msg =
-    let
-        activeAttributes =
-            [ pointer
-            , onClick msg
-            ]
-
-        deactiveAttributes message =
-            [ alpha 0.3
-            , htmlAttribute <| HA.style "cursor" "not-allowed"
-            , htmlAttribute <| HA.title message
-            ]
-    in
-    el
-        ([ width <| px <| round <| size * 4
-         , height <| px <| round <| size * 2
-         , Background.color Palette.blue
-         , Font.color Palette.white
-         , Border.rounded 10
-         ]
-            ++ (case maybeDisabled of
-                    Just message ->
-                        deactiveAttributes message
-
-                    Nothing ->
-                        activeAttributes
-               )
-        )
-    <|
-        el [ centerX, centerY, Font.size (round size) ] (text name)
 
 
 iconFromCategory : String -> H.Html msg
@@ -467,3 +451,125 @@ onClick msg =
             }
         )
         |> htmlAttribute
+
+
+renderSignatures : Float -> Punch -> Element Msg
+renderSignatures size punch =
+    case punch.apiPunch of
+        Loaded _ x ->
+            column [ width fill ]
+                [ if String.isEmpty x.clearedAt then
+                    none
+
+                  else
+                    el
+                        [ width fill
+                        , Background.color Palette.blue
+                        , Font.color Palette.white
+                        , padding 8
+                        , Font.size (scaledInt size -1)
+                        ]
+                        (text "Signatures")
+                , column [ width fill, padding 10, spacing 2 ]
+                    [ if String.isEmpty x.clearedAt then
+                        el [ alignRight ] <|
+                            signButton size
+                                "Clear"
+                                (if x.statusControlledBySwcr then
+                                    Just "Swcr controls status"
+
+                                 else if x.isRestrictedForUser then
+                                    Just "Access denied"
+
+                                 else
+                                    Nothing
+                                )
+                                (ClearPunchButtonPressed punch)
+
+                      else
+                        row [ width Element.fill ]
+                            [ wrappedRow [ width fill, spacingXY 10 0 ]
+                                [ el [ Font.bold ] (text "Cleared by")
+                                , row [ spacing 10 ]
+                                    [ text (x.clearedByFirstName ++ " " ++ x.clearedByLastName)
+                                    , el [ alignRight ] (text <| String.left 10 x.clearedAt)
+                                    ]
+                                ]
+                            , signButton size
+                                "Unclear"
+                                (if x.verifiedAt /= "" then
+                                    Just "Punch is verified"
+
+                                 else
+                                    Nothing
+                                )
+                                (UnclearPunchButtonPressed punch)
+                            ]
+                    , if x.clearedAt /= "" then
+                        if String.isEmpty x.verifiedAt then
+                            el [ alignRight ] <|
+                                signButton size
+                                    "Verify"
+                                    (if x.statusControlledBySwcr then
+                                        Just "Swcr controls status"
+
+                                     else if x.isRestrictedForUser then
+                                        Just "Access denied"
+
+                                     else
+                                        Nothing
+                                    )
+                                    (VerifyPunchButtonPressed punch)
+
+                        else
+                            row [ width fill, spacingXY 10 0 ]
+                                [ wrappedRow [ width fill, spacingXY 10 0 ]
+                                    [ el [ Font.bold ] (text "Verified by")
+                                    , row [ spacing 10 ]
+                                        [ el [ alignRight ] <| text (x.verifiedByFirstName ++ " " ++ x.verifiedByLastName)
+                                        , el [ alignRight ] (text <| String.left 10 x.verifiedAt)
+                                        ]
+                                    ]
+                                , signButton size "Unverify" Nothing (UnverifyPunchButtonPressed punch)
+                                ]
+
+                      else
+                        none
+                    ]
+                ]
+
+        _ ->
+            none
+
+
+signButton : Float -> String -> Maybe String -> Msg -> Element Msg
+signButton size name maybeDisabled msg =
+    let
+        activeAttributes =
+            [ pointer
+            , onClick msg
+            ]
+
+        deactiveAttributes message =
+            [ alpha 0.3
+            , htmlAttribute <| HA.style "cursor" "not-allowed"
+            , htmlAttribute <| HA.title message
+            ]
+    in
+    el
+        ([ width <| px <| round <| size * 4
+         , height <| px <| round <| size * 2
+         , Background.color Palette.blue
+         , Font.color Palette.white
+         , Border.rounded 10
+         ]
+            ++ (case maybeDisabled of
+                    Just message ->
+                        deactiveAttributes message
+
+                    Nothing ->
+                        activeAttributes
+               )
+        )
+    <|
+        el [ centerX, centerY, Font.size (round size) ] (text name)

@@ -43,3 +43,4 @@ type DropDown
     | RaisedByDropDown
     | ClearingByDropDown
     | TypeDropDown
+    | SortingDropDown

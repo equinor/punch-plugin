@@ -5593,6 +5593,7 @@ var $author$project$Punch$Messages$GotPunchList = function (a) {
 var $author$project$Punch$Messages$GotToken = function (a) {
 	return {$: 'GotToken', a: a};
 };
+var $author$project$Equinor$Types$NotLoaded = {$: 'NotLoaded'};
 var $author$project$Punch$Punch = function (id) {
 	return function (tag) {
 		return function (tagDescription) {
@@ -5606,7 +5607,11 @@ var $author$project$Punch$Punch = function (id) {
 										return function (clearingByOrg) {
 											return function (location) {
 												return function (typeDescription) {
-													return {clearingByOrg: clearingByOrg, commPk: commPk, createdAt: createdAt, description: description, id: id, location: location, mcPk: mcPk, raisedByOrg: raisedByOrg, status: status, tag: tag, tagDescription: tagDescription, typeDescription: typeDescription, updatedAt: updatedAt};
+													return function (sortingDescription) {
+														return function (apiPunch) {
+															return {apiPunch: apiPunch, clearingByOrg: clearingByOrg, commPk: commPk, createdAt: createdAt, description: description, id: id, location: location, mcPk: mcPk, raisedByOrg: raisedByOrg, sortingDescription: sortingDescription, status: status, tag: tag, tagDescription: tagDescription, typeDescription: typeDescription, updatedAt: updatedAt};
+														};
+													};
 												};
 											};
 										};
@@ -5647,6 +5652,8 @@ var $author$project$Equinor$Data$Procosys$Status$decoder = $elm$json$Json$Decode
 			$elm$json$Json$Decode$null($author$project$Equinor$Data$Procosys$Status$OS)
 		]));
 var $NoRedInk$elm_json_decode_pipeline$Json$Decode$Pipeline$custom = $elm$json$Json$Decode$map2($elm$core$Basics$apR);
+var $NoRedInk$elm_json_decode_pipeline$Json$Decode$Pipeline$hardcoded = A2($elm$core$Basics$composeR, $elm$json$Json$Decode$succeed, $NoRedInk$elm_json_decode_pipeline$Json$Decode$Pipeline$custom);
+var $elm$json$Json$Decode$int = _Json_decodeInt;
 var $elm$json$Json$Decode$fail = _Json_fail;
 var $NoRedInk$elm_json_decode_pipeline$Json$Decode$Pipeline$optionalDecoder = F3(
 	function (pathDecoder, valDecoder, fallback) {
@@ -5703,7 +5710,6 @@ var $elm$core$Basics$composeL = F3(
 		return g(
 			f(x));
 	});
-var $elm$json$Json$Decode$int = _Json_decodeInt;
 var $elm$time$Time$Posix = function (a) {
 	return {$: 'Posix', a: a};
 };
@@ -5712,63 +5718,71 @@ var $author$project$Punch$timeDecoder = A2(
 	$elm$json$Json$Decode$andThen,
 	A2($elm$core$Basics$composeL, $elm$json$Json$Decode$succeed, $elm$time$Time$millisToPosix),
 	$elm$json$Json$Decode$int);
-var $author$project$Punch$decoder = A4(
-	$NoRedInk$elm_json_decode_pipeline$Json$Decode$Pipeline$optional,
-	'typeDescription',
-	$elm$json$Json$Decode$string,
-	'',
+var $author$project$Punch$decoder = A2(
+	$NoRedInk$elm_json_decode_pipeline$Json$Decode$Pipeline$hardcoded,
+	$author$project$Equinor$Types$NotLoaded,
 	A4(
 		$NoRedInk$elm_json_decode_pipeline$Json$Decode$Pipeline$optional,
-		'location',
+		'sortingDescription',
 		$elm$json$Json$Decode$string,
 		'',
 		A4(
 			$NoRedInk$elm_json_decode_pipeline$Json$Decode$Pipeline$optional,
-			'clearingByOrg',
+			'typeDescription',
 			$elm$json$Json$Decode$string,
 			'',
 			A4(
 				$NoRedInk$elm_json_decode_pipeline$Json$Decode$Pipeline$optional,
-				'raisedByOrg',
+				'location',
 				$elm$json$Json$Decode$string,
 				'',
-				A3(
-					$NoRedInk$elm_json_decode_pipeline$Json$Decode$Pipeline$required,
-					'mcPk',
+				A4(
+					$NoRedInk$elm_json_decode_pipeline$Json$Decode$Pipeline$optional,
+					'clearingByOrg',
 					$elm$json$Json$Decode$string,
-					A3(
-						$NoRedInk$elm_json_decode_pipeline$Json$Decode$Pipeline$required,
-						'commPk',
+					'',
+					A4(
+						$NoRedInk$elm_json_decode_pipeline$Json$Decode$Pipeline$optional,
+						'raisedByOrg',
 						$elm$json$Json$Decode$string,
+						'',
 						A3(
 							$NoRedInk$elm_json_decode_pipeline$Json$Decode$Pipeline$required,
-							'status',
-							$author$project$Equinor$Data$Procosys$Status$decoder,
+							'mcPk',
+							$elm$json$Json$Decode$string,
 							A3(
 								$NoRedInk$elm_json_decode_pipeline$Json$Decode$Pipeline$required,
-								'updatedAt',
+								'commPk',
 								$elm$json$Json$Decode$string,
 								A3(
 									$NoRedInk$elm_json_decode_pipeline$Json$Decode$Pipeline$required,
-									'createdAt',
-									$author$project$Punch$timeDecoder,
+									'status',
+									$author$project$Equinor$Data$Procosys$Status$decoder,
 									A3(
 										$NoRedInk$elm_json_decode_pipeline$Json$Decode$Pipeline$required,
-										'description',
+										'updatedAt',
 										$elm$json$Json$Decode$string,
 										A3(
 											$NoRedInk$elm_json_decode_pipeline$Json$Decode$Pipeline$required,
-											'tagDescription',
-											$elm$json$Json$Decode$string,
+											'createdAt',
+											$author$project$Punch$timeDecoder,
 											A3(
 												$NoRedInk$elm_json_decode_pipeline$Json$Decode$Pipeline$required,
-												'tag',
+												'description',
 												$elm$json$Json$Decode$string,
 												A3(
 													$NoRedInk$elm_json_decode_pipeline$Json$Decode$Pipeline$required,
-													'id',
+													'tagDescription',
 													$elm$json$Json$Decode$string,
-													$elm$json$Json$Decode$succeed($author$project$Punch$Punch))))))))))))));
+													A3(
+														$NoRedInk$elm_json_decode_pipeline$Json$Decode$Pipeline$required,
+														'tag',
+														$elm$json$Json$Decode$string,
+														A3(
+															$NoRedInk$elm_json_decode_pipeline$Json$Decode$Pipeline$required,
+															'id',
+															$elm$json$Json$Decode$int,
+															$elm$json$Json$Decode$succeed($author$project$Punch$Punch))))))))))))))));
 var $elm$json$Json$Decode$list = _Json_decodeList;
 var $author$project$Punch$Types$TokenSuccess = F2(
 	function (refNo, token) {
@@ -5818,14 +5832,13 @@ var $mdgriffith$elm_ui$Internal$Model$Height = function (a) {
 };
 var $mdgriffith$elm_ui$Element$height = $mdgriffith$elm_ui$Internal$Model$Height;
 var $author$project$Punch$Types$NoDropDown = {$: 'NoDropDown'};
-var $author$project$Equinor$Types$NotLoaded = {$: 'NotLoaded'};
 var $elm$core$Dict$RBEmpty_elm_builtin = {$: 'RBEmpty_elm_builtin'};
 var $elm$core$Dict$empty = $elm$core$Dict$RBEmpty_elm_builtin;
 var $elm$core$Platform$Cmd$batch = _Platform_batch;
 var $elm$core$Platform$Cmd$none = $elm$core$Platform$Cmd$batch(_List_Nil);
 var $author$project$Punch$Model$initialModel = function (flags) {
 	return _Utils_Tuple2(
-		{apiToken: '', categories: $author$project$Equinor$Types$NotLoaded, context: flags.context, dropDown: $author$project$Punch$Types$NoDropDown, errorMsg: '', highlight: flags.textToHighlight, organizations: $author$project$Equinor$Types$NotLoaded, procosysPlantId: flags.procosysPlantId, punch: $elm$core$Dict$empty, requests: $elm$core$Dict$empty, selectedPunch: $elm$core$Maybe$Nothing, types: $author$project$Equinor$Types$NotLoaded},
+		{apiToken: '', categories: $author$project$Equinor$Types$NotLoaded, context: flags.context, dropDown: $author$project$Punch$Types$NoDropDown, errorMsg: '', highlight: flags.textToHighlight, organizations: $author$project$Equinor$Types$NotLoaded, procosysPlantId: flags.procosysPlantId, punch: $elm$core$Dict$empty, requests: $elm$core$Dict$empty, selectedPunch: $elm$core$Maybe$Nothing, sorts: $author$project$Equinor$Types$NotLoaded, types: $author$project$Equinor$Types$NotLoaded},
 		$elm$core$Platform$Cmd$none);
 };
 var $mdgriffith$elm_ui$Internal$Style$classes = {above: 'a', active: 'atv', alignBottom: 'ab', alignCenterX: 'cx', alignCenterY: 'cy', alignContainerBottom: 'acb', alignContainerCenterX: 'accx', alignContainerCenterY: 'accy', alignContainerRight: 'acr', alignLeft: 'al', alignRight: 'ar', alignTop: 'at', alignedHorizontally: 'ah', alignedVertically: 'av', any: 's', behind: 'bh', below: 'b', bold: 'w7', borderDashed: 'bd', borderDotted: 'bdt', borderNone: 'bn', borderSolid: 'bs', capturePointerEvents: 'cpe', clip: 'cp', clipX: 'cpx', clipY: 'cpy', column: 'c', container: 'ctr', contentBottom: 'cb', contentCenterX: 'ccx', contentCenterY: 'ccy', contentLeft: 'cl', contentRight: 'cr', contentTop: 'ct', cursorPointer: 'cptr', cursorText: 'ctxt', focus: 'fcs', focusedWithin: 'focus-within', fullSize: 'fs', grid: 'g', hasBehind: 'hbh', heightContent: 'hc', heightExact: 'he', heightFill: 'hf', heightFillPortion: 'hfp', hover: 'hv', imageContainer: 'ic', inFront: 'fr', inputLabel: 'lbl', inputMultiline: 'iml', inputMultilineFiller: 'imlf', inputMultilineParent: 'imlp', inputMultilineWrapper: 'implw', inputText: 'it', italic: 'i', link: 'lnk', nearby: 'nb', noTextSelection: 'notxt', onLeft: 'ol', onRight: 'or', opaque: 'oq', overflowHidden: 'oh', page: 'pg', paragraph: 'p', passPointerEvents: 'ppe', root: 'ui', row: 'r', scrollbars: 'sb', scrollbarsX: 'sbx', scrollbarsY: 'sby', seButton: 'sbt', single: 'e', sizeByCapital: 'cap', spaceEvenly: 'sev', strike: 'sk', text: 't', textCenter: 'tc', textExtraBold: 'w8', textExtraLight: 'w2', textHeavy: 'w9', textJustify: 'tj', textJustifyAll: 'tja', textLeft: 'tl', textLight: 'w3', textMedium: 'w5', textNormalWeight: 'w4', textRight: 'tr', textSemiBold: 'w6', textThin: 'w1', textUnitalicized: 'tun', transition: 'ts', transparent: 'clr', underline: 'u', widthContent: 'wc', widthExact: 'we', widthFill: 'wf', widthFillPortion: 'wfp', wrapped: 'wrp'};
@@ -11738,24 +11751,12 @@ var $author$project$Punch$Update$apiRequest = F2(
 								])))
 					])));
 	});
-var $author$project$Punch$Update$closeDropDowns = function (_v0) {
-	var m = _v0.a;
-	var c = _v0.b;
-	return _Utils_Tuple2(
-		_Utils_update(
-			m,
-			{dropDown: $author$project$Punch$Types$NoDropDown}),
-		c);
-};
-var $author$project$Equinor$Types$Loading = F2(
+var $author$project$Punch$Messages$ClearResult = F2(
 	function (a, b) {
-		return {$: 'Loading', a: a, b: b};
+		return {$: 'ClearResult', a: a, b: b};
 	});
 var $author$project$Punch$Messages$GotApiResult = function (a) {
 	return {$: 'GotApiResult', a: a};
-};
-var $author$project$Punch$Messages$GotCategories = function (a) {
-	return {$: 'GotCategories', a: a};
 };
 var $elm$url$Url$Builder$QueryParameter = F2(
 	function (a, b) {
@@ -12170,26 +12171,13 @@ var $elm$core$Dict$update = F3(
 			return A2($elm$core$Dict$remove, targetKey, dictionary);
 		}
 	});
-var $elm$http$Http$emptyBody = _Http_emptyBody;
-var $elm$json$Json$Decode$decodeString = _Json_runOnString;
-var $elm$http$Http$expectStringResponse = F2(
+var $elm$http$Http$expectBytesResponse = F2(
 	function (toMsg, toResult) {
 		return A3(
 			_Http_expect,
-			'',
-			$elm$core$Basics$identity,
+			'arraybuffer',
+			_Http_toDataView,
 			A2($elm$core$Basics$composeR, toResult, toMsg));
-	});
-var $elm$core$Result$mapError = F2(
-	function (f, result) {
-		if (result.$ === 'Ok') {
-			var v = result.a;
-			return $elm$core$Result$Ok(v);
-		} else {
-			var e = result.a;
-			return $elm$core$Result$Err(
-				f(e));
-		}
 	});
 var $elm$http$Http$BadBody = function (a) {
 	return {$: 'BadBody', a: a};
@@ -12202,6 +12190,17 @@ var $elm$http$Http$BadUrl = function (a) {
 };
 var $elm$http$Http$NetworkError = {$: 'NetworkError'};
 var $elm$http$Http$Timeout = {$: 'Timeout'};
+var $elm$core$Result$mapError = F2(
+	function (f, result) {
+		if (result.$ === 'Ok') {
+			var v = result.a;
+			return $elm$core$Result$Ok(v);
+		} else {
+			var e = result.a;
+			return $elm$core$Result$Err(
+				f(e));
+		}
+	});
 var $elm$http$Http$resolve = F2(
 	function (toResult, response) {
 		switch (response.$) {
@@ -12225,24 +12224,26 @@ var $elm$http$Http$resolve = F2(
 					toResult(body));
 		}
 	});
-var $elm$http$Http$expectJson = F2(
-	function (toMsg, decoder) {
-		return A2(
-			$elm$http$Http$expectStringResponse,
-			toMsg,
-			$elm$http$Http$resolve(
-				function (string) {
-					return A2(
-						$elm$core$Result$mapError,
-						$elm$json$Json$Decode$errorToString,
-						A2($elm$json$Json$Decode$decodeString, decoder, string));
-				}));
-	});
+var $elm$http$Http$expectWhatever = function (toMsg) {
+	return A2(
+		$elm$http$Http$expectBytesResponse,
+		toMsg,
+		$elm$http$Http$resolve(
+			function (_v0) {
+				return $elm$core$Result$Ok(_Utils_Tuple0);
+			}));
+};
 var $elm$http$Http$Header = F2(
 	function (a, b) {
 		return {$: 'Header', a: a, b: b};
 	});
 var $elm$http$Http$header = $elm$http$Http$Header;
+var $elm$http$Http$jsonBody = function (value) {
+	return A2(
+		_Http_pair,
+		'application/json',
+		A2($elm$json$Json$Encode$encode, 0, value));
+};
 var $elm$http$Http$Request = function (a) {
 	return {$: 'Request', a: a};
 };
@@ -12393,16 +12394,6 @@ var $elm$http$Http$request = function (r) {
 		$elm$http$Http$Request(
 			{allowCookiesFromOtherDomains: false, body: r.body, expect: r.expect, headers: r.headers, method: r.method, timeout: r.timeout, tracker: r.tracker, url: r.url}));
 };
-var $author$project$Punch$Types$SelectItem = F3(
-	function (id, code, description) {
-		return {code: code, description: description, id: id};
-	});
-var $author$project$Punch$Types$selectItemDecoder = A4(
-	$elm$json$Json$Decode$map3,
-	$author$project$Punch$Types$SelectItem,
-	A2($elm$json$Json$Decode$field, 'Id', $elm$json$Json$Decode$int),
-	A2($elm$json$Json$Decode$field, 'Code', $elm$json$Json$Decode$string),
-	A2($elm$json$Json$Decode$field, 'Description', $elm$json$Json$Decode$string));
 var $elm$url$Url$Builder$toQueryPair = function (_v0) {
 	var key = _v0.a;
 	var value = _v0.b;
@@ -12441,6 +12432,84 @@ var $author$project$Punch$Api$url = F2(
 				A2($elm$core$List$cons, $author$project$Punch$Api$apiVersion, queryParams));
 		}
 	});
+var $author$project$Punch$Api$clear = F3(
+	function (punch, plantId, token) {
+		return $elm$http$Http$request(
+			{
+				body: $elm$http$Http$jsonBody(
+					$elm$json$Json$Encode$int(punch.id)),
+				expect: $elm$http$Http$expectWhatever(
+					A2(
+						$elm$core$Basics$composeL,
+						$author$project$Punch$Messages$GotApiResult,
+						$author$project$Punch$Messages$ClearResult(punch))),
+				headers: _List_fromArray(
+					[
+						A2($elm$http$Http$header, 'Authorization', 'Bearer ' + token)
+					]),
+				method: 'POST',
+				timeout: $elm$core$Maybe$Nothing,
+				tracker: $elm$core$Maybe$Nothing,
+				url: A2(
+					$author$project$Punch$Api$url,
+					_List_fromArray(
+						['PunchListItem', 'Clear']),
+					_List_fromArray(
+						[
+							A2($elm$url$Url$Builder$string, 'plantId', plantId),
+							$author$project$Punch$Api$apiVersion
+						]))
+			});
+	});
+var $author$project$Punch$Update$closeDropDowns = function (_v0) {
+	var m = _v0.a;
+	var c = _v0.b;
+	return _Utils_Tuple2(
+		_Utils_update(
+			m,
+			{dropDown: $author$project$Punch$Types$NoDropDown}),
+		c);
+};
+var $author$project$Equinor$Types$Loading = F2(
+	function (a, b) {
+		return {$: 'Loading', a: a, b: b};
+	});
+var $author$project$Punch$Messages$GotCategories = function (a) {
+	return {$: 'GotCategories', a: a};
+};
+var $elm$http$Http$emptyBody = _Http_emptyBody;
+var $elm$json$Json$Decode$decodeString = _Json_runOnString;
+var $elm$http$Http$expectStringResponse = F2(
+	function (toMsg, toResult) {
+		return A3(
+			_Http_expect,
+			'',
+			$elm$core$Basics$identity,
+			A2($elm$core$Basics$composeR, toResult, toMsg));
+	});
+var $elm$http$Http$expectJson = F2(
+	function (toMsg, decoder) {
+		return A2(
+			$elm$http$Http$expectStringResponse,
+			toMsg,
+			$elm$http$Http$resolve(
+				function (string) {
+					return A2(
+						$elm$core$Result$mapError,
+						$elm$json$Json$Decode$errorToString,
+						A2($elm$json$Json$Decode$decodeString, decoder, string));
+				}));
+	});
+var $author$project$Punch$Types$SelectItem = F3(
+	function (id, code, description) {
+		return {code: code, description: description, id: id};
+	});
+var $author$project$Punch$Types$selectItemDecoder = A4(
+	$elm$json$Json$Decode$map3,
+	$author$project$Punch$Types$SelectItem,
+	A2($elm$json$Json$Decode$field, 'Id', $elm$json$Json$Decode$int),
+	A2($elm$json$Json$Decode$field, 'Code', $elm$json$Json$Decode$string),
+	A2($elm$json$Json$Decode$field, 'Description', $elm$json$Json$Decode$string));
 var $author$project$Punch$Api$categories = F2(
 	function (plantId, token) {
 		return $elm$http$Http$request(
@@ -12488,6 +12557,99 @@ var $author$project$Punch$Update$getCategories = function (_v0) {
 				c));
 	}
 };
+var $author$project$Punch$Messages$GotPunchDetails = F2(
+	function (a, b) {
+		return {$: 'GotPunchDetails', a: a, b: b};
+	});
+var $elm$url$Url$Builder$int = F2(
+	function (key, value) {
+		return A2(
+			$elm$url$Url$Builder$QueryParameter,
+			$elm$url$Url$percentEncode(key),
+			$elm$core$String$fromInt(value));
+	});
+var $author$project$Punch$ApiPunch = F8(
+	function (clearedAt, clearedByFirstName, clearedByLastName, verifiedAt, verifiedByFirstName, verifiedByLastName, isRestrictedForUser, statusControlledBySwcr) {
+		return {clearedAt: clearedAt, clearedByFirstName: clearedByFirstName, clearedByLastName: clearedByLastName, isRestrictedForUser: isRestrictedForUser, statusControlledBySwcr: statusControlledBySwcr, verifiedAt: verifiedAt, verifiedByFirstName: verifiedByFirstName, verifiedByLastName: verifiedByLastName};
+	});
+var $elm$json$Json$Decode$bool = _Json_decodeBool;
+var $author$project$Punch$nullString = $elm$json$Json$Decode$oneOf(
+	_List_fromArray(
+		[
+			$elm$json$Json$Decode$string,
+			$elm$json$Json$Decode$null('')
+		]));
+var $author$project$Punch$webApiDecoder = A3(
+	$NoRedInk$elm_json_decode_pipeline$Json$Decode$Pipeline$required,
+	'StatusControlledBySwcr',
+	$elm$json$Json$Decode$bool,
+	A3(
+		$NoRedInk$elm_json_decode_pipeline$Json$Decode$Pipeline$required,
+		'IsRestrictedForUser',
+		$elm$json$Json$Decode$bool,
+		A3(
+			$NoRedInk$elm_json_decode_pipeline$Json$Decode$Pipeline$required,
+			'VerifiedByLastName',
+			$author$project$Punch$nullString,
+			A3(
+				$NoRedInk$elm_json_decode_pipeline$Json$Decode$Pipeline$required,
+				'VerifiedByFirstName',
+				$author$project$Punch$nullString,
+				A3(
+					$NoRedInk$elm_json_decode_pipeline$Json$Decode$Pipeline$required,
+					'VerifiedAt',
+					$author$project$Punch$nullString,
+					A3(
+						$NoRedInk$elm_json_decode_pipeline$Json$Decode$Pipeline$required,
+						'ClearedByLastName',
+						$author$project$Punch$nullString,
+						A3(
+							$NoRedInk$elm_json_decode_pipeline$Json$Decode$Pipeline$required,
+							'ClearedByFirstName',
+							$author$project$Punch$nullString,
+							A3(
+								$NoRedInk$elm_json_decode_pipeline$Json$Decode$Pipeline$required,
+								'ClearedAt',
+								$author$project$Punch$nullString,
+								$elm$json$Json$Decode$succeed($author$project$Punch$ApiPunch)))))))));
+var $author$project$Punch$Api$details = F3(
+	function (punch, plantId, token) {
+		return $elm$http$Http$request(
+			{
+				body: $elm$http$Http$emptyBody,
+				expect: A2(
+					$elm$http$Http$expectJson,
+					A2(
+						$elm$core$Basics$composeL,
+						$author$project$Punch$Messages$GotApiResult,
+						$author$project$Punch$Messages$GotPunchDetails(punch)),
+					$author$project$Punch$webApiDecoder),
+				headers: _List_fromArray(
+					[
+						A2($elm$http$Http$header, 'Authorization', 'Bearer ' + token)
+					]),
+				method: 'GET',
+				timeout: $elm$core$Maybe$Nothing,
+				tracker: $elm$core$Maybe$Nothing,
+				url: A2(
+					$author$project$Punch$Api$url,
+					_List_fromArray(
+						['PunchListItem']),
+					_List_fromArray(
+						[
+							A2($elm$url$Url$Builder$string, 'plantId', plantId),
+							A2($elm$url$Url$Builder$int, 'punchItemId', punch.id),
+							$author$project$Punch$Api$apiVersion
+						]))
+			});
+	});
+var $author$project$Punch$Update$getDetails = function (punch) {
+	return $author$project$Punch$Update$apiRequest(
+		_List_fromArray(
+			[
+				$author$project$Punch$Api$details(punch)
+			]));
+};
 var $author$project$Punch$Messages$GotOrganizations = function (a) {
 	return {$: 'GotOrganizations', a: a};
 };
@@ -12534,6 +12696,56 @@ var $author$project$Punch$Update$getOrganizations = function (_v0) {
 					m,
 					{
 						organizations: A2($author$project$Equinor$Types$Loading, '', $elm$core$Maybe$Nothing)
+					}),
+				c));
+	}
+};
+var $author$project$Punch$Messages$GotSorts = function (a) {
+	return {$: 'GotSorts', a: a};
+};
+var $author$project$Punch$Api$sorts = F2(
+	function (plantId, token) {
+		return $elm$http$Http$request(
+			{
+				body: $elm$http$Http$emptyBody,
+				expect: A2(
+					$elm$http$Http$expectJson,
+					A2($elm$core$Basics$composeL, $author$project$Punch$Messages$GotApiResult, $author$project$Punch$Messages$GotSorts),
+					$elm$json$Json$Decode$list($author$project$Punch$Types$selectItemDecoder)),
+				headers: _List_fromArray(
+					[
+						A2($elm$http$Http$header, 'Authorization', 'Bearer ' + token)
+					]),
+				method: 'GET',
+				timeout: $elm$core$Maybe$Nothing,
+				tracker: $elm$core$Maybe$Nothing,
+				url: A2(
+					$author$project$Punch$Api$url,
+					_List_fromArray(
+						['PunchListItem', 'Sorts']),
+					_List_fromArray(
+						[
+							A2($elm$url$Url$Builder$string, 'plantId', plantId),
+							$author$project$Punch$Api$apiVersion
+						]))
+			});
+	});
+var $author$project$Punch$Update$getSorts = function (_v0) {
+	var m = _v0.a;
+	var c = _v0.b;
+	var _v1 = m.sorts;
+	if (_v1.$ === 'Loaded') {
+		return _Utils_Tuple2(m, c);
+	} else {
+		return A2(
+			$author$project$Punch$Update$apiRequest,
+			_List_fromArray(
+				[$author$project$Punch$Api$sorts]),
+			_Utils_Tuple2(
+				_Utils_update(
+					m,
+					{
+						sorts: A2($author$project$Equinor$Types$Loading, '', $elm$core$Maybe$Nothing)
 					}),
 				c));
 	}
@@ -12602,10 +12814,23 @@ var $author$project$Punch$Update$handleApiResult = F2(
 		var c = _v0.b;
 		switch (apiResult.$) {
 			case 'GotPunchDetails':
-				var id = apiResult.a;
+				var oldPunch = apiResult.a;
 				var result = apiResult.b;
 				var updater = function (punch) {
-					return punch;
+					return _Utils_update(
+						punch,
+						{
+							apiPunch: function () {
+								if (result.$ === 'Ok') {
+									var apiPunch = result.a;
+									return A2($author$project$Equinor$Types$Loaded, '', apiPunch);
+								} else {
+									var err = result.a;
+									var _v3 = A2($elm$core$Debug$log, 'err', err);
+									return A2($author$project$Equinor$Types$DataError, '', $elm$core$Maybe$Nothing);
+								}
+							}()
+						});
 				};
 				return _Utils_Tuple2(
 					_Utils_update(
@@ -12613,7 +12838,7 @@ var $author$project$Punch$Update$handleApiResult = F2(
 						{
 							punch: A3(
 								$elm$core$Dict$update,
-								id,
+								oldPunch.id,
 								$elm$core$Maybe$map(updater),
 								m.punch)
 						}),
@@ -12706,6 +12931,31 @@ var $author$project$Punch$Update$handleApiResult = F2(
 							}),
 						c);
 				}
+			case 'SetSortingResult':
+				var originalPunch = apiResult.a;
+				var result = apiResult.b;
+				if (result.$ === 'Ok') {
+					return _Utils_Tuple2(m, c);
+				} else {
+					var err = result.a;
+					var updater = function (punch) {
+						return _Utils_update(
+							punch,
+							{sortingDescription: originalPunch.sortingDescription});
+					};
+					return _Utils_Tuple2(
+						_Utils_update(
+							m,
+							{
+								errorMsg: 'Error changing sorting',
+								punch: A3(
+									$elm$core$Dict$update,
+									originalPunch.id,
+									$elm$core$Maybe$map(updater),
+									m.punch)
+							}),
+						c);
+				}
 			case 'SetCategoryResult':
 				var originalPunch = apiResult.a;
 				var result = apiResult.b;
@@ -12775,7 +13025,7 @@ var $author$project$Punch$Update$handleApiResult = F2(
 							}),
 						c);
 				}
-			default:
+			case 'GotTypes':
 				var result = apiResult.a;
 				if (result.$ === 'Ok') {
 					var types = result.a;
@@ -12797,6 +13047,56 @@ var $author$project$Punch$Update$handleApiResult = F2(
 							}),
 						c);
 				}
+			case 'GotSorts':
+				var result = apiResult.a;
+				if (result.$ === 'Ok') {
+					var sorts = result.a;
+					return _Utils_Tuple2(
+						_Utils_update(
+							m,
+							{
+								sorts: A2($author$project$Equinor$Types$Loaded, '', sorts)
+							}),
+						c);
+				} else {
+					var err = result.a;
+					return _Utils_Tuple2(
+						_Utils_update(
+							m,
+							{
+								errorMsg: 'Error getting sorts',
+								sorts: A2($author$project$Equinor$Types$DataError, '', $elm$core$Maybe$Nothing)
+							}),
+						c);
+				}
+			case 'ClearResult':
+				var punch = apiResult.a;
+				var result = apiResult.b;
+				return A2(
+					$author$project$Punch$Update$getDetails,
+					punch,
+					_Utils_Tuple2(m, c));
+			case 'UnclearResult':
+				var punch = apiResult.a;
+				var result = apiResult.b;
+				return A2(
+					$author$project$Punch$Update$getDetails,
+					punch,
+					_Utils_Tuple2(m, c));
+			case 'VerifyResult':
+				var punch = apiResult.a;
+				var result = apiResult.b;
+				return A2(
+					$author$project$Punch$Update$getDetails,
+					punch,
+					_Utils_Tuple2(m, c));
+			default:
+				var punch = apiResult.a;
+				var result = apiResult.b;
+				return A2(
+					$author$project$Punch$Update$getDetails,
+					punch,
+					_Utils_Tuple2(m, c));
 		}
 	});
 var $elm$json$Json$Encode$null = _Json_encodeNull;
@@ -12842,29 +13142,6 @@ var $author$project$Punch$Messages$SetCategoryResult = F2(
 	function (a, b) {
 		return {$: 'SetCategoryResult', a: a, b: b};
 	});
-var $elm$http$Http$expectBytesResponse = F2(
-	function (toMsg, toResult) {
-		return A3(
-			_Http_expect,
-			'arraybuffer',
-			_Http_toDataView,
-			A2($elm$core$Basics$composeR, toResult, toMsg));
-	});
-var $elm$http$Http$expectWhatever = function (toMsg) {
-	return A2(
-		$elm$http$Http$expectBytesResponse,
-		toMsg,
-		$elm$http$Http$resolve(
-			function (_v0) {
-				return $elm$core$Result$Ok(_Utils_Tuple0);
-			}));
-};
-var $elm$http$Http$jsonBody = function (value) {
-	return A2(
-		_Http_pair,
-		'application/json',
-		A2($elm$json$Json$Encode$encode, 0, value));
-};
 var $author$project$Punch$Api$setCategory = F4(
 	function (originalPunch, selectItem, plantId, token) {
 		return $elm$http$Http$request(
@@ -12875,11 +13152,7 @@ var $author$project$Punch$Api$setCategory = F4(
 							[
 								_Utils_Tuple2(
 								'PunchItemId',
-								$elm$json$Json$Encode$int(
-									A2(
-										$elm$core$Maybe$withDefault,
-										0,
-										$elm$core$String$toInt(originalPunch.id)))),
+								$elm$json$Json$Encode$int(originalPunch.id)),
 								_Utils_Tuple2(
 								'CategoryId',
 								$elm$json$Json$Encode$int(selectItem.id))
@@ -12921,11 +13194,7 @@ var $author$project$Punch$Api$setClearingBy = F4(
 							[
 								_Utils_Tuple2(
 								'PunchItemId',
-								$elm$json$Json$Encode$int(
-									A2(
-										$elm$core$Maybe$withDefault,
-										0,
-										$elm$core$String$toInt(originalPunch.id)))),
+								$elm$json$Json$Encode$int(originalPunch.id)),
 								_Utils_Tuple2(
 								'ClearingByOrganizationId',
 								$elm$json$Json$Encode$int(selectItem.id))
@@ -12986,11 +13255,7 @@ var $author$project$Punch$Api$setRaisedBy = F4(
 							[
 								_Utils_Tuple2(
 								'PunchItemId',
-								$elm$json$Json$Encode$int(
-									A2(
-										$elm$core$Maybe$withDefault,
-										0,
-										$elm$core$String$toInt(originalPunch.id)))),
+								$elm$json$Json$Encode$int(originalPunch.id)),
 								_Utils_Tuple2(
 								'RaisedByOrganizationId',
 								$elm$json$Json$Encode$int(selectItem.id))
@@ -13018,6 +13283,48 @@ var $author$project$Punch$Api$setRaisedBy = F4(
 						]))
 			});
 	});
+var $author$project$Punch$Messages$SetSortingResult = F2(
+	function (a, b) {
+		return {$: 'SetSortingResult', a: a, b: b};
+	});
+var $author$project$Punch$Api$setSorting = F4(
+	function (originalPunch, selectItem, plantId, token) {
+		return $elm$http$Http$request(
+			{
+				body: $elm$http$Http$jsonBody(
+					$elm$json$Json$Encode$object(
+						_List_fromArray(
+							[
+								_Utils_Tuple2(
+								'PunchItemId',
+								$elm$json$Json$Encode$int(originalPunch.id)),
+								_Utils_Tuple2(
+								'SortingId',
+								$elm$json$Json$Encode$int(selectItem.id))
+							]))),
+				expect: $elm$http$Http$expectWhatever(
+					A2(
+						$elm$core$Basics$composeL,
+						$author$project$Punch$Messages$GotApiResult,
+						$author$project$Punch$Messages$SetSortingResult(originalPunch))),
+				headers: _List_fromArray(
+					[
+						A2($elm$http$Http$header, 'Authorization', 'Bearer ' + token)
+					]),
+				method: 'PUT',
+				timeout: $elm$core$Maybe$Nothing,
+				tracker: $elm$core$Maybe$Nothing,
+				url: A2(
+					$author$project$Punch$Api$url,
+					_List_fromArray(
+						['PunchListItem', 'SetSorting']),
+					_List_fromArray(
+						[
+							A2($elm$url$Url$Builder$string, 'plantId', plantId),
+							$author$project$Punch$Api$apiVersion
+						]))
+			});
+	});
 var $author$project$Punch$Messages$SetTypeResult = F2(
 	function (a, b) {
 		return {$: 'SetTypeResult', a: a, b: b};
@@ -13032,11 +13339,7 @@ var $author$project$Punch$Api$setType = F4(
 							[
 								_Utils_Tuple2(
 								'PunchItemId',
-								$elm$json$Json$Encode$int(
-									A2(
-										$elm$core$Maybe$withDefault,
-										0,
-										$elm$core$String$toInt(originalPunch.id)))),
+								$elm$json$Json$Encode$int(originalPunch.id)),
 								_Utils_Tuple2(
 								'TypeId',
 								$elm$json$Json$Encode$int(selectItem.id))
@@ -13064,6 +13367,39 @@ var $author$project$Punch$Api$setType = F4(
 						]))
 			});
 	});
+var $author$project$Punch$Messages$UnclearResult = F2(
+	function (a, b) {
+		return {$: 'UnclearResult', a: a, b: b};
+	});
+var $author$project$Punch$Api$unClear = F3(
+	function (punch, plantId, token) {
+		return $elm$http$Http$request(
+			{
+				body: $elm$http$Http$jsonBody(
+					$elm$json$Json$Encode$int(punch.id)),
+				expect: $elm$http$Http$expectWhatever(
+					A2(
+						$elm$core$Basics$composeL,
+						$author$project$Punch$Messages$GotApiResult,
+						$author$project$Punch$Messages$UnclearResult(punch))),
+				headers: _List_fromArray(
+					[
+						A2($elm$http$Http$header, 'Authorization', 'Bearer ' + token)
+					]),
+				method: 'POST',
+				timeout: $elm$core$Maybe$Nothing,
+				tracker: $elm$core$Maybe$Nothing,
+				url: A2(
+					$author$project$Punch$Api$url,
+					_List_fromArray(
+						['PunchListItem', 'Unclear']),
+					_List_fromArray(
+						[
+							A2($elm$url$Url$Builder$string, 'plantId', plantId),
+							$author$project$Punch$Api$apiVersion
+						]))
+			});
+	});
 var $author$project$Punch$Update$unSelectPunch = function (_v0) {
 	var m = _v0.a;
 	var c = _v0.b;
@@ -13073,6 +13409,39 @@ var $author$project$Punch$Update$unSelectPunch = function (_v0) {
 			{selectedPunch: $elm$core$Maybe$Nothing}),
 		c);
 };
+var $author$project$Punch$Messages$UnverifyResult = F2(
+	function (a, b) {
+		return {$: 'UnverifyResult', a: a, b: b};
+	});
+var $author$project$Punch$Api$unVerify = F3(
+	function (punch, plantId, token) {
+		return $elm$http$Http$request(
+			{
+				body: $elm$http$Http$jsonBody(
+					$elm$json$Json$Encode$int(punch.id)),
+				expect: $elm$http$Http$expectWhatever(
+					A2(
+						$elm$core$Basics$composeL,
+						$author$project$Punch$Messages$GotApiResult,
+						$author$project$Punch$Messages$UnverifyResult(punch))),
+				headers: _List_fromArray(
+					[
+						A2($elm$http$Http$header, 'Authorization', 'Bearer ' + token)
+					]),
+				method: 'POST',
+				timeout: $elm$core$Maybe$Nothing,
+				tracker: $elm$core$Maybe$Nothing,
+				url: A2(
+					$author$project$Punch$Api$url,
+					_List_fromArray(
+						['PunchListItem', 'Unverify']),
+					_List_fromArray(
+						[
+							A2($elm$url$Url$Builder$string, 'plantId', plantId),
+							$author$project$Punch$Api$apiVersion
+						]))
+			});
+	});
 var $author$project$Punch$Messages$PunchDescriptionResult = F2(
 	function (a, b) {
 		return {$: 'PunchDescriptionResult', a: a, b: b};
@@ -13087,11 +13456,7 @@ var $author$project$Punch$Api$updateDescription = F3(
 							[
 								_Utils_Tuple2(
 								'PunchItemId',
-								$elm$json$Json$Encode$int(
-									A2(
-										$elm$core$Maybe$withDefault,
-										0,
-										$elm$core$String$toInt(punch.id)))),
+								$elm$json$Json$Encode$int(punch.id)),
 								_Utils_Tuple2(
 								'Description',
 								$elm$json$Json$Encode$string(punch.description))
@@ -13112,6 +13477,39 @@ var $author$project$Punch$Api$updateDescription = F3(
 					$author$project$Punch$Api$url,
 					_List_fromArray(
 						['PunchListItem', 'SetDescription']),
+					_List_fromArray(
+						[
+							A2($elm$url$Url$Builder$string, 'plantId', plantId),
+							$author$project$Punch$Api$apiVersion
+						]))
+			});
+	});
+var $author$project$Punch$Messages$VerifyResult = F2(
+	function (a, b) {
+		return {$: 'VerifyResult', a: a, b: b};
+	});
+var $author$project$Punch$Api$verify = F3(
+	function (punch, plantId, token) {
+		return $elm$http$Http$request(
+			{
+				body: $elm$http$Http$jsonBody(
+					$elm$json$Json$Encode$int(punch.id)),
+				expect: $elm$http$Http$expectWhatever(
+					A2(
+						$elm$core$Basics$composeL,
+						$author$project$Punch$Messages$GotApiResult,
+						$author$project$Punch$Messages$VerifyResult(punch))),
+				headers: _List_fromArray(
+					[
+						A2($elm$http$Http$header, 'Authorization', 'Bearer ' + token)
+					]),
+				method: 'POST',
+				timeout: $elm$core$Maybe$Nothing,
+				tracker: $elm$core$Maybe$Nothing,
+				url: A2(
+					$author$project$Punch$Api$url,
+					_List_fromArray(
+						['PunchListItem', 'Verify']),
 					_List_fromArray(
 						[
 							A2($elm$url$Url$Builder$string, 'plantId', plantId),
@@ -13143,9 +13541,12 @@ var $author$project$Punch$Update$update = F2(
 					model.selectedPunch,
 					$elm$core$Maybe$Just(punch)) ? $author$project$Punch$Update$unSelectPunch(
 					$author$project$Punch$Update$closeDropDowns(mc)) : A2(
-					$author$project$Punch$Update$selectPunch,
+					$author$project$Punch$Update$getDetails,
 					punch,
-					$author$project$Punch$Update$closeDropDowns(mc));
+					A2(
+						$author$project$Punch$Update$selectPunch,
+						punch,
+						$author$project$Punch$Update$closeDropDowns(mc)));
 			case 'NeverHappens':
 				return _Utils_Tuple2(
 					model,
@@ -13200,8 +13601,10 @@ var $author$project$Punch$Update$update = F2(
 							return $author$project$Punch$Update$getOrganizations;
 						case 'ClearingByDropDown':
 							return $author$project$Punch$Update$getOrganizations;
-						default:
+						case 'TypeDropDown':
 							return $author$project$Punch$Update$getTypes;
+						default:
+							return $author$project$Punch$Update$getSorts;
 					}
 				}()(
 					_Utils_Tuple2(
@@ -13209,7 +13612,7 @@ var $author$project$Punch$Update$update = F2(
 							model,
 							{dropDown: dropDown}),
 						$elm$core$Platform$Cmd$none));
-			default:
+			case 'DropDownItemPressed':
 				var punch = msg.a;
 				var item = msg.b;
 				var updated = function () {
@@ -13231,10 +13634,14 @@ var $author$project$Punch$Update$update = F2(
 							return _Utils_update(
 								punch,
 								{clearingByOrg: item.description});
-						default:
+						case 'TypeDropDown':
 							return _Utils_update(
 								punch,
 								{typeDescription: item.description});
+						default:
+							return _Utils_update(
+								punch,
+								{sortingDescription: item.description});
 					}
 				}();
 				return function () {
@@ -13260,11 +13667,17 @@ var $author$project$Punch$Update$update = F2(
 									[
 										A2($author$project$Punch$Api$setClearingBy, punch, item)
 									]));
-						default:
+						case 'TypeDropDown':
 							return $author$project$Punch$Update$apiRequest(
 								_List_fromArray(
 									[
 										A2($author$project$Punch$Api$setType, punch, item)
+									]));
+						default:
+							return $author$project$Punch$Update$apiRequest(
+								_List_fromArray(
+									[
+										A2($author$project$Punch$Api$setSorting, punch, item)
 									]));
 					}
 				}()(
@@ -13276,6 +13689,42 @@ var $author$project$Punch$Update$update = F2(
 								punch: A3($elm$core$Dict$insert, punch.id, updated, model.punch)
 							}),
 						$elm$core$Platform$Cmd$none));
+			case 'ClearPunchButtonPressed':
+				var punch = msg.a;
+				return A2(
+					$author$project$Punch$Update$apiRequest,
+					_List_fromArray(
+						[
+							$author$project$Punch$Api$clear(punch)
+						]),
+					mc);
+			case 'UnclearPunchButtonPressed':
+				var punch = msg.a;
+				return A2(
+					$author$project$Punch$Update$apiRequest,
+					_List_fromArray(
+						[
+							$author$project$Punch$Api$unClear(punch)
+						]),
+					mc);
+			case 'VerifyPunchButtonPressed':
+				var punch = msg.a;
+				return A2(
+					$author$project$Punch$Update$apiRequest,
+					_List_fromArray(
+						[
+							$author$project$Punch$Api$verify(punch)
+						]),
+					mc);
+			default:
+				var punch = msg.a;
+				return A2(
+					$author$project$Punch$Update$apiRequest,
+					_List_fromArray(
+						[
+							$author$project$Punch$Api$unVerify(punch)
+						]),
+					mc);
 		}
 	});
 var $elm$core$Dict$isEmpty = function (dict) {
@@ -15042,8 +15491,8 @@ var $author$project$Equinor$Palette$scaledInt = function (size) {
 		$author$project$Equinor$Palette$scaled(size),
 		$elm$core$Basics$round);
 };
-var $author$project$Punch$View$renderDescription = F3(
-	function (textToHighlight, size, punch) {
+var $author$project$Punch$View$renderDescription = F4(
+	function (textToHighlight, size, readOnly, punch) {
 		return A2(
 			$mdgriffith$elm_ui$Element$column,
 			_List_fromArray(
@@ -15062,7 +15511,21 @@ var $author$project$Punch$View$renderDescription = F3(
 							$mdgriffith$elm_ui$Element$Font$bold
 						]),
 					$mdgriffith$elm_ui$Element$text('Punch description:')),
+					readOnly ? A2(
+					$mdgriffith$elm_ui$Element$column,
+					_List_fromArray(
+						[
+							$mdgriffith$elm_ui$Element$width($mdgriffith$elm_ui$Element$fill)
+						]),
 					A2(
+						$elm$core$List$map,
+						function (txt) {
+							return (txt === '') ? $mdgriffith$elm_ui$Element$text(' ') : A2(
+								$mdgriffith$elm_ui$Element$paragraph,
+								_List_Nil,
+								A2($author$project$Equinor$Palette$highlight, textToHighlight, txt));
+						},
+						$elm$core$String$lines(punch.description))) : A2(
 					$mdgriffith$elm_ui$Element$Input$multiline,
 					_List_fromArray(
 						[
@@ -15086,10 +15549,280 @@ var $author$project$Punch$View$renderDescription = F3(
 var $author$project$Punch$Types$CategoryDropDown = {$: 'CategoryDropDown'};
 var $author$project$Punch$Types$ClearingByDropDown = {$: 'ClearingByDropDown'};
 var $author$project$Punch$Types$RaisedByDropDown = {$: 'RaisedByDropDown'};
+var $author$project$Punch$Types$SortingDropDown = {$: 'SortingDropDown'};
 var $author$project$Punch$Types$TypeDropDown = {$: 'TypeDropDown'};
 var $author$project$Punch$Messages$DropDownPressed = function (a) {
 	return {$: 'DropDownPressed', a: a};
 };
+var $mdgriffith$elm_ui$Element$Border$widthXY = F2(
+	function (x, y) {
+		return A2(
+			$mdgriffith$elm_ui$Internal$Model$StyleClass,
+			$mdgriffith$elm_ui$Internal$Flag$borderWidth,
+			A5(
+				$mdgriffith$elm_ui$Internal$Model$BorderWidth,
+				'b-' + ($elm$core$String$fromInt(x) + ('-' + $elm$core$String$fromInt(y))),
+				y,
+				x,
+				y,
+				x));
+	});
+var $mdgriffith$elm_ui$Element$Border$widthEach = function (_v0) {
+	var bottom = _v0.bottom;
+	var top = _v0.top;
+	var left = _v0.left;
+	var right = _v0.right;
+	return (_Utils_eq(top, bottom) && _Utils_eq(left, right)) ? (_Utils_eq(top, right) ? $mdgriffith$elm_ui$Element$Border$width(top) : A2($mdgriffith$elm_ui$Element$Border$widthXY, left, top)) : A2(
+		$mdgriffith$elm_ui$Internal$Model$StyleClass,
+		$mdgriffith$elm_ui$Internal$Flag$borderWidth,
+		A5(
+			$mdgriffith$elm_ui$Internal$Model$BorderWidth,
+			'b-' + ($elm$core$String$fromInt(top) + ('-' + ($elm$core$String$fromInt(right) + ('-' + ($elm$core$String$fromInt(bottom) + ('-' + $elm$core$String$fromInt(left))))))),
+			top,
+			right,
+			bottom,
+			left));
+};
+var $mdgriffith$elm_ui$Internal$Model$Padding = F5(
+	function (a, b, c, d, e) {
+		return {$: 'Padding', a: a, b: b, c: c, d: d, e: e};
+	});
+var $mdgriffith$elm_ui$Internal$Model$Spaced = F3(
+	function (a, b, c) {
+		return {$: 'Spaced', a: a, b: b, c: c};
+	});
+var $mdgriffith$elm_ui$Internal$Model$extractSpacingAndPadding = function (attrs) {
+	return A3(
+		$elm$core$List$foldr,
+		F2(
+			function (attr, _v0) {
+				var pad = _v0.a;
+				var spacing = _v0.b;
+				return _Utils_Tuple2(
+					function () {
+						if (pad.$ === 'Just') {
+							var x = pad.a;
+							return pad;
+						} else {
+							if ((attr.$ === 'StyleClass') && (attr.b.$ === 'PaddingStyle')) {
+								var _v3 = attr.b;
+								var name = _v3.a;
+								var t = _v3.b;
+								var r = _v3.c;
+								var b = _v3.d;
+								var l = _v3.e;
+								return $elm$core$Maybe$Just(
+									A5($mdgriffith$elm_ui$Internal$Model$Padding, name, t, r, b, l));
+							} else {
+								return $elm$core$Maybe$Nothing;
+							}
+						}
+					}(),
+					function () {
+						if (spacing.$ === 'Just') {
+							var x = spacing.a;
+							return spacing;
+						} else {
+							if ((attr.$ === 'StyleClass') && (attr.b.$ === 'SpacingStyle')) {
+								var _v6 = attr.b;
+								var name = _v6.a;
+								var x = _v6.b;
+								var y = _v6.c;
+								return $elm$core$Maybe$Just(
+									A3($mdgriffith$elm_ui$Internal$Model$Spaced, name, x, y));
+							} else {
+								return $elm$core$Maybe$Nothing;
+							}
+						}
+					}());
+			}),
+		_Utils_Tuple2($elm$core$Maybe$Nothing, $elm$core$Maybe$Nothing),
+		attrs);
+};
+var $mdgriffith$elm_ui$Element$wrappedRow = F2(
+	function (attrs, children) {
+		var _v0 = $mdgriffith$elm_ui$Internal$Model$extractSpacingAndPadding(attrs);
+		var padded = _v0.a;
+		var spaced = _v0.b;
+		if (spaced.$ === 'Nothing') {
+			return A4(
+				$mdgriffith$elm_ui$Internal$Model$element,
+				$mdgriffith$elm_ui$Internal$Model$asRow,
+				$mdgriffith$elm_ui$Internal$Model$div,
+				A2(
+					$elm$core$List$cons,
+					$mdgriffith$elm_ui$Internal$Model$htmlClass($mdgriffith$elm_ui$Internal$Style$classes.contentLeft + (' ' + ($mdgriffith$elm_ui$Internal$Style$classes.contentCenterY + (' ' + $mdgriffith$elm_ui$Internal$Style$classes.wrapped)))),
+					A2(
+						$elm$core$List$cons,
+						$mdgriffith$elm_ui$Element$width($mdgriffith$elm_ui$Element$shrink),
+						A2(
+							$elm$core$List$cons,
+							$mdgriffith$elm_ui$Element$height($mdgriffith$elm_ui$Element$shrink),
+							attrs))),
+				$mdgriffith$elm_ui$Internal$Model$Unkeyed(children));
+		} else {
+			var _v2 = spaced.a;
+			var spaceName = _v2.a;
+			var x = _v2.b;
+			var y = _v2.c;
+			var newPadding = function () {
+				if (padded.$ === 'Just') {
+					var _v5 = padded.a;
+					var name = _v5.a;
+					var t = _v5.b;
+					var r = _v5.c;
+					var b = _v5.d;
+					var l = _v5.e;
+					if ((_Utils_cmp(r, x / 2) > -1) && (_Utils_cmp(b, y / 2) > -1)) {
+						var newTop = t - (y / 2);
+						var newRight = r - (x / 2);
+						var newLeft = l - (x / 2);
+						var newBottom = b - (y / 2);
+						return $elm$core$Maybe$Just(
+							A2(
+								$mdgriffith$elm_ui$Internal$Model$StyleClass,
+								$mdgriffith$elm_ui$Internal$Flag$padding,
+								A5(
+									$mdgriffith$elm_ui$Internal$Model$PaddingStyle,
+									A4($mdgriffith$elm_ui$Internal$Model$paddingNameFloat, newTop, newRight, newBottom, newLeft),
+									newTop,
+									newRight,
+									newBottom,
+									newLeft)));
+					} else {
+						return $elm$core$Maybe$Nothing;
+					}
+				} else {
+					return $elm$core$Maybe$Nothing;
+				}
+			}();
+			if (newPadding.$ === 'Just') {
+				var pad = newPadding.a;
+				return A4(
+					$mdgriffith$elm_ui$Internal$Model$element,
+					$mdgriffith$elm_ui$Internal$Model$asRow,
+					$mdgriffith$elm_ui$Internal$Model$div,
+					A2(
+						$elm$core$List$cons,
+						$mdgriffith$elm_ui$Internal$Model$htmlClass($mdgriffith$elm_ui$Internal$Style$classes.contentLeft + (' ' + ($mdgriffith$elm_ui$Internal$Style$classes.contentCenterY + (' ' + $mdgriffith$elm_ui$Internal$Style$classes.wrapped)))),
+						A2(
+							$elm$core$List$cons,
+							$mdgriffith$elm_ui$Element$width($mdgriffith$elm_ui$Element$shrink),
+							A2(
+								$elm$core$List$cons,
+								$mdgriffith$elm_ui$Element$height($mdgriffith$elm_ui$Element$shrink),
+								_Utils_ap(
+									attrs,
+									_List_fromArray(
+										[pad]))))),
+					$mdgriffith$elm_ui$Internal$Model$Unkeyed(children));
+			} else {
+				var halfY = -(y / 2);
+				var halfX = -(x / 2);
+				return A4(
+					$mdgriffith$elm_ui$Internal$Model$element,
+					$mdgriffith$elm_ui$Internal$Model$asEl,
+					$mdgriffith$elm_ui$Internal$Model$div,
+					attrs,
+					$mdgriffith$elm_ui$Internal$Model$Unkeyed(
+						_List_fromArray(
+							[
+								A4(
+								$mdgriffith$elm_ui$Internal$Model$element,
+								$mdgriffith$elm_ui$Internal$Model$asRow,
+								$mdgriffith$elm_ui$Internal$Model$div,
+								A2(
+									$elm$core$List$cons,
+									$mdgriffith$elm_ui$Internal$Model$htmlClass($mdgriffith$elm_ui$Internal$Style$classes.contentLeft + (' ' + ($mdgriffith$elm_ui$Internal$Style$classes.contentCenterY + (' ' + $mdgriffith$elm_ui$Internal$Style$classes.wrapped)))),
+									A2(
+										$elm$core$List$cons,
+										$mdgriffith$elm_ui$Internal$Model$Attr(
+											A2(
+												$elm$html$Html$Attributes$style,
+												'margin',
+												$elm$core$String$fromFloat(halfY) + ('px' + (' ' + ($elm$core$String$fromFloat(halfX) + 'px'))))),
+										A2(
+											$elm$core$List$cons,
+											$mdgriffith$elm_ui$Internal$Model$Attr(
+												A2(
+													$elm$html$Html$Attributes$style,
+													'width',
+													'calc(100% + ' + ($elm$core$String$fromInt(x) + 'px)'))),
+											A2(
+												$elm$core$List$cons,
+												$mdgriffith$elm_ui$Internal$Model$Attr(
+													A2(
+														$elm$html$Html$Attributes$style,
+														'height',
+														'calc(100% + ' + ($elm$core$String$fromInt(y) + 'px)'))),
+												A2(
+													$elm$core$List$cons,
+													A2(
+														$mdgriffith$elm_ui$Internal$Model$StyleClass,
+														$mdgriffith$elm_ui$Internal$Flag$spacing,
+														A3($mdgriffith$elm_ui$Internal$Model$SpacingStyle, spaceName, x, y)),
+													_List_Nil))))),
+								$mdgriffith$elm_ui$Internal$Model$Unkeyed(children))
+							])));
+			}
+		}
+	});
+var $author$project$Equinor$Palette$kv = F4(
+	function (size, heading, value, subValue) {
+		var dontRender = value === '';
+		return dontRender ? $mdgriffith$elm_ui$Element$none : A2(
+			$mdgriffith$elm_ui$Element$column,
+			_List_fromArray(
+				[
+					$mdgriffith$elm_ui$Element$Border$widthEach(
+					{bottom: 1, left: 0, right: 0, top: 0}),
+					$mdgriffith$elm_ui$Element$width($mdgriffith$elm_ui$Element$fill),
+					$mdgriffith$elm_ui$Element$Font$size(
+					$elm$core$Basics$round(size)),
+					$mdgriffith$elm_ui$Element$Border$color($author$project$Equinor$Palette$mistBlue)
+				]),
+			_List_fromArray(
+				[
+					A2(
+					$mdgriffith$elm_ui$Element$el,
+					_List_fromArray(
+						[
+							$mdgriffith$elm_ui$Element$Font$color($author$project$Equinor$Palette$mossGreen),
+							$mdgriffith$elm_ui$Element$Font$bold,
+							$mdgriffith$elm_ui$Element$Font$size(
+							A2($author$project$Equinor$Palette$scaledInt, size, -3)),
+							$mdgriffith$elm_ui$Element$width($mdgriffith$elm_ui$Element$fill)
+						]),
+					$mdgriffith$elm_ui$Element$text(heading)),
+					A2(
+					$mdgriffith$elm_ui$Element$wrappedRow,
+					_List_fromArray(
+						[
+							$mdgriffith$elm_ui$Element$width($mdgriffith$elm_ui$Element$fill)
+						]),
+					_List_fromArray(
+						[
+							A2(
+							$mdgriffith$elm_ui$Element$paragraph,
+							_List_Nil,
+							_List_fromArray(
+								[
+									$mdgriffith$elm_ui$Element$text(value)
+								])),
+							(subValue === '') ? $mdgriffith$elm_ui$Element$none : A2(
+							$mdgriffith$elm_ui$Element$paragraph,
+							_List_fromArray(
+								[
+									$mdgriffith$elm_ui$Element$Font$size(
+									A2($author$project$Equinor$Palette$scaledInt, size, -2))
+								]),
+							_List_fromArray(
+								[
+									$mdgriffith$elm_ui$Element$text(subValue)
+								]))
+						]))
+				]));
+	});
 var $mdgriffith$elm_ui$Internal$Model$Max = F2(
 	function (a, b) {
 		return {$: 'Max', a: a, b: b};
@@ -15386,8 +16119,8 @@ var $author$project$Punch$View$selectionList = F4(
 				A3($author$project$Punch$View$selectItem, size, current, punch)),
 			webData);
 	});
-var $author$project$Punch$View$dropDown = F6(
-	function (size, dropDownType, current, field, punch, model) {
+var $author$project$Punch$View$dropDown = F7(
+	function (size, readOnly, punch, model, dropDownType, current, field) {
 		var name = function () {
 			switch (dropDownType.$) {
 				case 'NoDropDown':
@@ -15398,8 +16131,10 @@ var $author$project$Punch$View$dropDown = F6(
 					return 'Raised By';
 				case 'ClearingByDropDown':
 					return 'Clearing By';
-				default:
+				case 'TypeDropDown':
 					return 'Type';
+				default:
+					return 'Sorting';
 			}
 		}();
 		var header = A2(
@@ -15413,7 +16148,7 @@ var $author$project$Punch$View$dropDown = F6(
 					$mdgriffith$elm_ui$Element$width($mdgriffith$elm_ui$Element$fill)
 				]),
 			$mdgriffith$elm_ui$Element$text(name));
-		return _Utils_eq(model.dropDown, dropDownType) ? A2(
+		return readOnly ? A4($author$project$Equinor$Palette$kv, size, name, current, '') : (_Utils_eq(model.dropDown, dropDownType) ? A2(
 			$mdgriffith$elm_ui$Element$column,
 			_List_fromArray(
 				[
@@ -15449,279 +16184,11 @@ var $author$project$Punch$View$dropDown = F6(
 				[
 					header,
 					$mdgriffith$elm_ui$Element$text(current)
-				]));
+				])));
 	});
-var $mdgriffith$elm_ui$Element$Border$widthXY = F2(
-	function (x, y) {
-		return A2(
-			$mdgriffith$elm_ui$Internal$Model$StyleClass,
-			$mdgriffith$elm_ui$Internal$Flag$borderWidth,
-			A5(
-				$mdgriffith$elm_ui$Internal$Model$BorderWidth,
-				'b-' + ($elm$core$String$fromInt(x) + ('-' + $elm$core$String$fromInt(y))),
-				y,
-				x,
-				y,
-				x));
-	});
-var $mdgriffith$elm_ui$Element$Border$widthEach = function (_v0) {
-	var bottom = _v0.bottom;
-	var top = _v0.top;
-	var left = _v0.left;
-	var right = _v0.right;
-	return (_Utils_eq(top, bottom) && _Utils_eq(left, right)) ? (_Utils_eq(top, right) ? $mdgriffith$elm_ui$Element$Border$width(top) : A2($mdgriffith$elm_ui$Element$Border$widthXY, left, top)) : A2(
-		$mdgriffith$elm_ui$Internal$Model$StyleClass,
-		$mdgriffith$elm_ui$Internal$Flag$borderWidth,
-		A5(
-			$mdgriffith$elm_ui$Internal$Model$BorderWidth,
-			'b-' + ($elm$core$String$fromInt(top) + ('-' + ($elm$core$String$fromInt(right) + ('-' + ($elm$core$String$fromInt(bottom) + ('-' + $elm$core$String$fromInt(left))))))),
-			top,
-			right,
-			bottom,
-			left));
-};
-var $mdgriffith$elm_ui$Internal$Model$Padding = F5(
-	function (a, b, c, d, e) {
-		return {$: 'Padding', a: a, b: b, c: c, d: d, e: e};
-	});
-var $mdgriffith$elm_ui$Internal$Model$Spaced = F3(
-	function (a, b, c) {
-		return {$: 'Spaced', a: a, b: b, c: c};
-	});
-var $mdgriffith$elm_ui$Internal$Model$extractSpacingAndPadding = function (attrs) {
-	return A3(
-		$elm$core$List$foldr,
-		F2(
-			function (attr, _v0) {
-				var pad = _v0.a;
-				var spacing = _v0.b;
-				return _Utils_Tuple2(
-					function () {
-						if (pad.$ === 'Just') {
-							var x = pad.a;
-							return pad;
-						} else {
-							if ((attr.$ === 'StyleClass') && (attr.b.$ === 'PaddingStyle')) {
-								var _v3 = attr.b;
-								var name = _v3.a;
-								var t = _v3.b;
-								var r = _v3.c;
-								var b = _v3.d;
-								var l = _v3.e;
-								return $elm$core$Maybe$Just(
-									A5($mdgriffith$elm_ui$Internal$Model$Padding, name, t, r, b, l));
-							} else {
-								return $elm$core$Maybe$Nothing;
-							}
-						}
-					}(),
-					function () {
-						if (spacing.$ === 'Just') {
-							var x = spacing.a;
-							return spacing;
-						} else {
-							if ((attr.$ === 'StyleClass') && (attr.b.$ === 'SpacingStyle')) {
-								var _v6 = attr.b;
-								var name = _v6.a;
-								var x = _v6.b;
-								var y = _v6.c;
-								return $elm$core$Maybe$Just(
-									A3($mdgriffith$elm_ui$Internal$Model$Spaced, name, x, y));
-							} else {
-								return $elm$core$Maybe$Nothing;
-							}
-						}
-					}());
-			}),
-		_Utils_Tuple2($elm$core$Maybe$Nothing, $elm$core$Maybe$Nothing),
-		attrs);
-};
-var $mdgriffith$elm_ui$Element$wrappedRow = F2(
-	function (attrs, children) {
-		var _v0 = $mdgriffith$elm_ui$Internal$Model$extractSpacingAndPadding(attrs);
-		var padded = _v0.a;
-		var spaced = _v0.b;
-		if (spaced.$ === 'Nothing') {
-			return A4(
-				$mdgriffith$elm_ui$Internal$Model$element,
-				$mdgriffith$elm_ui$Internal$Model$asRow,
-				$mdgriffith$elm_ui$Internal$Model$div,
-				A2(
-					$elm$core$List$cons,
-					$mdgriffith$elm_ui$Internal$Model$htmlClass($mdgriffith$elm_ui$Internal$Style$classes.contentLeft + (' ' + ($mdgriffith$elm_ui$Internal$Style$classes.contentCenterY + (' ' + $mdgriffith$elm_ui$Internal$Style$classes.wrapped)))),
-					A2(
-						$elm$core$List$cons,
-						$mdgriffith$elm_ui$Element$width($mdgriffith$elm_ui$Element$shrink),
-						A2(
-							$elm$core$List$cons,
-							$mdgriffith$elm_ui$Element$height($mdgriffith$elm_ui$Element$shrink),
-							attrs))),
-				$mdgriffith$elm_ui$Internal$Model$Unkeyed(children));
-		} else {
-			var _v2 = spaced.a;
-			var spaceName = _v2.a;
-			var x = _v2.b;
-			var y = _v2.c;
-			var newPadding = function () {
-				if (padded.$ === 'Just') {
-					var _v5 = padded.a;
-					var name = _v5.a;
-					var t = _v5.b;
-					var r = _v5.c;
-					var b = _v5.d;
-					var l = _v5.e;
-					if ((_Utils_cmp(r, x / 2) > -1) && (_Utils_cmp(b, y / 2) > -1)) {
-						var newTop = t - (y / 2);
-						var newRight = r - (x / 2);
-						var newLeft = l - (x / 2);
-						var newBottom = b - (y / 2);
-						return $elm$core$Maybe$Just(
-							A2(
-								$mdgriffith$elm_ui$Internal$Model$StyleClass,
-								$mdgriffith$elm_ui$Internal$Flag$padding,
-								A5(
-									$mdgriffith$elm_ui$Internal$Model$PaddingStyle,
-									A4($mdgriffith$elm_ui$Internal$Model$paddingNameFloat, newTop, newRight, newBottom, newLeft),
-									newTop,
-									newRight,
-									newBottom,
-									newLeft)));
-					} else {
-						return $elm$core$Maybe$Nothing;
-					}
-				} else {
-					return $elm$core$Maybe$Nothing;
-				}
-			}();
-			if (newPadding.$ === 'Just') {
-				var pad = newPadding.a;
-				return A4(
-					$mdgriffith$elm_ui$Internal$Model$element,
-					$mdgriffith$elm_ui$Internal$Model$asRow,
-					$mdgriffith$elm_ui$Internal$Model$div,
-					A2(
-						$elm$core$List$cons,
-						$mdgriffith$elm_ui$Internal$Model$htmlClass($mdgriffith$elm_ui$Internal$Style$classes.contentLeft + (' ' + ($mdgriffith$elm_ui$Internal$Style$classes.contentCenterY + (' ' + $mdgriffith$elm_ui$Internal$Style$classes.wrapped)))),
-						A2(
-							$elm$core$List$cons,
-							$mdgriffith$elm_ui$Element$width($mdgriffith$elm_ui$Element$shrink),
-							A2(
-								$elm$core$List$cons,
-								$mdgriffith$elm_ui$Element$height($mdgriffith$elm_ui$Element$shrink),
-								_Utils_ap(
-									attrs,
-									_List_fromArray(
-										[pad]))))),
-					$mdgriffith$elm_ui$Internal$Model$Unkeyed(children));
-			} else {
-				var halfY = -(y / 2);
-				var halfX = -(x / 2);
-				return A4(
-					$mdgriffith$elm_ui$Internal$Model$element,
-					$mdgriffith$elm_ui$Internal$Model$asEl,
-					$mdgriffith$elm_ui$Internal$Model$div,
-					attrs,
-					$mdgriffith$elm_ui$Internal$Model$Unkeyed(
-						_List_fromArray(
-							[
-								A4(
-								$mdgriffith$elm_ui$Internal$Model$element,
-								$mdgriffith$elm_ui$Internal$Model$asRow,
-								$mdgriffith$elm_ui$Internal$Model$div,
-								A2(
-									$elm$core$List$cons,
-									$mdgriffith$elm_ui$Internal$Model$htmlClass($mdgriffith$elm_ui$Internal$Style$classes.contentLeft + (' ' + ($mdgriffith$elm_ui$Internal$Style$classes.contentCenterY + (' ' + $mdgriffith$elm_ui$Internal$Style$classes.wrapped)))),
-									A2(
-										$elm$core$List$cons,
-										$mdgriffith$elm_ui$Internal$Model$Attr(
-											A2(
-												$elm$html$Html$Attributes$style,
-												'margin',
-												$elm$core$String$fromFloat(halfY) + ('px' + (' ' + ($elm$core$String$fromFloat(halfX) + 'px'))))),
-										A2(
-											$elm$core$List$cons,
-											$mdgriffith$elm_ui$Internal$Model$Attr(
-												A2(
-													$elm$html$Html$Attributes$style,
-													'width',
-													'calc(100% + ' + ($elm$core$String$fromInt(x) + 'px)'))),
-											A2(
-												$elm$core$List$cons,
-												$mdgriffith$elm_ui$Internal$Model$Attr(
-													A2(
-														$elm$html$Html$Attributes$style,
-														'height',
-														'calc(100% + ' + ($elm$core$String$fromInt(y) + 'px)'))),
-												A2(
-													$elm$core$List$cons,
-													A2(
-														$mdgriffith$elm_ui$Internal$Model$StyleClass,
-														$mdgriffith$elm_ui$Internal$Flag$spacing,
-														A3($mdgriffith$elm_ui$Internal$Model$SpacingStyle, spaceName, x, y)),
-													_List_Nil))))),
-								$mdgriffith$elm_ui$Internal$Model$Unkeyed(children))
-							])));
-			}
-		}
-	});
-var $author$project$Equinor$Palette$kv = F4(
-	function (size, heading, value, subValue) {
-		var dontRender = value === '';
-		return dontRender ? $mdgriffith$elm_ui$Element$none : A2(
-			$mdgriffith$elm_ui$Element$column,
-			_List_fromArray(
-				[
-					$mdgriffith$elm_ui$Element$Border$widthEach(
-					{bottom: 1, left: 0, right: 0, top: 0}),
-					$mdgriffith$elm_ui$Element$width($mdgriffith$elm_ui$Element$fill),
-					$mdgriffith$elm_ui$Element$Font$size(
-					$elm$core$Basics$round(size)),
-					$mdgriffith$elm_ui$Element$Border$color($author$project$Equinor$Palette$mistBlue)
-				]),
-			_List_fromArray(
-				[
-					A2(
-					$mdgriffith$elm_ui$Element$el,
-					_List_fromArray(
-						[
-							$mdgriffith$elm_ui$Element$Font$color($author$project$Equinor$Palette$mossGreen),
-							$mdgriffith$elm_ui$Element$Font$bold,
-							$mdgriffith$elm_ui$Element$Font$size(
-							A2($author$project$Equinor$Palette$scaledInt, size, -3)),
-							$mdgriffith$elm_ui$Element$width($mdgriffith$elm_ui$Element$fill)
-						]),
-					$mdgriffith$elm_ui$Element$text(heading)),
-					A2(
-					$mdgriffith$elm_ui$Element$wrappedRow,
-					_List_fromArray(
-						[
-							$mdgriffith$elm_ui$Element$width($mdgriffith$elm_ui$Element$fill)
-						]),
-					_List_fromArray(
-						[
-							A2(
-							$mdgriffith$elm_ui$Element$paragraph,
-							_List_Nil,
-							_List_fromArray(
-								[
-									$mdgriffith$elm_ui$Element$text(value)
-								])),
-							(subValue === '') ? $mdgriffith$elm_ui$Element$none : A2(
-							$mdgriffith$elm_ui$Element$paragraph,
-							_List_fromArray(
-								[
-									$mdgriffith$elm_ui$Element$Font$size(
-									A2($author$project$Equinor$Palette$scaledInt, size, -2))
-								]),
-							_List_fromArray(
-								[
-									$mdgriffith$elm_ui$Element$text(subValue)
-								]))
-						]))
-				]));
-	});
-var $author$project$Punch$View$renderDetails = F3(
-	function (size, model, punch) {
+var $author$project$Punch$View$renderDetails = F4(
+	function (size, model, readOnly, punch) {
+		var dd = A4($author$project$Punch$View$dropDown, size, readOnly, punch, model);
 		return A2(
 			$mdgriffith$elm_ui$Element$column,
 			_List_fromArray(
@@ -15738,16 +16205,20 @@ var $author$project$Punch$View$renderDetails = F3(
 						]),
 					_List_fromArray(
 						[
-							A4($author$project$Equinor$Palette$kv, size, 'No', punch.id, ''),
+							A4(
+							$author$project$Equinor$Palette$kv,
+							size,
+							'No',
+							$elm$core$String$fromInt(punch.id),
+							''),
 							A4($author$project$Equinor$Palette$kv, size, 'Tag', punch.tag, ''),
 							A4($author$project$Equinor$Palette$kv, size, 'Type', punch.typeDescription, ''),
 							A4($author$project$Equinor$Palette$kv, size, 'Commissioning package', punch.commPk, ''),
 							A4($author$project$Equinor$Palette$kv, size, 'MC package', punch.mcPk, ''),
 							A4($author$project$Equinor$Palette$kv, size, 'Location', punch.location, '')
 						])),
-					A6(
-					$author$project$Punch$View$dropDown,
-					size,
+					A3(
+					dd,
 					$author$project$Punch$Types$CategoryDropDown,
 					function () {
 						var _v0 = punch.status;
@@ -15759,40 +16230,269 @@ var $author$project$Punch$View$renderDetails = F3(
 					}(),
 					function ($) {
 						return $.categories;
-					},
-					punch,
-					model),
-					A6(
-					$author$project$Punch$View$dropDown,
-					size,
+					}),
+					A3(
+					dd,
 					$author$project$Punch$Types$RaisedByDropDown,
 					punch.raisedByOrg,
 					function ($) {
 						return $.organizations;
-					},
-					punch,
-					model),
-					A6(
-					$author$project$Punch$View$dropDown,
-					size,
+					}),
+					A3(
+					dd,
 					$author$project$Punch$Types$ClearingByDropDown,
 					punch.clearingByOrg,
 					function ($) {
 						return $.organizations;
-					},
-					punch,
-					model),
-					A6(
-					$author$project$Punch$View$dropDown,
-					size,
+					}),
+					A3(
+					dd,
 					$author$project$Punch$Types$TypeDropDown,
 					punch.typeDescription,
 					function ($) {
 						return $.types;
-					},
-					punch,
-					model)
+					}),
+					A3(
+					dd,
+					$author$project$Punch$Types$SortingDropDown,
+					punch.sortingDescription,
+					function ($) {
+						return $.sorts;
+					})
 				]));
+	});
+var $author$project$Punch$Messages$ClearPunchButtonPressed = function (a) {
+	return {$: 'ClearPunchButtonPressed', a: a};
+};
+var $author$project$Punch$Messages$UnclearPunchButtonPressed = function (a) {
+	return {$: 'UnclearPunchButtonPressed', a: a};
+};
+var $author$project$Punch$Messages$UnverifyPunchButtonPressed = function (a) {
+	return {$: 'UnverifyPunchButtonPressed', a: a};
+};
+var $author$project$Punch$Messages$VerifyPunchButtonPressed = function (a) {
+	return {$: 'VerifyPunchButtonPressed', a: a};
+};
+var $mdgriffith$elm_ui$Internal$Model$Right = {$: 'Right'};
+var $mdgriffith$elm_ui$Element$alignRight = $mdgriffith$elm_ui$Internal$Model$AlignX($mdgriffith$elm_ui$Internal$Model$Right);
+var $elm$html$Html$Attributes$title = $elm$html$Html$Attributes$stringProperty('title');
+var $author$project$Punch$View$signButton = F4(
+	function (size, name, maybeDisabled, msg) {
+		var deactiveAttributes = function (message) {
+			return _List_fromArray(
+				[
+					$mdgriffith$elm_ui$Element$alpha(0.3),
+					$mdgriffith$elm_ui$Element$htmlAttribute(
+					A2($elm$html$Html$Attributes$style, 'cursor', 'not-allowed')),
+					$mdgriffith$elm_ui$Element$htmlAttribute(
+					$elm$html$Html$Attributes$title(message))
+				]);
+		};
+		var activeAttributes = _List_fromArray(
+			[
+				$mdgriffith$elm_ui$Element$pointer,
+				$author$project$Punch$View$onClick(msg)
+			]);
+		return A2(
+			$mdgriffith$elm_ui$Element$el,
+			_Utils_ap(
+				_List_fromArray(
+					[
+						$mdgriffith$elm_ui$Element$width(
+						$mdgriffith$elm_ui$Element$px(
+							$elm$core$Basics$round(size * 4))),
+						$mdgriffith$elm_ui$Element$height(
+						$mdgriffith$elm_ui$Element$px(
+							$elm$core$Basics$round(size * 2))),
+						$mdgriffith$elm_ui$Element$Background$color($author$project$Equinor$Palette$blue),
+						$mdgriffith$elm_ui$Element$Font$color($author$project$Equinor$Palette$white),
+						$mdgriffith$elm_ui$Element$Border$rounded(10)
+					]),
+				function () {
+					if (maybeDisabled.$ === 'Just') {
+						var message = maybeDisabled.a;
+						return deactiveAttributes(message);
+					} else {
+						return activeAttributes;
+					}
+				}()),
+			A2(
+				$mdgriffith$elm_ui$Element$el,
+				_List_fromArray(
+					[
+						$mdgriffith$elm_ui$Element$centerX,
+						$mdgriffith$elm_ui$Element$centerY,
+						$mdgriffith$elm_ui$Element$Font$size(
+						$elm$core$Basics$round(size))
+					]),
+				$mdgriffith$elm_ui$Element$text(name)));
+	});
+var $mdgriffith$elm_ui$Element$spacingXY = F2(
+	function (x, y) {
+		return A2(
+			$mdgriffith$elm_ui$Internal$Model$StyleClass,
+			$mdgriffith$elm_ui$Internal$Flag$spacing,
+			A3(
+				$mdgriffith$elm_ui$Internal$Model$SpacingStyle,
+				A2($mdgriffith$elm_ui$Internal$Model$spacingName, x, y),
+				x,
+				y));
+	});
+var $author$project$Punch$View$renderSignatures = F2(
+	function (size, punch) {
+		var _v0 = punch.apiPunch;
+		if (_v0.$ === 'Loaded') {
+			var x = _v0.b;
+			return A2(
+				$mdgriffith$elm_ui$Element$column,
+				_List_fromArray(
+					[
+						$mdgriffith$elm_ui$Element$width($mdgriffith$elm_ui$Element$fill)
+					]),
+				_List_fromArray(
+					[
+						$elm$core$String$isEmpty(x.clearedAt) ? $mdgriffith$elm_ui$Element$none : A2(
+						$mdgriffith$elm_ui$Element$el,
+						_List_fromArray(
+							[
+								$mdgriffith$elm_ui$Element$width($mdgriffith$elm_ui$Element$fill),
+								$mdgriffith$elm_ui$Element$Background$color($author$project$Equinor$Palette$blue),
+								$mdgriffith$elm_ui$Element$Font$color($author$project$Equinor$Palette$white),
+								$mdgriffith$elm_ui$Element$padding(8),
+								$mdgriffith$elm_ui$Element$Font$size(
+								A2($author$project$Equinor$Palette$scaledInt, size, -1))
+							]),
+						$mdgriffith$elm_ui$Element$text('Signatures')),
+						A2(
+						$mdgriffith$elm_ui$Element$column,
+						_List_fromArray(
+							[
+								$mdgriffith$elm_ui$Element$width($mdgriffith$elm_ui$Element$fill),
+								$mdgriffith$elm_ui$Element$padding(10),
+								$mdgriffith$elm_ui$Element$spacing(2)
+							]),
+						_List_fromArray(
+							[
+								$elm$core$String$isEmpty(x.clearedAt) ? A2(
+								$mdgriffith$elm_ui$Element$el,
+								_List_fromArray(
+									[$mdgriffith$elm_ui$Element$alignRight]),
+								A4(
+									$author$project$Punch$View$signButton,
+									size,
+									'Clear',
+									x.statusControlledBySwcr ? $elm$core$Maybe$Just('Swcr controls status') : (x.isRestrictedForUser ? $elm$core$Maybe$Just('Access denied') : $elm$core$Maybe$Nothing),
+									$author$project$Punch$Messages$ClearPunchButtonPressed(punch))) : A2(
+								$mdgriffith$elm_ui$Element$row,
+								_List_fromArray(
+									[
+										$mdgriffith$elm_ui$Element$width($mdgriffith$elm_ui$Element$fill)
+									]),
+								_List_fromArray(
+									[
+										A2(
+										$mdgriffith$elm_ui$Element$wrappedRow,
+										_List_fromArray(
+											[
+												$mdgriffith$elm_ui$Element$width($mdgriffith$elm_ui$Element$fill),
+												A2($mdgriffith$elm_ui$Element$spacingXY, 10, 0)
+											]),
+										_List_fromArray(
+											[
+												A2(
+												$mdgriffith$elm_ui$Element$el,
+												_List_fromArray(
+													[$mdgriffith$elm_ui$Element$Font$bold]),
+												$mdgriffith$elm_ui$Element$text('Cleared by')),
+												A2(
+												$mdgriffith$elm_ui$Element$row,
+												_List_fromArray(
+													[
+														$mdgriffith$elm_ui$Element$spacing(10)
+													]),
+												_List_fromArray(
+													[
+														$mdgriffith$elm_ui$Element$text(x.clearedByFirstName + (' ' + x.clearedByLastName)),
+														A2(
+														$mdgriffith$elm_ui$Element$el,
+														_List_fromArray(
+															[$mdgriffith$elm_ui$Element$alignRight]),
+														$mdgriffith$elm_ui$Element$text(
+															A2($elm$core$String$left, 10, x.clearedAt)))
+													]))
+											])),
+										A4(
+										$author$project$Punch$View$signButton,
+										size,
+										'Unclear',
+										(x.verifiedAt !== '') ? $elm$core$Maybe$Just('Punch is verified') : $elm$core$Maybe$Nothing,
+										$author$project$Punch$Messages$UnclearPunchButtonPressed(punch))
+									])),
+								(x.clearedAt !== '') ? ($elm$core$String$isEmpty(x.verifiedAt) ? A2(
+								$mdgriffith$elm_ui$Element$el,
+								_List_fromArray(
+									[$mdgriffith$elm_ui$Element$alignRight]),
+								A4(
+									$author$project$Punch$View$signButton,
+									size,
+									'Verify',
+									x.statusControlledBySwcr ? $elm$core$Maybe$Just('Swcr controls status') : (x.isRestrictedForUser ? $elm$core$Maybe$Just('Access denied') : $elm$core$Maybe$Nothing),
+									$author$project$Punch$Messages$VerifyPunchButtonPressed(punch))) : A2(
+								$mdgriffith$elm_ui$Element$row,
+								_List_fromArray(
+									[
+										$mdgriffith$elm_ui$Element$width($mdgriffith$elm_ui$Element$fill),
+										A2($mdgriffith$elm_ui$Element$spacingXY, 10, 0)
+									]),
+								_List_fromArray(
+									[
+										A2(
+										$mdgriffith$elm_ui$Element$wrappedRow,
+										_List_fromArray(
+											[
+												$mdgriffith$elm_ui$Element$width($mdgriffith$elm_ui$Element$fill),
+												A2($mdgriffith$elm_ui$Element$spacingXY, 10, 0)
+											]),
+										_List_fromArray(
+											[
+												A2(
+												$mdgriffith$elm_ui$Element$el,
+												_List_fromArray(
+													[$mdgriffith$elm_ui$Element$Font$bold]),
+												$mdgriffith$elm_ui$Element$text('Verified by')),
+												A2(
+												$mdgriffith$elm_ui$Element$row,
+												_List_fromArray(
+													[
+														$mdgriffith$elm_ui$Element$spacing(10)
+													]),
+												_List_fromArray(
+													[
+														A2(
+														$mdgriffith$elm_ui$Element$el,
+														_List_fromArray(
+															[$mdgriffith$elm_ui$Element$alignRight]),
+														$mdgriffith$elm_ui$Element$text(x.verifiedByFirstName + (' ' + x.verifiedByLastName))),
+														A2(
+														$mdgriffith$elm_ui$Element$el,
+														_List_fromArray(
+															[$mdgriffith$elm_ui$Element$alignRight]),
+														$mdgriffith$elm_ui$Element$text(
+															A2($elm$core$String$left, 10, x.verifiedAt)))
+													]))
+											])),
+										A4(
+										$author$project$Punch$View$signButton,
+										size,
+										'Unverify',
+										$elm$core$Maybe$Nothing,
+										$author$project$Punch$Messages$UnverifyPunchButtonPressed(punch))
+									]))) : $mdgriffith$elm_ui$Element$none
+							]))
+					]));
+		} else {
+			return $mdgriffith$elm_ui$Element$none;
+		}
 	});
 var $elm$core$List$takeReverse = F3(
 	function (n, list, kept) {
@@ -16060,6 +16760,15 @@ var $author$project$Punch$View$renderPunchListItem = F3(
 					$elm$core$List$take,
 					2,
 					$elm$core$String$lines(item.description))));
+		var readOnly = function () {
+			var _v3 = item.apiPunch;
+			if (_v3.$ === 'Loaded') {
+				var x = _v3.b;
+				return x.isRestrictedForUser;
+			} else {
+				return true;
+			}
+		}();
 		var isSelected = function () {
 			var _v2 = model.selectedPunch;
 			if (_v2.$ === 'Just') {
@@ -16177,7 +16886,7 @@ var $author$project$Punch$View$renderPunchListItem = F3(
 				]));
 		var color = $author$project$Equinor$Palette$white;
 		return _Utils_Tuple2(
-			item.id,
+			$elm$core$String$fromInt(item.id),
 			A2(
 				$mdgriffith$elm_ui$Element$column,
 				_List_fromArray(
@@ -16225,8 +16934,9 @@ var $author$project$Punch$View$renderPunchListItem = F3(
 							]),
 						_List_fromArray(
 							[
-								isSelected ? A3($author$project$Punch$View$renderDescription, model.highlight, size, item) : $mdgriffith$elm_ui$Element$none,
-								A3($author$project$Punch$View$renderDetails, size, model, item),
+								isSelected ? A4($author$project$Punch$View$renderDescription, model.highlight, size, readOnly, item) : $mdgriffith$elm_ui$Element$none,
+								A4($author$project$Punch$View$renderDetails, size, model, readOnly, item),
+								A2($author$project$Punch$View$renderSignatures, size, item),
 								$elm$core$String$isEmpty(model.errorMsg) ? $mdgriffith$elm_ui$Element$none : A2(
 								$mdgriffith$elm_ui$Element$paragraph,
 								_List_fromArray(
