@@ -54,7 +54,7 @@ renderPunchListItem size model item =
         readOnly =
             case item.apiPunch of
                 Loaded _ x ->
-                    x.isRestrictedForUser
+                    x.isRestrictedForUser || x.clearedAt /= ""
 
                 _ ->
                     True

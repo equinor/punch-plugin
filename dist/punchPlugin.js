@@ -16889,7 +16889,7 @@ var $author$project$Punch$View$renderPunchListItem = F3(
 			var _v3 = item.apiPunch;
 			if (_v3.$ === 'Loaded') {
 				var x = _v3.b;
-				return x.isRestrictedForUser;
+				return x.isRestrictedForUser || (x.clearedAt !== '');
 			} else {
 				return true;
 			}
