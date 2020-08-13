@@ -16,6 +16,7 @@ type Msg
       -- Screen Interaction
     | PunchItemPressed Punch
     | GotApiResult ApiResult
+    | CloseDropDownButtonPressed
       -- Form
     | DescriptionFieldLostFocus Punch
     | DescriptionFieldInput Punch String

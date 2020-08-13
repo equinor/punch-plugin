@@ -13612,6 +13612,8 @@ var $author$project$Punch$Update$update = F2(
 							model,
 							{dropDown: dropDown}),
 						$elm$core$Platform$Cmd$none));
+			case 'CloseDropDownButtonPressed':
+				return $author$project$Punch$Update$closeDropDowns(mc);
 			case 'DropDownItemPressed':
 				var punch = msg.a;
 				var item = msg.b;
@@ -15551,9 +15553,15 @@ var $author$project$Punch$Types$ClearingByDropDown = {$: 'ClearingByDropDown'};
 var $author$project$Punch$Types$RaisedByDropDown = {$: 'RaisedByDropDown'};
 var $author$project$Punch$Types$SortingDropDown = {$: 'SortingDropDown'};
 var $author$project$Punch$Types$TypeDropDown = {$: 'TypeDropDown'};
+var $author$project$Punch$Messages$CloseDropDownButtonPressed = {$: 'CloseDropDownButtonPressed'};
 var $author$project$Punch$Messages$DropDownPressed = function (a) {
 	return {$: 'DropDownPressed', a: a};
 };
+var $mdgriffith$elm_ui$Internal$Model$AlignX = function (a) {
+	return {$: 'AlignX', a: a};
+};
+var $mdgriffith$elm_ui$Internal$Model$Right = {$: 'Right'};
+var $mdgriffith$elm_ui$Element$alignRight = $mdgriffith$elm_ui$Internal$Model$AlignX($mdgriffith$elm_ui$Internal$Model$Right);
 var $mdgriffith$elm_ui$Element$Border$widthXY = F2(
 	function (x, y) {
 		return A2(
@@ -15831,6 +15839,24 @@ var $mdgriffith$elm_ui$Element$maximum = F2(
 	function (i, l) {
 		return A2($mdgriffith$elm_ui$Internal$Model$Max, i, l);
 	});
+var $mdgriffith$elm_ui$Element$row = F2(
+	function (attrs, children) {
+		return A4(
+			$mdgriffith$elm_ui$Internal$Model$element,
+			$mdgriffith$elm_ui$Internal$Model$asRow,
+			$mdgriffith$elm_ui$Internal$Model$div,
+			A2(
+				$elm$core$List$cons,
+				$mdgriffith$elm_ui$Internal$Model$htmlClass($mdgriffith$elm_ui$Internal$Style$classes.contentLeft + (' ' + $mdgriffith$elm_ui$Internal$Style$classes.contentCenterY)),
+				A2(
+					$elm$core$List$cons,
+					$mdgriffith$elm_ui$Element$width($mdgriffith$elm_ui$Element$shrink),
+					A2(
+						$elm$core$List$cons,
+						$mdgriffith$elm_ui$Element$height($mdgriffith$elm_ui$Element$shrink),
+						attrs))),
+			$mdgriffith$elm_ui$Internal$Model$Unkeyed(children));
+	});
 var $author$project$Punch$Messages$DropDownItemPressed = F2(
 	function (a, b) {
 		return {$: 'DropDownItemPressed', a: a, b: b};
@@ -15842,9 +15868,6 @@ var $mdgriffith$elm_ui$Internal$Model$PseudoSelector = F2(
 		return {$: 'PseudoSelector', a: a, b: b};
 	});
 var $mdgriffith$elm_ui$Internal$Flag$hover = $mdgriffith$elm_ui$Internal$Flag$flag(33);
-var $mdgriffith$elm_ui$Internal$Model$AlignX = function (a) {
-	return {$: 'AlignX', a: a};
-};
 var $mdgriffith$elm_ui$Internal$Model$AlignY = function (a) {
 	return {$: 'AlignY', a: a};
 };
@@ -15971,52 +15994,68 @@ var $mdgriffith$elm_ui$Element$mouseOver = function (decs) {
 			$mdgriffith$elm_ui$Internal$Model$Hover,
 			$mdgriffith$elm_ui$Internal$Model$unwrapDecorations(decs)));
 };
-var $mdgriffith$elm_ui$Element$row = F2(
-	function (attrs, children) {
-		return A4(
-			$mdgriffith$elm_ui$Internal$Model$element,
-			$mdgriffith$elm_ui$Internal$Model$asRow,
-			$mdgriffith$elm_ui$Internal$Model$div,
-			A2(
-				$elm$core$List$cons,
-				$mdgriffith$elm_ui$Internal$Model$htmlClass($mdgriffith$elm_ui$Internal$Style$classes.contentLeft + (' ' + $mdgriffith$elm_ui$Internal$Style$classes.contentCenterY)),
-				A2(
-					$elm$core$List$cons,
-					$mdgriffith$elm_ui$Element$width($mdgriffith$elm_ui$Element$shrink),
-					A2(
-						$elm$core$List$cons,
-						$mdgriffith$elm_ui$Element$height($mdgriffith$elm_ui$Element$shrink),
-						attrs))),
-			$mdgriffith$elm_ui$Internal$Model$Unkeyed(children));
-	});
 var $author$project$Equinor$Palette$white = A3($mdgriffith$elm_ui$Element$rgb, 1, 1, 1);
 var $author$project$Punch$View$selectItem = F4(
 	function (size, current, punch, item) {
 		return _Utils_Tuple2(
 			$elm$core$String$fromInt(item.id),
 			A2(
-				$mdgriffith$elm_ui$Element$row,
+				$mdgriffith$elm_ui$Element$el,
 				_List_fromArray(
 					[
 						$mdgriffith$elm_ui$Element$width($mdgriffith$elm_ui$Element$fill),
-						$mdgriffith$elm_ui$Element$padding(10),
-						$mdgriffith$elm_ui$Element$spacing(10),
-						$mdgriffith$elm_ui$Element$mouseOver(
-						_List_fromArray(
-							[
-								$mdgriffith$elm_ui$Element$Background$color($author$project$Equinor$Palette$mistBlue)
-							])),
-						$mdgriffith$elm_ui$Element$Background$color(
-						(_Utils_eq(current, item.description) || _Utils_eq(current, item.code)) ? $author$project$Equinor$Palette$lightGrey : $author$project$Equinor$Palette$white),
-						$mdgriffith$elm_ui$Element$pointer,
-						$author$project$Punch$View$onClick(
-						A2($author$project$Punch$Messages$DropDownItemPressed, punch, item))
+						A2($mdgriffith$elm_ui$Element$paddingXY, 0, 1)
 					]),
-				_List_fromArray(
-					[
-						$mdgriffith$elm_ui$Element$text(item.code),
-						$mdgriffith$elm_ui$Element$text(item.description)
-					])));
+				A2(
+					$mdgriffith$elm_ui$Element$row,
+					_List_fromArray(
+						[
+							$mdgriffith$elm_ui$Element$width($mdgriffith$elm_ui$Element$fill),
+							$mdgriffith$elm_ui$Element$padding(10),
+							$mdgriffith$elm_ui$Element$spacing(10),
+							$mdgriffith$elm_ui$Element$Border$widthEach(
+							{bottom: 1, left: 0, right: 0, top: 0}),
+							$mdgriffith$elm_ui$Element$Border$color($author$project$Equinor$Palette$mistBlue),
+							$mdgriffith$elm_ui$Element$mouseOver(
+							_List_fromArray(
+								[
+									$mdgriffith$elm_ui$Element$Background$color($author$project$Equinor$Palette$mistBlue)
+								])),
+							$mdgriffith$elm_ui$Element$Background$color(
+							(_Utils_eq(current, item.description) || _Utils_eq(current, item.code)) ? $author$project$Equinor$Palette$lightGrey : $author$project$Equinor$Palette$white),
+							$mdgriffith$elm_ui$Element$pointer,
+							$author$project$Punch$View$onClick(
+							A2($author$project$Punch$Messages$DropDownItemPressed, punch, item))
+						]),
+					_List_fromArray(
+						[
+							A2(
+							$mdgriffith$elm_ui$Element$paragraph,
+							_List_fromArray(
+								[
+									$mdgriffith$elm_ui$Element$Font$size(
+									A2($author$project$Equinor$Palette$scaledInt, size, -4)),
+									$mdgriffith$elm_ui$Element$width(
+									$mdgriffith$elm_ui$Element$px(
+										$elm$core$Basics$round(size * 4)))
+								]),
+							_List_fromArray(
+								[
+									$mdgriffith$elm_ui$Element$text(item.code)
+								])),
+							A2(
+							$mdgriffith$elm_ui$Element$paragraph,
+							_List_fromArray(
+								[
+									$mdgriffith$elm_ui$Element$Font$size(
+									A2($author$project$Equinor$Palette$scaledInt, size, -2)),
+									$mdgriffith$elm_ui$Element$width($mdgriffith$elm_ui$Element$fill)
+								]),
+							_List_fromArray(
+								[
+									$mdgriffith$elm_ui$Element$text(item.description)
+								]))
+						]))));
 	});
 var $mdgriffith$elm_ui$Element$scrollbars = A2($mdgriffith$elm_ui$Internal$Model$Class, $mdgriffith$elm_ui$Internal$Flag$overflow, $mdgriffith$elm_ui$Internal$Style$classes.scrollbars);
 var $author$project$Equinor$Component$SelectionList$selectionList = F2(
@@ -16153,14 +16192,38 @@ var $author$project$Punch$View$dropDown = F7(
 			_List_fromArray(
 				[
 					$mdgriffith$elm_ui$Element$Border$width(1),
+					$mdgriffith$elm_ui$Element$Border$color($author$project$Equinor$Palette$blue),
 					$mdgriffith$elm_ui$Element$Border$rounded(4),
+					$mdgriffith$elm_ui$Element$padding(10),
 					$mdgriffith$elm_ui$Element$width($mdgriffith$elm_ui$Element$fill),
 					$mdgriffith$elm_ui$Element$height(
-					A2($mdgriffith$elm_ui$Element$maximum, 500, $mdgriffith$elm_ui$Element$fill))
+					A2($mdgriffith$elm_ui$Element$maximum, 500, $mdgriffith$elm_ui$Element$fill)),
+					$mdgriffith$elm_ui$Element$spacing(6)
 				]),
 			_List_fromArray(
 				[
-					header,
+					A2(
+					$mdgriffith$elm_ui$Element$row,
+					_List_fromArray(
+						[
+							$mdgriffith$elm_ui$Element$width($mdgriffith$elm_ui$Element$fill)
+						]),
+					_List_fromArray(
+						[
+							header,
+							A2(
+							$mdgriffith$elm_ui$Element$el,
+							_List_fromArray(
+								[
+									$mdgriffith$elm_ui$Element$alignRight,
+									$mdgriffith$elm_ui$Element$padding(6),
+									$mdgriffith$elm_ui$Element$Border$rounded(4),
+									$mdgriffith$elm_ui$Element$Border$width(1),
+									$mdgriffith$elm_ui$Element$pointer,
+									$author$project$Punch$View$onClick($author$project$Punch$Messages$CloseDropDownButtonPressed)
+								]),
+							$mdgriffith$elm_ui$Element$text('X'))
+						])),
 					A4(
 					$author$project$Punch$View$selectionList,
 					size,
@@ -16174,6 +16237,7 @@ var $author$project$Punch$View$dropDown = F7(
 					$mdgriffith$elm_ui$Element$width($mdgriffith$elm_ui$Element$fill),
 					$mdgriffith$elm_ui$Element$scrollbarY,
 					$mdgriffith$elm_ui$Element$Border$width(1),
+					$mdgriffith$elm_ui$Element$Border$color($author$project$Equinor$Palette$blue),
 					$mdgriffith$elm_ui$Element$padding(10),
 					$mdgriffith$elm_ui$Element$Border$rounded(4),
 					$mdgriffith$elm_ui$Element$pointer,
@@ -16193,7 +16257,8 @@ var $author$project$Punch$View$renderDetails = F4(
 			$mdgriffith$elm_ui$Element$column,
 			_List_fromArray(
 				[
-					$mdgriffith$elm_ui$Element$width($mdgriffith$elm_ui$Element$fill)
+					$mdgriffith$elm_ui$Element$width($mdgriffith$elm_ui$Element$fill),
+					$mdgriffith$elm_ui$Element$spacing(2)
 				]),
 			_List_fromArray(
 				[
@@ -16273,8 +16338,6 @@ var $author$project$Punch$Messages$UnverifyPunchButtonPressed = function (a) {
 var $author$project$Punch$Messages$VerifyPunchButtonPressed = function (a) {
 	return {$: 'VerifyPunchButtonPressed', a: a};
 };
-var $mdgriffith$elm_ui$Internal$Model$Right = {$: 'Right'};
-var $mdgriffith$elm_ui$Element$alignRight = $mdgriffith$elm_ui$Internal$Model$AlignX($mdgriffith$elm_ui$Internal$Model$Right);
 var $elm$html$Html$Attributes$title = $elm$html$Html$Attributes$stringProperty('title');
 var $author$project$Punch$View$signButton = F4(
 	function (size, name, maybeDisabled, msg) {
@@ -16930,7 +16993,8 @@ var $author$project$Punch$View$renderPunchListItem = F3(
 								$mdgriffith$elm_ui$Element$Background$color($author$project$Equinor$Palette$white),
 								$author$project$Punch$View$onClick($author$project$Punch$Messages$NoOp),
 								$mdgriffith$elm_ui$Element$Border$rounded(4),
-								$mdgriffith$elm_ui$Element$padding(4)
+								$mdgriffith$elm_ui$Element$padding(4),
+								$mdgriffith$elm_ui$Element$spacing(6)
 							]),
 						_List_fromArray(
 							[

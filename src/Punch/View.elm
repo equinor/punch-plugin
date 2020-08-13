@@ -171,7 +171,7 @@ renderPunchListItem size model item =
                     tagBeskrivelse item
             ]
         , if isSelected then
-            column [ width fill, height fill, Background.color Palette.white, onClick NoOp, Border.rounded 4, padding 4 ]
+            column [ width fill, height fill, Background.color Palette.white, onClick NoOp, Border.rounded 4, padding 4, spacing 6 ]
                 [ if isSelected then
                     renderDescription model.highlight size readOnly item
 
@@ -231,7 +231,7 @@ renderDetails size model readOnly punch =
         dd =
             dropDown size readOnly punch model
     in
-    column [ width fill ]
+    column [ width fill, spacing 2 ]
         [ column [ spacing 6 ]
             [ kv size "No" (String.fromInt punch.id) ""
             , kv size "Tag" punch.tag ""
@@ -295,11 +295,14 @@ dropDown size readOnly punch model dropDownType current field =
     else if model.dropDown == dropDownType then
         column
             [ Border.width 1
+            , Border.color Palette.blue
             , Border.rounded 4
+            , padding 10
             , width fill
             , height (fill |> maximum 500)
+            , spacing 6
             ]
-            [ header
+            [ row [ width fill ] [ header, el [ alignRight, padding 6, Border.rounded 4, Border.width 1, pointer, onClick CloseDropDownButtonPressed ] (text "X") ]
             , selectionList size current punch (field model)
             ]
 
@@ -308,6 +311,7 @@ dropDown size readOnly punch model dropDownType current field =
             [ width fill
             , scrollbarY
             , Border.width 1
+            , Border.color Palette.blue
             , padding 10
             , Border.rounded 4
             , pointer
@@ -326,21 +330,26 @@ selectionList size current punch webData =
 selectItem : Float -> String -> Punch -> SelectItem -> ( String, Element Msg )
 selectItem size current punch item =
     ( item.id |> String.fromInt
-    , row
-        [ width fill
-        , padding 10
-        , spacing 10
-        , mouseOver [ Background.color Palette.mistBlue ]
-        , Background.color <|
-            if current == item.description || current == item.code then
-                Palette.lightGrey
+    , el [ width fill, paddingXY 0 1 ] <|
+        row
+            [ width fill
+            , padding 10
+            , spacing 10
+            , Border.widthEach { left = 0, top = 0, right = 0, bottom = 1 }
+            , Border.color Palette.mistBlue
+            , mouseOver [ Background.color Palette.mistBlue ]
+            , Background.color <|
+                if current == item.description || current == item.code then
+                    Palette.lightGrey
 
-            else
-                Palette.white
-        , pointer
-        , onClick <| DropDownItemPressed punch item
-        ]
-        [ text item.code, text item.description ]
+                else
+                    Palette.white
+            , pointer
+            , onClick <| DropDownItemPressed punch item
+            ]
+            [ paragraph [ Font.size (scaledInt size -4), width <| px <| round <| size * 4 ] [ text item.code ]
+            , paragraph [ Font.size (scaledInt size -2), width fill ] [ text item.description ]
+            ]
     )
 
 

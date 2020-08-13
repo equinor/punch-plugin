@@ -106,6 +106,9 @@ update msg model =
                                 getSorts
                        )
 
+        CloseDropDownButtonPressed ->
+            mc |> closeDropDowns
+
         DropDownItemPressed punch item ->
             let
                 updated =
@@ -314,7 +317,10 @@ handleApiResult apiResult ( m, c ) =
                                     Loaded "" apiPunch
 
                                 Err err ->
-                                    let _ = Debug.log "err" err in
+                                    let
+                                        _ =
+                                            Debug.log "err" err
+                                    in
                                     DataError "" Nothing
                     }
             in
