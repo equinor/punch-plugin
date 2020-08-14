@@ -4586,6 +4586,184 @@ function _Http_track(router, xhr, tracker)
 	});
 }
 
+
+// DECODER
+
+var _File_decoder = _Json_decodePrim(function(value) {
+	// NOTE: checks if `File` exists in case this is run on node
+	return (typeof File !== 'undefined' && value instanceof File)
+		? $elm$core$Result$Ok(value)
+		: _Json_expecting('a FILE', value);
+});
+
+
+// METADATA
+
+function _File_name(file) { return file.name; }
+function _File_mime(file) { return file.type; }
+function _File_size(file) { return file.size; }
+
+function _File_lastModified(file)
+{
+	return $elm$time$Time$millisToPosix(file.lastModified);
+}
+
+
+// DOWNLOAD
+
+var _File_downloadNode;
+
+function _File_getDownloadNode()
+{
+	return _File_downloadNode || (_File_downloadNode = document.createElement('a'));
+}
+
+var _File_download = F3(function(name, mime, content)
+{
+	return _Scheduler_binding(function(callback)
+	{
+		var blob = new Blob([content], {type: mime});
+
+		// for IE10+
+		if (navigator.msSaveOrOpenBlob)
+		{
+			navigator.msSaveOrOpenBlob(blob, name);
+			return;
+		}
+
+		// for HTML5
+		var node = _File_getDownloadNode();
+		var objectUrl = URL.createObjectURL(blob);
+		node.href = objectUrl;
+		node.download = name;
+		_File_click(node);
+		URL.revokeObjectURL(objectUrl);
+	});
+});
+
+function _File_downloadUrl(href)
+{
+	return _Scheduler_binding(function(callback)
+	{
+		var node = _File_getDownloadNode();
+		node.href = href;
+		node.download = '';
+		node.origin === location.origin || (node.target = '_blank');
+		_File_click(node);
+	});
+}
+
+
+// IE COMPATIBILITY
+
+function _File_makeBytesSafeForInternetExplorer(bytes)
+{
+	// only needed by IE10 and IE11 to fix https://github.com/elm/file/issues/10
+	// all other browsers can just run `new Blob([bytes])` directly with no problem
+	//
+	return new Uint8Array(bytes.buffer, bytes.byteOffset, bytes.byteLength);
+}
+
+function _File_click(node)
+{
+	// only needed by IE10 and IE11 to fix https://github.com/elm/file/issues/11
+	// all other browsers have MouseEvent and do not need this conditional stuff
+	//
+	if (typeof MouseEvent === 'function')
+	{
+		node.dispatchEvent(new MouseEvent('click'));
+	}
+	else
+	{
+		var event = document.createEvent('MouseEvents');
+		event.initMouseEvent('click', true, true, window, 0, 0, 0, 0, 0, false, false, false, false, 0, null);
+		document.body.appendChild(node);
+		node.dispatchEvent(event);
+		document.body.removeChild(node);
+	}
+}
+
+
+// UPLOAD
+
+var _File_node;
+
+function _File_uploadOne(mimes)
+{
+	return _Scheduler_binding(function(callback)
+	{
+		_File_node = document.createElement('input');
+		_File_node.type = 'file';
+		_File_node.accept = A2($elm$core$String$join, ',', mimes);
+		_File_node.addEventListener('change', function(event)
+		{
+			callback(_Scheduler_succeed(event.target.files[0]));
+		});
+		_File_click(_File_node);
+	});
+}
+
+function _File_uploadOneOrMore(mimes)
+{
+	return _Scheduler_binding(function(callback)
+	{
+		_File_node = document.createElement('input');
+		_File_node.type = 'file';
+		_File_node.multiple = true;
+		_File_node.accept = A2($elm$core$String$join, ',', mimes);
+		_File_node.addEventListener('change', function(event)
+		{
+			var elmFiles = _List_fromArray(event.target.files);
+			callback(_Scheduler_succeed(_Utils_Tuple2(elmFiles.a, elmFiles.b)));
+		});
+		_File_click(_File_node);
+	});
+}
+
+
+// CONTENT
+
+function _File_toString(blob)
+{
+	return _Scheduler_binding(function(callback)
+	{
+		var reader = new FileReader();
+		reader.addEventListener('loadend', function() {
+			callback(_Scheduler_succeed(reader.result));
+		});
+		reader.readAsText(blob);
+		return function() { reader.abort(); };
+	});
+}
+
+function _File_toBytes(blob)
+{
+	return _Scheduler_binding(function(callback)
+	{
+		var reader = new FileReader();
+		reader.addEventListener('loadend', function() {
+			callback(_Scheduler_succeed(new DataView(reader.result)));
+		});
+		reader.readAsArrayBuffer(blob);
+		return function() { reader.abort(); };
+	});
+}
+
+function _File_toUrl(blob)
+{
+	return _Scheduler_binding(function(callback)
+	{
+		var reader = new FileReader();
+		reader.addEventListener('loadend', function() {
+			callback(_Scheduler_succeed(reader.result));
+		});
+		reader.readAsDataURL(blob);
+		return function() { reader.abort(); };
+	});
+}
+
+
+
 // CREATE
 
 var _Regex_never = /.^/;
@@ -5848,7 +6026,7 @@ var $elm$core$Platform$Cmd$batch = _Platform_batch;
 var $elm$core$Platform$Cmd$none = $elm$core$Platform$Cmd$batch(_List_Nil);
 var $author$project$Punch$Model$initialModel = function (flags) {
 	return _Utils_Tuple2(
-		{apiToken: '', categories: $author$project$Equinor$Types$NotLoaded, context: flags.context, dropDown: $author$project$Punch$Types$NoDropDown, errorMsg: '', highlight: flags.textToHighlight, organizations: $author$project$Equinor$Types$NotLoaded, procosysPlantId: flags.procosysPlantId, punch: $elm$core$Dict$empty, requests: $elm$core$Dict$empty, selectedPunch: $elm$core$Maybe$Nothing, sorts: $author$project$Equinor$Types$NotLoaded, types: $author$project$Equinor$Types$NotLoaded},
+		{apiToken: '', categories: $author$project$Equinor$Types$NotLoaded, context: flags.context, currentAttachment: $elm$core$Maybe$Nothing, dropDown: $author$project$Punch$Types$NoDropDown, errorMsg: '', highlight: flags.textToHighlight, organizations: $author$project$Equinor$Types$NotLoaded, procosysPlantId: flags.procosysPlantId, punch: $elm$core$Dict$empty, requests: $elm$core$Dict$empty, selectedPunch: $elm$core$Maybe$Nothing, sorts: $author$project$Equinor$Types$NotLoaded, types: $author$project$Equinor$Types$NotLoaded},
 		$elm$core$Platform$Cmd$none);
 };
 var $mdgriffith$elm_ui$Internal$Style$classes = {above: 'a', active: 'atv', alignBottom: 'ab', alignCenterX: 'cx', alignCenterY: 'cy', alignContainerBottom: 'acb', alignContainerCenterX: 'accx', alignContainerCenterY: 'accy', alignContainerRight: 'acr', alignLeft: 'al', alignRight: 'ar', alignTop: 'at', alignedHorizontally: 'ah', alignedVertically: 'av', any: 's', behind: 'bh', below: 'b', bold: 'w7', borderDashed: 'bd', borderDotted: 'bdt', borderNone: 'bn', borderSolid: 'bs', capturePointerEvents: 'cpe', clip: 'cp', clipX: 'cpx', clipY: 'cpy', column: 'c', container: 'ctr', contentBottom: 'cb', contentCenterX: 'ccx', contentCenterY: 'ccy', contentLeft: 'cl', contentRight: 'cr', contentTop: 'ct', cursorPointer: 'cptr', cursorText: 'ctxt', focus: 'fcs', focusedWithin: 'focus-within', fullSize: 'fs', grid: 'g', hasBehind: 'hbh', heightContent: 'hc', heightExact: 'he', heightFill: 'hf', heightFillPortion: 'hfp', hover: 'hv', imageContainer: 'ic', inFront: 'fr', inputLabel: 'lbl', inputMultiline: 'iml', inputMultilineFiller: 'imlf', inputMultilineParent: 'imlp', inputMultilineWrapper: 'implw', inputText: 'it', italic: 'i', link: 'lnk', nearby: 'nb', noTextSelection: 'notxt', onLeft: 'ol', onRight: 'or', opaque: 'oq', overflowHidden: 'oh', page: 'pg', paragraph: 'p', passPointerEvents: 'ppe', root: 'ui', row: 'r', scrollbars: 'sb', scrollbarsX: 'sbx', scrollbarsY: 'sby', seButton: 'sbt', single: 'e', sizeByCapital: 'cap', spaceEvenly: 'sev', strike: 'sk', text: 't', textCenter: 'tc', textExtraBold: 'w8', textExtraLight: 'w2', textHeavy: 'w9', textJustify: 'tj', textJustifyAll: 'tja', textLeft: 'tl', textLight: 'w3', textMedium: 'w5', textNormalWeight: 'w4', textRight: 'tr', textSemiBold: 'w6', textThin: 'w1', textUnitalicized: 'tun', transition: 'ts', transparent: 'clr', underline: 'u', widthContent: 'wc', widthExact: 'we', widthFill: 'wf', widthFillPortion: 'wfp', wrapped: 'wrp'};
@@ -11710,64 +11888,21 @@ var $mdgriffith$elm_ui$Element$rgb255 = F3(
 		return A4($mdgriffith$elm_ui$Internal$Model$Rgba, red / 255, green / 255, blue / 255, 1);
 	});
 var $author$project$Equinor$Palette$slateBlue = A3($mdgriffith$elm_ui$Element$rgb255, 36, 55, 70);
-var $author$project$Punch$Api$clientId = '47641c40-0135-459b-8ab4-459e68dc8d08/.default';
-var $author$project$Punch$Ports$toJs = _Platform_outgoingPort('toJs', $elm$core$Basics$identity);
-var $author$project$Punch$Update$createEvent = F2(
-	function (topic, payload) {
-		return $author$project$Punch$Ports$toJs(
-			$elm$json$Json$Encode$object(
-				_List_fromArray(
-					[
-						_Utils_Tuple2(
-						'topic',
-						$elm$json$Json$Encode$string(topic)),
-						_Utils_Tuple2('payload', payload)
-					])));
+var $author$project$Punch$Messages$AttachmentDecoded = F4(
+	function (a, b, c, d) {
+		return {$: 'AttachmentDecoded', a: a, b: b, c: c, d: d};
 	});
-var $elm$json$Json$Encode$int = _Json_wrap;
-var $author$project$Punch$Update$apiRequest = F2(
-	function (requests, _v0) {
-		var m = _v0.a;
-		var c = _v0.b;
-		var highestRefNo = A2(
-			$elm$core$Maybe$withDefault,
-			0,
-			$elm$core$List$maximum(
-				$elm$core$Dict$keys(m.requests)));
-		var nextRef = highestRefNo + 1;
-		return _Utils_Tuple2(
-			_Utils_update(
-				m,
-				{
-					errorMsg: '',
-					requests: A3($elm$core$Dict$insert, nextRef, requests, m.requests)
-				}),
-			$elm$core$Platform$Cmd$batch(
-				_List_fromArray(
-					[
-						c,
-						A2(
-						$author$project$Punch$Update$createEvent,
-						'getToken',
-						$elm$json$Json$Encode$object(
-							_List_fromArray(
-								[
-									_Utils_Tuple2(
-									'clientId',
-									$elm$json$Json$Encode$string($author$project$Punch$Api$clientId)),
-									_Utils_Tuple2(
-									'refNo',
-									$elm$json$Json$Encode$int(nextRef))
-								])))
-					])));
+var $author$project$Punch$Messages$AttachmentFileLoaded = F2(
+	function (a, b) {
+		return {$: 'AttachmentFileLoaded', a: a, b: b};
+	});
+var $author$project$Punch$Messages$AddAttachmentResult = F3(
+	function (a, b, c) {
+		return {$: 'AddAttachmentResult', a: a, b: b, c: c};
 	});
 var $author$project$Punch$Messages$GotApiResult = function (a) {
 	return {$: 'GotApiResult', a: a};
 };
-var $author$project$Punch$Messages$GotAttachment = F2(
-	function (a, b) {
-		return {$: 'GotAttachment', a: a, b: b};
-	});
 var $elm$url$Url$Builder$QueryParameter = F2(
 	function (a, b) {
 		return {$: 'QueryParameter', a: a, b: b};
@@ -12181,7 +12316,6 @@ var $elm$core$Dict$update = F3(
 			return A2($elm$core$Dict$remove, targetKey, dictionary);
 		}
 	});
-var $elm$http$Http$emptyBody = _Http_emptyBody;
 var $elm$http$Http$expectBytesResponse = F2(
 	function (toMsg, toResult) {
 		return A3(
@@ -12244,6 +12378,7 @@ var $elm$http$Http$expectWhatever = function (toMsg) {
 				return $elm$core$Result$Ok(_Utils_Tuple0);
 			}));
 };
+var $elm$http$Http$filePart = _Http_pair;
 var $elm$http$Http$Header = F2(
 	function (a, b) {
 		return {$: 'Header', a: a, b: b};
@@ -12256,6 +12391,12 @@ var $elm$url$Url$Builder$int = F2(
 			$elm$url$Url$percentEncode(key),
 			$elm$core$String$fromInt(value));
 	});
+var $elm$http$Http$multipartBody = function (parts) {
+	return A2(
+		_Http_pair,
+		'',
+		_Http_toFormData(parts));
+};
 var $elm$http$Http$Request = function (a) {
 	return {$: 'Request', a: a};
 };
@@ -12444,6 +12585,96 @@ var $author$project$Punch$Api$url = F2(
 				A2($elm$core$List$cons, $author$project$Punch$Api$apiVersion, queryParams));
 		}
 	});
+var $author$project$Punch$Api$addAttachment = F4(
+	function (punch, att, plantId, token) {
+		return $elm$http$Http$request(
+			{
+				body: $elm$http$Http$multipartBody(
+					_List_fromArray(
+						[
+							A2($elm$http$Http$filePart, 'ImportImage', att.file)
+						])),
+				expect: $elm$http$Http$expectWhatever(
+					A2(
+						$elm$core$Basics$composeL,
+						$author$project$Punch$Messages$GotApiResult,
+						A2($author$project$Punch$Messages$AddAttachmentResult, punch, att))),
+				headers: _List_fromArray(
+					[
+						A2($elm$http$Http$header, 'Authorization', 'Bearer ' + token)
+					]),
+				method: 'POST',
+				timeout: $elm$core$Maybe$Nothing,
+				tracker: $elm$core$Maybe$Nothing,
+				url: A2(
+					$author$project$Punch$Api$url,
+					_List_fromArray(
+						['PunchListItem', 'Attachment']),
+					_List_fromArray(
+						[
+							A2($elm$url$Url$Builder$string, 'plantId', plantId),
+							A2($elm$url$Url$Builder$int, 'punchItemId', att.punchId),
+							A2($elm$url$Url$Builder$string, 'title', att.name),
+							$author$project$Punch$Api$apiVersion
+						]))
+			});
+	});
+var $author$project$Punch$Api$clientId = '47641c40-0135-459b-8ab4-459e68dc8d08/.default';
+var $author$project$Punch$Ports$toJs = _Platform_outgoingPort('toJs', $elm$core$Basics$identity);
+var $author$project$Punch$Update$createEvent = F2(
+	function (topic, payload) {
+		return $author$project$Punch$Ports$toJs(
+			$elm$json$Json$Encode$object(
+				_List_fromArray(
+					[
+						_Utils_Tuple2(
+						'topic',
+						$elm$json$Json$Encode$string(topic)),
+						_Utils_Tuple2('payload', payload)
+					])));
+	});
+var $elm$json$Json$Encode$int = _Json_wrap;
+var $author$project$Punch$Update$apiRequest = F2(
+	function (requests, _v0) {
+		var m = _v0.a;
+		var c = _v0.b;
+		var highestRefNo = A2(
+			$elm$core$Maybe$withDefault,
+			0,
+			$elm$core$List$maximum(
+				$elm$core$Dict$keys(m.requests)));
+		var nextRef = highestRefNo + 1;
+		return _Utils_Tuple2(
+			_Utils_update(
+				m,
+				{
+					errorMsg: '',
+					requests: A3($elm$core$Dict$insert, nextRef, requests, m.requests)
+				}),
+			$elm$core$Platform$Cmd$batch(
+				_List_fromArray(
+					[
+						c,
+						A2(
+						$author$project$Punch$Update$createEvent,
+						'getToken',
+						$elm$json$Json$Encode$object(
+							_List_fromArray(
+								[
+									_Utils_Tuple2(
+									'clientId',
+									$elm$json$Json$Encode$string($author$project$Punch$Api$clientId)),
+									_Utils_Tuple2(
+									'refNo',
+									$elm$json$Json$Encode$int(nextRef))
+								])))
+					])));
+	});
+var $author$project$Punch$Messages$GotAttachment = F2(
+	function (a, b) {
+		return {$: 'GotAttachment', a: a, b: b};
+	});
+var $elm$http$Http$emptyBody = _Http_emptyBody;
 var $author$project$Punch$Api$attachment = F4(
 	function (punch, att, plantId, token) {
 		return $elm$http$Http$request(
@@ -12563,6 +12794,13 @@ var $author$project$Punch$Api$deleteAttachment = F4(
 							$author$project$Punch$Api$apiVersion
 						]))
 			});
+	});
+var $elm$file$File$Select$file = F2(
+	function (mimes, toMsg) {
+		return A2(
+			$elm$core$Task$perform,
+			toMsg,
+			_File_uploadOne(mimes));
 	});
 var $author$project$Punch$Messages$GotAttachments = F2(
 	function (a, b) {
@@ -13290,7 +13528,7 @@ var $author$project$Punch$Update$handleApiResult = F2(
 					$author$project$Punch$Update$getDetails,
 					punch,
 					_Utils_Tuple2(m, c));
-			default:
+			case 'DeleteAttachmentResult':
 				var punch = apiResult.a;
 				var att = apiResult.b;
 				var result = apiResult.c;
@@ -13303,8 +13541,30 @@ var $author$project$Punch$Update$handleApiResult = F2(
 					var err = result.a;
 					return _Utils_Tuple2(m, c);
 				}
+			default:
+				var punch = apiResult.a;
+				var att = apiResult.b;
+				var result = apiResult.c;
+				if (result.$ === 'Ok') {
+					return A2(
+						$author$project$Punch$Update$getAttachments,
+						punch,
+						_Utils_Tuple2(
+							_Utils_update(
+								m,
+								{currentAttachment: $elm$core$Maybe$Nothing}),
+							c));
+				} else {
+					var err = result.a;
+					return _Utils_Tuple2(
+						_Utils_update(
+							m,
+							{errorMsg: 'Cound not add Attachment'}),
+						c);
+				}
 		}
 	});
+var $elm$file$File$name = _File_name;
 var $elm$json$Json$Encode$null = _Json_encodeNull;
 var $author$project$Punch$Update$selectPunch = F2(
 	function (punch, _v0) {
@@ -13554,6 +13814,7 @@ var $author$project$Punch$Api$setType = F4(
 						]))
 			});
 	});
+var $elm$file$File$toUrl = _File_toUrl;
 var $author$project$Punch$Messages$UnclearResult = F2(
 	function (a, b) {
 		return {$: 'UnclearResult', a: a, b: b};
@@ -13776,17 +14037,82 @@ var $author$project$Punch$Update$update = F2(
 							A2($author$project$Punch$Api$deleteAttachment, punch, attachment)
 						]),
 					mc);
+			case 'NewAttachmentButtonPressed':
+				var punch = msg.a;
+				return _Utils_Tuple2(
+					model,
+					A2(
+						$elm$file$File$Select$file,
+						_List_Nil,
+						$author$project$Punch$Messages$AttachmentFileLoaded(punch.id)));
+			case 'AttachmentFileLoaded':
+				var punchId = msg.a;
+				var file = msg.b;
+				var uri = $elm$file$File$toUrl(file);
+				var name = $elm$file$File$name(file);
+				return _Utils_Tuple2(
+					model,
+					A2(
+						$elm$core$Task$perform,
+						A3($author$project$Punch$Messages$AttachmentDecoded, file, punchId, name),
+						uri));
+			case 'AttachmentDecoded':
+				var file = msg.a;
+				var punchId = msg.b;
+				var name = msg.c;
+				var uri = msg.d;
+				return _Utils_Tuple2(
+					_Utils_update(
+						model,
+						{
+							currentAttachment: $elm$core$Maybe$Just(
+								{file: file, name: name, punchId: punchId, uri: uri})
+						}),
+					$elm$core$Platform$Cmd$none);
+			case 'FileNameInputChanged':
+				var str = msg.a;
+				var _v1 = model.currentAttachment;
+				if (_v1.$ === 'Just') {
+					var currentAttachment = _v1.a;
+					return _Utils_Tuple2(
+						_Utils_update(
+							model,
+							{
+								currentAttachment: $elm$core$Maybe$Just(
+									_Utils_update(
+										currentAttachment,
+										{name: str}))
+							}),
+						$elm$core$Platform$Cmd$none);
+				} else {
+					return mc;
+				}
+			case 'AddUploadedAttachmentToPunch':
+				var punch = msg.a;
+				var _v2 = model.currentAttachment;
+				if (_v2.$ === 'Just') {
+					var currentAttachment = _v2.a;
+					return A2(
+						$author$project$Punch$Update$apiRequest,
+						_List_fromArray(
+							[
+								A2($author$project$Punch$Api$addAttachment, punch, currentAttachment)
+							]),
+						mc);
+				} else {
+					return mc;
+				}
 			case 'NeverHappens':
 				return _Utils_Tuple2(
 					model,
 					A2($author$project$Punch$Update$createEvent, '', $elm$json$Json$Encode$null));
 			case 'DescriptionFieldLostFocus':
 				var punch = msg.a;
-				var _v1 = model.selectedPunch;
-				if (_v1.$ === 'Nothing') {
+				var _v3 = model.selectedPunch;
+				if (_v3.$ === 'Nothing') {
 					return mc;
 				} else {
-					var selected = _v1.a;
+					var selected = _v3.a;
 					return _Utils_eq(punch.description, selected.description) ? mc : A2(
 						$author$project$Punch$Update$apiRequest,
 						_List_fromArray(
@@ -13847,8 +14173,8 @@ var $author$project$Punch$Update$update = F2(
 				var punch = msg.a;
 				var item = msg.b;
 				var updated = function () {
-					var _v4 = model.dropDown;
-					switch (_v4.$) {
+					var _v6 = model.dropDown;
+					switch (_v6.$) {
 						case 'NoDropDown':
 							return punch;
 						case 'CategoryDropDown':
@@ -13876,8 +14202,8 @@ var $author$project$Punch$Update$update = F2(
 					}
 				}();
 				return function () {
-					var _v3 = model.dropDown;
-					switch (_v3.$) {
+					var _v5 = model.dropDown;
+					switch (_v5.$) {
 						case 'NoDropDown':
 							return $elm$core$Basics$identity;
 						case 'CategoryDropDown':
@@ -14768,6 +15094,20 @@ var $mdgriffith$elm_ui$Internal$Model$Px = function (a) {
 };
 var $mdgriffith$elm_ui$Element$px = $mdgriffith$elm_ui$Internal$Model$Px;
 var $author$project$Equinor$Palette$red = A3($mdgriffith$elm_ui$Element$rgb255, 255, 59, 59);
+var $author$project$Punch$Messages$AddUploadedAttachmentToPunch = function (a) {
+	return {$: 'AddUploadedAttachmentToPunch', a: a};
+};
+var $author$project$Punch$Messages$FileNameInputChanged = function (a) {
+	return {$: 'FileNameInputChanged', a: a};
+};
+var $author$project$Punch$Messages$NewAttachmentButtonPressed = function (a) {
+	return {$: 'NewAttachmentButtonPressed', a: a};
+};
+var $mdgriffith$elm_ui$Internal$Model$AlignX = function (a) {
+	return {$: 'AlignX', a: a};
+};
+var $mdgriffith$elm_ui$Internal$Model$Right = {$: 'Right'};
+var $mdgriffith$elm_ui$Element$alignRight = $mdgriffith$elm_ui$Internal$Model$AlignX($mdgriffith$elm_ui$Internal$Model$Right);
 var $author$project$Punch$Messages$AttachmentPressed = F2(
 	function (a, b) {
 		return {$: 'AttachmentPressed', a: a, b: b};
@@ -14776,12 +15116,82 @@ var $author$project$Punch$Messages$DeleteAttachmentButtonPressed = F2(
 	function (a, b) {
 		return {$: 'DeleteAttachmentButtonPressed', a: a, b: b};
 	});
-var $mdgriffith$elm_ui$Internal$Model$AlignX = function (a) {
-	return {$: 'AlignX', a: a};
+var $mdgriffith$elm_ui$Internal$Model$CenterX = {$: 'CenterX'};
+var $mdgriffith$elm_ui$Element$centerX = $mdgriffith$elm_ui$Internal$Model$AlignX($mdgriffith$elm_ui$Internal$Model$CenterX);
+var $mdgriffith$elm_ui$Internal$Flag$borderColor = $mdgriffith$elm_ui$Internal$Flag$flag(28);
+var $mdgriffith$elm_ui$Element$Border$color = function (clr) {
+	return A2(
+		$mdgriffith$elm_ui$Internal$Model$StyleClass,
+		$mdgriffith$elm_ui$Internal$Flag$borderColor,
+		A3(
+			$mdgriffith$elm_ui$Internal$Model$Colored,
+			'bc-' + $mdgriffith$elm_ui$Internal$Model$formatColorClass(clr),
+			'border-color',
+			clr));
 };
-var $mdgriffith$elm_ui$Internal$Model$Right = {$: 'Right'};
-var $mdgriffith$elm_ui$Element$alignRight = $mdgriffith$elm_ui$Internal$Model$AlignX($mdgriffith$elm_ui$Internal$Model$Right);
 var $author$project$Equinor$Palette$energyRed = A3($mdgriffith$elm_ui$Element$rgb255, 255, 18, 67);
+var $elm$html$Html$Attributes$alt = $elm$html$Html$Attributes$stringProperty('alt');
+var $elm$html$Html$Attributes$src = function (url) {
+	return A2(
+		$elm$html$Html$Attributes$stringProperty,
+		'src',
+		_VirtualDom_noJavaScriptOrHtmlUri(url));
+};
+var $mdgriffith$elm_ui$Element$image = F2(
+	function (attrs, _v0) {
+		var src = _v0.src;
+		var description = _v0.description;
+		var imageAttributes = A2(
+			$elm$core$List$filter,
+			function (a) {
+				switch (a.$) {
+					case 'Width':
+						return true;
+					case 'Height':
+						return true;
+					default:
+						return false;
+				}
+			},
+			attrs);
+		return A4(
+			$mdgriffith$elm_ui$Internal$Model$element,
+			$mdgriffith$elm_ui$Internal$Model$asEl,
+			$mdgriffith$elm_ui$Internal$Model$div,
+			A2(
+				$elm$core$List$cons,
+				$mdgriffith$elm_ui$Internal$Model$htmlClass($mdgriffith$elm_ui$Internal$Style$classes.imageContainer),
+				attrs),
+			$mdgriffith$elm_ui$Internal$Model$Unkeyed(
+				_List_fromArray(
+					[
+						A4(
+						$mdgriffith$elm_ui$Internal$Model$element,
+						$mdgriffith$elm_ui$Internal$Model$asEl,
+						$mdgriffith$elm_ui$Internal$Model$NodeName('img'),
+						_Utils_ap(
+							_List_fromArray(
+								[
+									$mdgriffith$elm_ui$Internal$Model$Attr(
+									$elm$html$Html$Attributes$src(src)),
+									$mdgriffith$elm_ui$Internal$Model$Attr(
+									$elm$html$Html$Attributes$alt(description))
+								]),
+							imageAttributes),
+						$mdgriffith$elm_ui$Internal$Model$Unkeyed(_List_Nil))
+					])));
+	});
+var $mdgriffith$elm_ui$Internal$Flag$borderRound = $mdgriffith$elm_ui$Internal$Flag$flag(17);
+var $mdgriffith$elm_ui$Element$Border$rounded = function (radius) {
+	return A2(
+		$mdgriffith$elm_ui$Internal$Model$StyleClass,
+		$mdgriffith$elm_ui$Internal$Flag$borderRound,
+		A3(
+			$mdgriffith$elm_ui$Internal$Model$Single,
+			'br-' + $elm$core$String$fromInt(radius),
+			'border-radius',
+			$elm$core$String$fromInt(radius) + 'px'));
+};
 var $mdgriffith$elm_ui$Internal$Model$AsRow = {$: 'AsRow'};
 var $mdgriffith$elm_ui$Internal$Model$asRow = $mdgriffith$elm_ui$Internal$Model$AsRow;
 var $mdgriffith$elm_ui$Element$row = F2(
@@ -14802,6 +15212,22 @@ var $mdgriffith$elm_ui$Element$row = F2(
 						attrs))),
 			$mdgriffith$elm_ui$Internal$Model$Unkeyed(children));
 	});
+var $mdgriffith$elm_ui$Internal$Model$BorderWidth = F5(
+	function (a, b, c, d, e) {
+		return {$: 'BorderWidth', a: a, b: b, c: c, d: d, e: e};
+	});
+var $mdgriffith$elm_ui$Element$Border$width = function (v) {
+	return A2(
+		$mdgriffith$elm_ui$Internal$Model$StyleClass,
+		$mdgriffith$elm_ui$Internal$Flag$borderWidth,
+		A5(
+			$mdgriffith$elm_ui$Internal$Model$BorderWidth,
+			'b-' + $elm$core$String$fromInt(v),
+			v,
+			v,
+			v,
+			v));
+};
 var $author$project$Punch$View$renderAttachmentItem = F3(
 	function (size, punch, a) {
 		return A2(
@@ -14809,26 +15235,67 @@ var $author$project$Punch$View$renderAttachmentItem = F3(
 			_List_fromArray(
 				[
 					$mdgriffith$elm_ui$Element$width($mdgriffith$elm_ui$Element$fill),
-					$mdgriffith$elm_ui$Element$padding(10)
+					$mdgriffith$elm_ui$Element$padding(10),
+					$mdgriffith$elm_ui$Element$spacing(
+					$elm$core$Basics$round(size))
 				]),
 			_List_fromArray(
 				[
 					A2(
-					$mdgriffith$elm_ui$Element$el,
+					$mdgriffith$elm_ui$Element$row,
 					_List_fromArray(
 						[
 							$mdgriffith$elm_ui$Element$width($mdgriffith$elm_ui$Element$fill),
 							$mdgriffith$elm_ui$Element$pointer,
+							$mdgriffith$elm_ui$Element$spacing(
+							$elm$core$Basics$round(size)),
 							$author$project$Punch$View$onClick(
 							A2($author$project$Punch$Messages$AttachmentPressed, punch, a))
 						]),
-					$mdgriffith$elm_ui$Element$text(a.title)),
+					_List_fromArray(
+						[
+							$elm$core$String$isEmpty(a.thumbnailAsBase64) ? A2(
+							$mdgriffith$elm_ui$Element$el,
+							_List_fromArray(
+								[
+									$mdgriffith$elm_ui$Element$width(
+									$mdgriffith$elm_ui$Element$px(100))
+								]),
+							A2(
+								$mdgriffith$elm_ui$Element$el,
+								_List_fromArray(
+									[$mdgriffith$elm_ui$Element$centerX]),
+								$mdgriffith$elm_ui$Element$text('no preview'))) : A2(
+							$mdgriffith$elm_ui$Element$image,
+							_List_fromArray(
+								[
+									$mdgriffith$elm_ui$Element$width(
+									$mdgriffith$elm_ui$Element$px(100))
+								]),
+							{
+								description: 'preview',
+								src: $elm$core$String$concat(
+									_List_fromArray(
+										['data:', a.mimeType, ';base64,', a.thumbnailAsBase64]))
+							}),
+							A2(
+							$mdgriffith$elm_ui$Element$el,
+							_List_fromArray(
+								[
+									$mdgriffith$elm_ui$Element$width($mdgriffith$elm_ui$Element$fill)
+								]),
+							$mdgriffith$elm_ui$Element$text(a.title))
+						])),
 					A2(
 					$mdgriffith$elm_ui$Element$el,
 					_List_fromArray(
 						[
 							$mdgriffith$elm_ui$Element$alignRight,
 							$mdgriffith$elm_ui$Element$Font$color($author$project$Equinor$Palette$energyRed),
+							$mdgriffith$elm_ui$Element$padding(6),
+							$mdgriffith$elm_ui$Element$Border$rounded(4),
+							$mdgriffith$elm_ui$Element$Border$width(1),
+							$mdgriffith$elm_ui$Element$Border$color($author$project$Equinor$Palette$energyRed),
 							$mdgriffith$elm_ui$Element$pointer,
 							$author$project$Punch$View$onClick(
 							A2($author$project$Punch$Messages$DeleteAttachmentButtonPressed, punch, a))
@@ -14860,6 +15327,15 @@ var $author$project$Punch$View$attachmentPreview = F3(
 				return $mdgriffith$elm_ui$Element$none;
 		}
 	});
+var $mdgriffith$elm_ui$Element$Input$HiddenLabel = function (a) {
+	return {$: 'HiddenLabel', a: a};
+};
+var $mdgriffith$elm_ui$Element$Input$labelHidden = $mdgriffith$elm_ui$Element$Input$HiddenLabel;
+var $mdgriffith$elm_ui$Element$Input$Placeholder = F2(
+	function (a, b) {
+		return {$: 'Placeholder', a: a, b: b};
+	});
+var $mdgriffith$elm_ui$Element$Input$placeholder = $mdgriffith$elm_ui$Element$Input$Placeholder;
 var $elm$core$Basics$pow = _Basics_pow;
 var $mdgriffith$elm_ui$Element$modular = F3(
 	function (normal, ratio, rescale) {
@@ -14874,48 +15350,9 @@ var $author$project$Equinor$Palette$scaledInt = function (size) {
 		$author$project$Equinor$Palette$scaled(size),
 		$elm$core$Basics$round);
 };
-var $mdgriffith$elm_ui$Element$rgb = F3(
-	function (r, g, b) {
-		return A4($mdgriffith$elm_ui$Internal$Model$Rgba, r, g, b, 1);
-	});
-var $author$project$Equinor$Palette$white = A3($mdgriffith$elm_ui$Element$rgb, 1, 1, 1);
-var $author$project$Punch$View$renderAttachments = F4(
-	function (size, model, readOnly, punch) {
-		return A2(
-			$mdgriffith$elm_ui$Element$column,
-			_List_fromArray(
-				[
-					$mdgriffith$elm_ui$Element$width($mdgriffith$elm_ui$Element$fill)
-				]),
-			_List_fromArray(
-				[
-					A2(
-					$mdgriffith$elm_ui$Element$el,
-					_List_fromArray(
-						[
-							$mdgriffith$elm_ui$Element$width($mdgriffith$elm_ui$Element$fill),
-							$mdgriffith$elm_ui$Element$Background$color($author$project$Equinor$Palette$blue),
-							$mdgriffith$elm_ui$Element$Font$color($author$project$Equinor$Palette$white),
-							$mdgriffith$elm_ui$Element$padding(8),
-							$mdgriffith$elm_ui$Element$Font$size(
-							A2($author$project$Equinor$Palette$scaledInt, size, -1))
-						]),
-					$mdgriffith$elm_ui$Element$text(
-						'Attachments (' + ($elm$core$String$fromInt(punch.attachmentCount) + ')'))),
-					A3($author$project$Punch$View$attachmentPreview, size, model, punch)
-				]));
-	});
-var $author$project$Punch$Messages$DescriptionFieldInput = F2(
-	function (a, b) {
-		return {$: 'DescriptionFieldInput', a: a, b: b};
-	});
-var $author$project$Punch$Messages$DescriptionFieldLostFocus = function (a) {
-	return {$: 'DescriptionFieldLostFocus', a: a};
+var $mdgriffith$elm_ui$Element$Input$TextInputNode = function (a) {
+	return {$: 'TextInputNode', a: a};
 };
-var $mdgriffith$elm_ui$Element$Input$HiddenLabel = function (a) {
-	return {$: 'HiddenLabel', a: a};
-};
-var $mdgriffith$elm_ui$Element$Input$labelHidden = $mdgriffith$elm_ui$Element$Input$HiddenLabel;
 var $mdgriffith$elm_ui$Element$Input$TextArea = {$: 'TextArea'};
 var $mdgriffith$elm_ui$Internal$Model$LivePolite = {$: 'LivePolite'};
 var $mdgriffith$elm_ui$Element$Region$announce = $mdgriffith$elm_ui$Internal$Model$Describe($mdgriffith$elm_ui$Internal$Model$LivePolite);
@@ -15043,47 +15480,13 @@ var $mdgriffith$elm_ui$Element$Input$calcMoveToCompensateForPadding = function (
 			$elm$core$Basics$floor(vSpace / 2));
 	}
 };
-var $mdgriffith$elm_ui$Internal$Flag$borderColor = $mdgriffith$elm_ui$Internal$Flag$flag(28);
-var $mdgriffith$elm_ui$Element$Border$color = function (clr) {
-	return A2(
-		$mdgriffith$elm_ui$Internal$Model$StyleClass,
-		$mdgriffith$elm_ui$Internal$Flag$borderColor,
-		A3(
-			$mdgriffith$elm_ui$Internal$Model$Colored,
-			'bc-' + $mdgriffith$elm_ui$Internal$Model$formatColorClass(clr),
-			'border-color',
-			clr));
-};
+var $mdgriffith$elm_ui$Element$rgb = F3(
+	function (r, g, b) {
+		return A4($mdgriffith$elm_ui$Internal$Model$Rgba, r, g, b, 1);
+	});
 var $mdgriffith$elm_ui$Element$Input$darkGrey = A3($mdgriffith$elm_ui$Element$rgb, 186 / 255, 189 / 255, 182 / 255);
 var $mdgriffith$elm_ui$Element$Input$defaultTextPadding = A2($mdgriffith$elm_ui$Element$paddingXY, 12, 12);
-var $mdgriffith$elm_ui$Internal$Flag$borderRound = $mdgriffith$elm_ui$Internal$Flag$flag(17);
-var $mdgriffith$elm_ui$Element$Border$rounded = function (radius) {
-	return A2(
-		$mdgriffith$elm_ui$Internal$Model$StyleClass,
-		$mdgriffith$elm_ui$Internal$Flag$borderRound,
-		A3(
-			$mdgriffith$elm_ui$Internal$Model$Single,
-			'br-' + $elm$core$String$fromInt(radius),
-			'border-radius',
-			$elm$core$String$fromInt(radius) + 'px'));
-};
 var $mdgriffith$elm_ui$Element$Input$white = A3($mdgriffith$elm_ui$Element$rgb, 1, 1, 1);
-var $mdgriffith$elm_ui$Internal$Model$BorderWidth = F5(
-	function (a, b, c, d, e) {
-		return {$: 'BorderWidth', a: a, b: b, c: c, d: d, e: e};
-	});
-var $mdgriffith$elm_ui$Element$Border$width = function (v) {
-	return A2(
-		$mdgriffith$elm_ui$Internal$Model$StyleClass,
-		$mdgriffith$elm_ui$Internal$Flag$borderWidth,
-		A5(
-			$mdgriffith$elm_ui$Internal$Model$BorderWidth,
-			'b-' + $elm$core$String$fromInt(v),
-			v,
-			v,
-			v,
-			v));
-};
 var $mdgriffith$elm_ui$Element$Input$defaultTextBoxStyle = _List_fromArray(
 	[
 		$mdgriffith$elm_ui$Element$Input$defaultTextPadding,
@@ -15807,6 +16210,122 @@ var $mdgriffith$elm_ui$Element$Input$textHelper = F3(
 			textOptions.label,
 			wrappedInput);
 	});
+var $mdgriffith$elm_ui$Element$Input$text = $mdgriffith$elm_ui$Element$Input$textHelper(
+	{
+		autofill: $elm$core$Maybe$Nothing,
+		spellchecked: false,
+		type_: $mdgriffith$elm_ui$Element$Input$TextInputNode('text')
+	});
+var $author$project$Equinor$Palette$white = A3($mdgriffith$elm_ui$Element$rgb, 1, 1, 1);
+var $author$project$Punch$View$renderAttachments = F4(
+	function (size, model, readOnly, punch) {
+		return A2(
+			$mdgriffith$elm_ui$Element$column,
+			_List_fromArray(
+				[
+					$mdgriffith$elm_ui$Element$width($mdgriffith$elm_ui$Element$fill)
+				]),
+			_List_fromArray(
+				[
+					A2(
+					$mdgriffith$elm_ui$Element$row,
+					_List_fromArray(
+						[
+							$mdgriffith$elm_ui$Element$width($mdgriffith$elm_ui$Element$fill),
+							$mdgriffith$elm_ui$Element$Background$color($author$project$Equinor$Palette$blue),
+							$mdgriffith$elm_ui$Element$Font$color($author$project$Equinor$Palette$white),
+							$mdgriffith$elm_ui$Element$Font$size(
+							A2($author$project$Equinor$Palette$scaledInt, size, -1)),
+							A2($mdgriffith$elm_ui$Element$paddingXY, 8, 4)
+						]),
+					_List_fromArray(
+						[
+							$mdgriffith$elm_ui$Element$text(
+							'Attachments (' + ($elm$core$String$fromInt(punch.attachmentCount) + ')')),
+							A2(
+							$mdgriffith$elm_ui$Element$el,
+							_List_fromArray(
+								[
+									$mdgriffith$elm_ui$Element$padding(6),
+									$mdgriffith$elm_ui$Element$alignRight,
+									$mdgriffith$elm_ui$Element$Border$width(1),
+									$mdgriffith$elm_ui$Element$Border$color($author$project$Equinor$Palette$white),
+									$mdgriffith$elm_ui$Element$Border$rounded(4),
+									$mdgriffith$elm_ui$Element$pointer,
+									$author$project$Punch$View$onClick(
+									$author$project$Punch$Messages$NewAttachmentButtonPressed(punch))
+								]),
+							$mdgriffith$elm_ui$Element$text('Add new'))
+						])),
+					function () {
+					var _v0 = model.currentAttachment;
+					if (_v0.$ === 'Just') {
+						var file = _v0.a;
+						return A2(
+							$mdgriffith$elm_ui$Element$row,
+							_List_fromArray(
+								[
+									$mdgriffith$elm_ui$Element$width($mdgriffith$elm_ui$Element$fill),
+									$mdgriffith$elm_ui$Element$spacing(
+									$elm$core$Basics$round(size)),
+									$mdgriffith$elm_ui$Element$padding(4)
+								]),
+							_List_fromArray(
+								[
+									A2(
+									$mdgriffith$elm_ui$Element$image,
+									_List_fromArray(
+										[
+											$mdgriffith$elm_ui$Element$width(
+											$mdgriffith$elm_ui$Element$px(
+												$elm$core$Basics$round(size * 4)))
+										]),
+									{description: 'Thumbnail of new attachment', src: file.uri}),
+									A2(
+									$mdgriffith$elm_ui$Element$Input$text,
+									_List_fromArray(
+										[
+											$mdgriffith$elm_ui$Element$width($mdgriffith$elm_ui$Element$fill)
+										]),
+									{
+										label: $mdgriffith$elm_ui$Element$Input$labelHidden('Name'),
+										onChange: $author$project$Punch$Messages$FileNameInputChanged,
+										placeholder: $elm$core$Maybe$Just(
+											A2(
+												$mdgriffith$elm_ui$Element$Input$placeholder,
+												_List_Nil,
+												$mdgriffith$elm_ui$Element$text('Enter name...'))),
+										text: file.name
+									}),
+									A2(
+									$mdgriffith$elm_ui$Element$el,
+									_List_fromArray(
+										[
+											$mdgriffith$elm_ui$Element$padding(6),
+											$mdgriffith$elm_ui$Element$alignRight,
+											$mdgriffith$elm_ui$Element$Border$width(1),
+											$mdgriffith$elm_ui$Element$Border$color($author$project$Equinor$Palette$blue),
+											$mdgriffith$elm_ui$Element$Border$rounded(4),
+											$mdgriffith$elm_ui$Element$pointer,
+											$author$project$Punch$View$onClick(
+											$author$project$Punch$Messages$AddUploadedAttachmentToPunch(punch))
+										]),
+									$mdgriffith$elm_ui$Element$text('Add'))
+								]));
+					} else {
+						return $mdgriffith$elm_ui$Element$none;
+					}
+				}(),
+					A3($author$project$Punch$View$attachmentPreview, size, model, punch)
+				]));
+	});
+var $author$project$Punch$Messages$DescriptionFieldInput = F2(
+	function (a, b) {
+		return {$: 'DescriptionFieldInput', a: a, b: b};
+	});
+var $author$project$Punch$Messages$DescriptionFieldLostFocus = function (a) {
+	return {$: 'DescriptionFieldLostFocus', a: a};
+};
 var $mdgriffith$elm_ui$Element$Input$multiline = F2(
 	function (attrs, multi) {
 		return A3(
@@ -15832,11 +16351,6 @@ var $elm$html$Html$Events$onBlur = function (msg) {
 		$elm$json$Json$Decode$succeed(msg));
 };
 var $mdgriffith$elm_ui$Element$Events$onLoseFocus = A2($elm$core$Basics$composeL, $mdgriffith$elm_ui$Internal$Model$Attr, $elm$html$Html$Events$onBlur);
-var $mdgriffith$elm_ui$Element$Input$Placeholder = F2(
-	function (a, b) {
-		return {$: 'Placeholder', a: a, b: b};
-	});
-var $mdgriffith$elm_ui$Element$Input$placeholder = $mdgriffith$elm_ui$Element$Input$Placeholder;
 var $author$project$Punch$View$renderDescription = F4(
 	function (textToHighlight, size, readOnly, punch) {
 		return A2(
@@ -16427,8 +16941,6 @@ var $author$project$Equinor$Component$SelectionList$selectionList = F2(
 				]),
 			A2($elm$core$List$map, viewFunction, items));
 	});
-var $mdgriffith$elm_ui$Internal$Model$CenterX = {$: 'CenterX'};
-var $mdgriffith$elm_ui$Element$centerX = $mdgriffith$elm_ui$Internal$Model$AlignX($mdgriffith$elm_ui$Internal$Model$CenterX);
 var $mdgriffith$elm_ui$Internal$Model$CenterY = {$: 'CenterY'};
 var $mdgriffith$elm_ui$Element$centerY = $mdgriffith$elm_ui$Internal$Model$AlignY($mdgriffith$elm_ui$Internal$Model$CenterY);
 var $author$project$Equinor$Component$SelectionList$fancySpinner = $mdgriffith$elm_ui$Element$html(

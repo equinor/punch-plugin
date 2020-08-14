@@ -1,4 +1,4 @@
-module Punch.Api exposing (attachment, attachments, categories, clear, clientId, deleteAttachment, details, organizations, setCategory, setClearingBy, setRaisedBy, setSorting, setType, sorts, types, unClear, unVerify, updateDescription, verify)
+module Punch.Api exposing (addAttachment, attachment, attachments, categories, clear, clientId, deleteAttachment, details, organizations, setCategory, setClearingBy, setRaisedBy, setSorting, setType, sorts, types, unClear, unVerify, updateDescription, verify)
 
 import Http
 import Json.Decode as D
@@ -483,6 +483,30 @@ deleteAttachment punch att plantId token =
                     , ( "AttachmentId", E.int att.id )
                     ]
         , expect = Http.expectWhatever (GotApiResult << DeleteAttachmentResult punch att)
+        , timeout = Nothing
+        , tracker = Nothing
+        }
+
+
+addAttachment : Punch -> AttachmentUpload -> String -> String -> Cmd Msg
+addAttachment punch att plantId token =
+    Http.request
+        { method = "POST"
+        , url =
+            url
+                [ "PunchListItem"
+                , "Attachment"
+                ]
+                [ string "plantId" plantId
+                , int "punchItemId" att.punchId
+                , string "title" att.name
+                , apiVersion
+                ]
+        , headers = [ Http.header "Authorization" ("Bearer " ++ token) ]
+        , body =
+            Http.multipartBody
+                [ Http.filePart "ImportImage" att.file ]
+        , expect = Http.expectWhatever (GotApiResult << AddAttachmentResult punch att)
         , timeout = Nothing
         , tracker = Nothing
         }

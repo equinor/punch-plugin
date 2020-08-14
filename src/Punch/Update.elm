@@ -3,6 +3,8 @@ module Punch.Update exposing (update)
 import Dict exposing (Dict)
 import Equinor.Data.Procosys.Status as Status exposing (Status(..))
 import Equinor.Types exposing (..)
+import File exposing (File)
+import File.Select
 import Http
 import Json.Encode as E
 import Punch exposing (Punch)
@@ -12,6 +14,7 @@ import Punch.Model exposing (Model)
 import Punch.Ports as Ports
 import Punch.Types as Types exposing (..)
 import Svg.Attributes exposing (z)
+import Task
 
 
 type alias MC =
@@ -71,6 +74,38 @@ update msg model =
 
         DeleteAttachmentButtonPressed punch attachment ->
             mc |> apiRequest [ Api.deleteAttachment punch attachment ]
+
+        NewAttachmentButtonPressed punch ->
+            ( model, File.Select.file [] (AttachmentFileLoaded punch.id) )
+
+        AttachmentFileLoaded punchId file ->
+            let
+                name =
+                    File.name file
+
+                uri =
+                    File.toUrl file
+            in
+            ( model, Task.perform (AttachmentDecoded file punchId name) uri )
+
+        AttachmentDecoded file punchId name uri ->
+            ( { model | currentAttachment = Just { file = file, name = name, uri = uri, punchId = punchId } }, Cmd.none )
+
+        FileNameInputChanged str ->
+            case model.currentAttachment of
+                Just currentAttachment ->
+                    ( { model | currentAttachment = Just { currentAttachment | name = str } }, Cmd.none )
+
+                Nothing ->
+                    mc
+
+        AddUploadedAttachmentToPunch punch ->
+            case model.currentAttachment of
+                Just currentAttachment ->
+                    mc |> apiRequest [ Api.addAttachment punch currentAttachment ]
+
+                Nothing ->
+                    mc
 
         NeverHappens ->
             ( model, createEvent "" E.null )
@@ -517,3 +552,12 @@ handleApiResult apiResult ( m, c ) =
 
                 Err err ->
                     ( m, c )
+
+        AddAttachmentResult punch att result ->
+            case result of
+                Ok _ ->
+                    ( { m | currentAttachment = Nothing }, c )
+                        |> getAttachments punch
+
+                Err err ->
+                    ( { m | errorMsg = "Cound not add Attachment" }, c )

@@ -72,6 +72,7 @@ type alias Model =
     , categories : WebData (List SelectItem)
     , types : WebData (List SelectItem)
     , sorts : WebData (List SelectItem)
+    , currentAttachment : Maybe AttachmentUpload
     }
 
 
@@ -90,6 +91,7 @@ initialModel flags =
       , categories = NotLoaded
       , types = NotLoaded
       , sorts = NotLoaded
+      , currentAttachment = Nothing
       }
     , Cmd.none
     )

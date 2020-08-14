@@ -1,5 +1,6 @@
 module Punch.Messages exposing (ApiResult(..), Msg(..))
 
+import File exposing (File)
 import Http
 import Json.Decode as D
 import Punch exposing (Punch)
@@ -19,6 +20,11 @@ type Msg
     | CloseDropDownButtonPressed
     | AttachmentPressed Punch Punch.Attachment
     | DeleteAttachmentButtonPressed Punch Punch.Attachment
+    | NewAttachmentButtonPressed Punch
+    | AttachmentFileLoaded Int File
+    | AttachmentDecoded File Int String String
+    | FileNameInputChanged String
+    | AddUploadedAttachmentToPunch Punch
       -- Form
     | DescriptionFieldLostFocus Punch
     | DescriptionFieldInput Punch String
@@ -49,3 +55,4 @@ type ApiResult
     | VerifyResult Punch (Result Http.Error ())
     | UnverifyResult Punch (Result Http.Error ())
     | DeleteAttachmentResult Punch Punch.Attachment (Result Http.Error ())
+    | AddAttachmentResult Punch AttachmentUpload (Result Http.Error ())

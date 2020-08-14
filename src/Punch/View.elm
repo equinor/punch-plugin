@@ -246,14 +246,31 @@ renderDescription textToHighlight size readOnly punch =
 renderAttachments : Float -> Model -> Bool -> Punch -> Element Msg
 renderAttachments size model readOnly punch =
     column [ width fill ]
-        [ el
+        [ row
             [ width fill
             , Background.color Palette.blue
             , Font.color Palette.white
-            , padding 8
             , Font.size (scaledInt size -1)
+            , paddingXY 8 4
             ]
-            (text <| "Attachments (" ++ String.fromInt punch.attachmentCount ++ ")")
+            [ text <| "Attachments (" ++ String.fromInt punch.attachmentCount ++ ")"
+            , el [ padding 6, alignRight, Border.width 1, Border.color Palette.white, Border.rounded 4, pointer, onClick <| NewAttachmentButtonPressed punch ] (text "Add new")
+            ]
+        , case model.currentAttachment of
+            Just file ->
+                row [ width fill, spacing <| round size, padding 4 ]
+                    [ image [ width <| px <| round <| size * 4 ] { description = "Thumbnail of new attachment", src = file.uri }
+                    , Input.text [ width fill ]
+                        { label = Input.labelHidden "Name"
+                        , onChange = FileNameInputChanged
+                        , placeholder = Just (Input.placeholder [] (text "Enter name..."))
+                        , text = file.name
+                        }
+                    , el [ padding 6, alignRight, Border.width 1, Border.color Palette.blue, Border.rounded 4, pointer, onClick <| AddUploadedAttachmentToPunch punch ] (text "Add")
+                    ]
+
+            Nothing ->
+                none
         , attachmentPreview size model punch
         ]
 
@@ -278,9 +295,21 @@ attachmentPreview size model punch =
 
 renderAttachmentItem : Float -> Punch -> Punch.Attachment -> Element Msg
 renderAttachmentItem size punch a =
-    row [ width fill, padding 10 ]
-        [ el [ width fill, pointer, onClick <| AttachmentPressed punch a ] (text a.title)
-        , el [ alignRight, Font.color Palette.energyRed, pointer, onClick <| DeleteAttachmentButtonPressed punch a ] (text "X")
+    row [ width fill, padding 10, spacing <| round size ]
+        [ row
+            [ width fill
+            , pointer
+            , spacing <| round size
+            , onClick <| AttachmentPressed punch a
+            ]
+            [ if String.isEmpty a.thumbnailAsBase64 then
+                el [ width (px 100) ] <| el [ centerX ] (text "no preview")
+
+              else
+                image [ width (px 100) ] { description = "preview", src = String.concat [ "data:", a.mimeType, ";base64,", a.thumbnailAsBase64 ] }
+            , el [ width fill ] (text a.title)
+            ]
+        , el [ alignRight, Font.color Palette.energyRed, padding 6, Border.rounded 4, Border.width 1, Border.color Palette.energyRed, pointer, onClick <| DeleteAttachmentButtonPressed punch a ] (text "X")
         ]
 
 

@@ -1,5 +1,6 @@
 module Punch.Types exposing (..)
 
+import File exposing (File)
 import Json.Decode as D
 
 
@@ -44,3 +45,11 @@ type DropDown
     | ClearingByDropDown
     | TypeDropDown
     | SortingDropDown
+
+
+type alias AttachmentUpload =
+    { file : File
+    , punchId : Int
+    , uri : String
+    , name : String
+    }
