@@ -260,19 +260,34 @@ renderAttachments size model readOnly punch =
             Just file ->
                 row [ width fill, spacing <| round size, padding 4 ]
                     [ image [ width <| px <| round <| size * 4 ] { description = "Thumbnail of new attachment", src = file.uri }
-                    , Input.text [ width fill ]
+                    , Input.text [ width fill, Input.focusedOnLoad, onEnterKey <| AddUploadedAttachmentToPunch punch ]
                         { label = Input.labelHidden "Name"
                         , onChange = FileNameInputChanged
                         , placeholder = Just (Input.placeholder [] (text "Enter name..."))
                         , text = file.name
                         }
-                    , el [ padding 6, alignRight, Border.width 1, Border.color Palette.blue, Border.rounded 4, pointer, onClick <| AddUploadedAttachmentToPunch punch ] (text "Add")
+                    , el [ padding 6, alignRight, Border.width 1, Background.color Palette.green, Font.color Palette.white, Border.color Palette.blue, Border.rounded 4, pointer, onClick <| AddUploadedAttachmentToPunch punch ] (text "Add")
                     ]
 
             Nothing ->
                 none
         , attachmentPreview size model punch
         ]
+
+
+onEnterKey msg =
+    htmlAttribute <|
+        HE.on "keydown"
+            (D.field "keyCode" D.int
+                |> D.andThen
+                    (\keyCode ->
+                        if keyCode == 13 then
+                            D.succeed msg
+
+                        else
+                            D.fail ""
+                    )
+            )
 
 
 attachmentPreview : Float -> Model -> Punch -> Element Msg

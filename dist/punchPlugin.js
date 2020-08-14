@@ -12744,6 +12744,15 @@ var $author$project$Punch$Api$clear = F3(
 						]))
 			});
 	});
+var $author$project$Punch$Update$clearAttachmentUpload = function (_v0) {
+	var m = _v0.a;
+	var c = _v0.b;
+	return _Utils_Tuple2(
+		_Utils_update(
+			m,
+			{currentAttachment: $elm$core$Maybe$Nothing}),
+		c);
+};
 var $author$project$Punch$Update$closeDropDowns = function (_v0) {
 	var m = _v0.a;
 	var c = _v0.b;
@@ -14006,8 +14015,9 @@ var $author$project$Punch$Update$update = F2(
 				var punch = msg.a;
 				return _Utils_eq(
 					model.selectedPunch,
-					$elm$core$Maybe$Just(punch)) ? $author$project$Punch$Update$unSelectPunch(
-					$author$project$Punch$Update$closeDropDowns(mc)) : A2(
+					$elm$core$Maybe$Just(punch)) ? $author$project$Punch$Update$clearAttachmentUpload(
+					$author$project$Punch$Update$unSelectPunch(
+						$author$project$Punch$Update$closeDropDowns(mc))) : A2(
 					$author$project$Punch$Update$getAttachments,
 					punch,
 					A2(
@@ -14016,7 +14026,8 @@ var $author$project$Punch$Update$update = F2(
 						A2(
 							$author$project$Punch$Update$selectPunch,
 							punch,
-							$author$project$Punch$Update$closeDropDowns(mc))));
+							$author$project$Punch$Update$clearAttachmentUpload(
+								$author$project$Punch$Update$closeDropDowns(mc)))));
 			case 'AttachmentPressed':
 				var punch = msg.a;
 				var attachment = msg.b;
@@ -15327,10 +15338,43 @@ var $author$project$Punch$View$attachmentPreview = F3(
 				return $mdgriffith$elm_ui$Element$none;
 		}
 	});
+var $elm$json$Json$Encode$bool = _Json_wrap;
+var $elm$html$Html$Attributes$boolProperty = F2(
+	function (key, bool) {
+		return A2(
+			_VirtualDom_property,
+			key,
+			$elm$json$Json$Encode$bool(bool));
+	});
+var $elm$html$Html$Attributes$autofocus = $elm$html$Html$Attributes$boolProperty('autofocus');
+var $mdgriffith$elm_ui$Element$Input$focusedOnLoad = $mdgriffith$elm_ui$Internal$Model$Attr(
+	$elm$html$Html$Attributes$autofocus(true));
 var $mdgriffith$elm_ui$Element$Input$HiddenLabel = function (a) {
 	return {$: 'HiddenLabel', a: a};
 };
 var $mdgriffith$elm_ui$Element$Input$labelHidden = $mdgriffith$elm_ui$Element$Input$HiddenLabel;
+var $elm$virtual_dom$VirtualDom$Normal = function (a) {
+	return {$: 'Normal', a: a};
+};
+var $elm$html$Html$Events$on = F2(
+	function (event, decoder) {
+		return A2(
+			$elm$virtual_dom$VirtualDom$on,
+			event,
+			$elm$virtual_dom$VirtualDom$Normal(decoder));
+	});
+var $author$project$Punch$View$onEnterKey = function (msg) {
+	return $mdgriffith$elm_ui$Element$htmlAttribute(
+		A2(
+			$elm$html$Html$Events$on,
+			'keydown',
+			A2(
+				$elm$json$Json$Decode$andThen,
+				function (keyCode) {
+					return (keyCode === 13) ? $elm$json$Json$Decode$succeed(msg) : $elm$json$Json$Decode$fail('');
+				},
+				A2($elm$json$Json$Decode$field, 'keyCode', $elm$json$Json$Decode$int))));
+};
 var $mdgriffith$elm_ui$Element$Input$Placeholder = F2(
 	function (a, b) {
 		return {$: 'Placeholder', a: a, b: b};
@@ -15952,14 +15996,6 @@ var $mdgriffith$elm_ui$Element$Input$renderPlaceholder = F3(
 	});
 var $mdgriffith$elm_ui$Element$scrollbarY = A2($mdgriffith$elm_ui$Internal$Model$Class, $mdgriffith$elm_ui$Internal$Flag$overflow, $mdgriffith$elm_ui$Internal$Style$classes.scrollbarsY);
 var $elm$html$Html$span = _VirtualDom_node('span');
-var $elm$json$Json$Encode$bool = _Json_wrap;
-var $elm$html$Html$Attributes$boolProperty = F2(
-	function (key, bool) {
-		return A2(
-			_VirtualDom_property,
-			key,
-			$elm$json$Json$Encode$bool(bool));
-	});
 var $elm$html$Html$Attributes$spellcheck = $elm$html$Html$Attributes$boolProperty('spellcheck');
 var $mdgriffith$elm_ui$Element$Input$spellcheck = A2($elm$core$Basics$composeL, $mdgriffith$elm_ui$Internal$Model$Attr, $elm$html$Html$Attributes$spellcheck);
 var $elm$html$Html$Attributes$type_ = $elm$html$Html$Attributes$stringProperty('type');
@@ -16285,7 +16321,10 @@ var $author$project$Punch$View$renderAttachments = F4(
 									$mdgriffith$elm_ui$Element$Input$text,
 									_List_fromArray(
 										[
-											$mdgriffith$elm_ui$Element$width($mdgriffith$elm_ui$Element$fill)
+											$mdgriffith$elm_ui$Element$width($mdgriffith$elm_ui$Element$fill),
+											$mdgriffith$elm_ui$Element$Input$focusedOnLoad,
+											$author$project$Punch$View$onEnterKey(
+											$author$project$Punch$Messages$AddUploadedAttachmentToPunch(punch))
 										]),
 									{
 										label: $mdgriffith$elm_ui$Element$Input$labelHidden('Name'),
@@ -16304,6 +16343,8 @@ var $author$project$Punch$View$renderAttachments = F4(
 											$mdgriffith$elm_ui$Element$padding(6),
 											$mdgriffith$elm_ui$Element$alignRight,
 											$mdgriffith$elm_ui$Element$Border$width(1),
+											$mdgriffith$elm_ui$Element$Background$color($author$project$Equinor$Palette$green),
+											$mdgriffith$elm_ui$Element$Font$color($author$project$Equinor$Palette$white),
 											$mdgriffith$elm_ui$Element$Border$color($author$project$Equinor$Palette$blue),
 											$mdgriffith$elm_ui$Element$Border$rounded(4),
 											$mdgriffith$elm_ui$Element$pointer,
@@ -16333,16 +16374,6 @@ var $mdgriffith$elm_ui$Element$Input$multiline = F2(
 			{autofill: $elm$core$Maybe$Nothing, spellchecked: multi.spellcheck, type_: $mdgriffith$elm_ui$Element$Input$TextArea},
 			attrs,
 			{label: multi.label, onChange: multi.onChange, placeholder: multi.placeholder, text: multi.text});
-	});
-var $elm$virtual_dom$VirtualDom$Normal = function (a) {
-	return {$: 'Normal', a: a};
-};
-var $elm$html$Html$Events$on = F2(
-	function (event, decoder) {
-		return A2(
-			$elm$virtual_dom$VirtualDom$on,
-			event,
-			$elm$virtual_dom$VirtualDom$Normal(decoder));
 	});
 var $elm$html$Html$Events$onBlur = function (msg) {
 	return A2(

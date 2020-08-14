@@ -61,10 +61,12 @@ update msg model =
                 mc
                     |> closeDropDowns
                     |> unSelectPunch
+                    |> clearAttachmentUpload
 
             else
                 mc
                     |> closeDropDowns
+                    |> clearAttachmentUpload
                     |> selectPunch punch
                     |> getDetails punch
                     |> getAttachments punch
@@ -292,6 +294,11 @@ setPunchListTo punchList ( m, c ) =
 unSelectPunch : MC -> MC
 unSelectPunch ( m, c ) =
     ( { m | selectedPunch = Nothing }, c )
+
+
+clearAttachmentUpload : MC -> MC
+clearAttachmentUpload ( m, c ) =
+    ( { m | currentAttachment = Nothing }, c )
 
 
 selectPunch : Punch -> MC -> MC
