@@ -64,6 +64,13 @@ update msg model =
                     |> closeDropDowns
                     |> selectPunch punch
                     |> getDetails punch
+                    |> getAttachments punch
+
+        AttachmentPressed punch attachment ->
+            mc |> apiRequest [ Api.attachment punch attachment ]
+
+        DeleteAttachmentButtonPressed punch attachment ->
+            mc |> apiRequest [ Api.deleteAttachment punch attachment ]
 
         NeverHappens ->
             ( model, createEvent "" E.null )
@@ -237,6 +244,11 @@ getDetails punch =
     apiRequest [ Api.details punch ]
 
 
+getAttachments : Punch -> MC -> MC
+getAttachments punch =
+    apiRequest [ Api.attachments punch ]
+
+
 setPunchListTo : List Punch -> MC -> MC
 setPunchListTo punchList ( m, c ) =
     ( { m | punch = List.foldl (\punch dict -> Dict.insert punch.id punch dict) Dict.empty punchList }, c )
@@ -334,6 +346,26 @@ handleApiResult apiResult ( m, c ) =
             ( { m | punch = Dict.update oldPunch.id (Maybe.map updater) m.punch }
             , c
             )
+
+        GotAttachments oldPunch result ->
+            let
+                updater punch =
+                    case result of
+                        Ok attachments ->
+                            { punch
+                                | attachments = Loaded "" attachments
+                                , attachmentCount = List.length attachments
+                            }
+
+                        Err err ->
+                            { punch | attachments = DataError "" Nothing }
+            in
+            ( { m | punch = Dict.update oldPunch.id (Maybe.map updater) m.punch }
+            , c
+            )
+
+        GotAttachment oldPunch result ->
+            ( m, c )
 
         PunchDescriptionResult punch result ->
             case result of
@@ -476,3 +508,12 @@ handleApiResult apiResult ( m, c ) =
 
         UnverifyResult punch result ->
             ( m, c ) |> getDetails punch
+
+        DeleteAttachmentResult punch att result ->
+            case result of
+                Ok _ ->
+                    ( m, c )
+                        |> getAttachments punch
+
+                Err err ->
+                    ( m, c )

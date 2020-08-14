@@ -1,4 +1,4 @@
-module Punch exposing (ApiPunch, Dict, Punch, PunchLists, Status, apiDecoder, decoder, encoder, filterByTimeFrame, sort, webApiDecoder)
+module Punch exposing (ApiPunch, Attachment, Dict, Punch, PunchLists, Status, apiDecoder, attachmentDecoder, decoder, encoder, filterByTimeFrame, sort, webApiDecoder)
 
 import Date exposing (Date)
 import Dict as CoreDict
@@ -35,7 +35,9 @@ type alias Punch =
     , location : String
     , typeDescription : String
     , sortingDescription : String
+    , attachmentCount : Int
     , apiPunch : WebData ApiPunch
+    , attachments : WebData (List Attachment)
     }
 
 
@@ -51,6 +53,16 @@ type alias ApiPunch =
     }
 
 
+type alias Attachment =
+    { id : Int
+    , uri : String
+    , title : String
+    , mimeType : String
+    , thumbnailAsBase64 : String
+    , hasFile : Bool
+    }
+
+
 webApiDecoder : D.Decoder ApiPunch
 webApiDecoder =
     D.succeed ApiPunch
@@ -62,6 +74,17 @@ webApiDecoder =
         |> required "VerifiedByLastName" nullString
         |> required "IsRestrictedForUser" D.bool
         |> required "StatusControlledBySwcr" D.bool
+
+
+attachmentDecoder : D.Decoder Attachment
+attachmentDecoder =
+    D.succeed Attachment
+        |> required "Id" D.int
+        |> required "Uri" nullString
+        |> required "Title" nullString
+        |> required "MimeType" nullString
+        |> required "ThumbnailAsBase64" nullString
+        |> required "HasFile" D.bool
 
 
 type alias PunchLists =
@@ -105,6 +128,7 @@ encoder punch =
         , ( "location", E.string punch.location )
         , ( "typeDescription", E.string punch.typeDescription )
         , ( "sortingDescription", E.string punch.sortingDescription )
+        , ( "attachmentCount", E.int punch.attachmentCount )
         ]
 
 
@@ -125,6 +149,8 @@ decoder =
         |> optional "location" D.string ""
         |> optional "typeDescription" D.string ""
         |> optional "sortingDescription" D.string ""
+        |> optional "attachmentCount" D.int 0
+        |> hardcoded NotLoaded
         |> hardcoded NotLoaded
 
 
@@ -150,6 +176,8 @@ apiDecoder =
             )
         |> required "PunchListType__Description" nullString
         |> required "PunchListSorting__Description" nullString
+        |> required "AttachmentCount" D.int
+        |> hardcoded NotLoaded
         |> hardcoded NotLoaded
 
 

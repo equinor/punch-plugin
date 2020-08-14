@@ -5608,8 +5608,12 @@ var $author$project$Punch$Punch = function (id) {
 											return function (location) {
 												return function (typeDescription) {
 													return function (sortingDescription) {
-														return function (apiPunch) {
-															return {apiPunch: apiPunch, clearingByOrg: clearingByOrg, commPk: commPk, createdAt: createdAt, description: description, id: id, location: location, mcPk: mcPk, raisedByOrg: raisedByOrg, sortingDescription: sortingDescription, status: status, tag: tag, tagDescription: tagDescription, typeDescription: typeDescription, updatedAt: updatedAt};
+														return function (attachmentCount) {
+															return function (apiPunch) {
+																return function (attachments) {
+																	return {apiPunch: apiPunch, attachmentCount: attachmentCount, attachments: attachments, clearingByOrg: clearingByOrg, commPk: commPk, createdAt: createdAt, description: description, id: id, location: location, mcPk: mcPk, raisedByOrg: raisedByOrg, sortingDescription: sortingDescription, status: status, tag: tag, tagDescription: tagDescription, typeDescription: typeDescription, updatedAt: updatedAt};
+																};
+															};
 														};
 													};
 												};
@@ -5721,68 +5725,76 @@ var $author$project$Punch$timeDecoder = A2(
 var $author$project$Punch$decoder = A2(
 	$NoRedInk$elm_json_decode_pipeline$Json$Decode$Pipeline$hardcoded,
 	$author$project$Equinor$Types$NotLoaded,
-	A4(
-		$NoRedInk$elm_json_decode_pipeline$Json$Decode$Pipeline$optional,
-		'sortingDescription',
-		$elm$json$Json$Decode$string,
-		'',
+	A2(
+		$NoRedInk$elm_json_decode_pipeline$Json$Decode$Pipeline$hardcoded,
+		$author$project$Equinor$Types$NotLoaded,
 		A4(
 			$NoRedInk$elm_json_decode_pipeline$Json$Decode$Pipeline$optional,
-			'typeDescription',
-			$elm$json$Json$Decode$string,
-			'',
+			'attachmentCount',
+			$elm$json$Json$Decode$int,
+			0,
 			A4(
 				$NoRedInk$elm_json_decode_pipeline$Json$Decode$Pipeline$optional,
-				'location',
+				'sortingDescription',
 				$elm$json$Json$Decode$string,
 				'',
 				A4(
 					$NoRedInk$elm_json_decode_pipeline$Json$Decode$Pipeline$optional,
-					'clearingByOrg',
+					'typeDescription',
 					$elm$json$Json$Decode$string,
 					'',
 					A4(
 						$NoRedInk$elm_json_decode_pipeline$Json$Decode$Pipeline$optional,
-						'raisedByOrg',
+						'location',
 						$elm$json$Json$Decode$string,
 						'',
-						A3(
-							$NoRedInk$elm_json_decode_pipeline$Json$Decode$Pipeline$required,
-							'mcPk',
+						A4(
+							$NoRedInk$elm_json_decode_pipeline$Json$Decode$Pipeline$optional,
+							'clearingByOrg',
 							$elm$json$Json$Decode$string,
-							A3(
-								$NoRedInk$elm_json_decode_pipeline$Json$Decode$Pipeline$required,
-								'commPk',
+							'',
+							A4(
+								$NoRedInk$elm_json_decode_pipeline$Json$Decode$Pipeline$optional,
+								'raisedByOrg',
 								$elm$json$Json$Decode$string,
+								'',
 								A3(
 									$NoRedInk$elm_json_decode_pipeline$Json$Decode$Pipeline$required,
-									'status',
-									$author$project$Equinor$Data$Procosys$Status$decoder,
+									'mcPk',
+									$elm$json$Json$Decode$string,
 									A3(
 										$NoRedInk$elm_json_decode_pipeline$Json$Decode$Pipeline$required,
-										'updatedAt',
+										'commPk',
 										$elm$json$Json$Decode$string,
 										A3(
 											$NoRedInk$elm_json_decode_pipeline$Json$Decode$Pipeline$required,
-											'createdAt',
-											$author$project$Punch$timeDecoder,
+											'status',
+											$author$project$Equinor$Data$Procosys$Status$decoder,
 											A3(
 												$NoRedInk$elm_json_decode_pipeline$Json$Decode$Pipeline$required,
-												'description',
+												'updatedAt',
 												$elm$json$Json$Decode$string,
 												A3(
 													$NoRedInk$elm_json_decode_pipeline$Json$Decode$Pipeline$required,
-													'tagDescription',
-													$elm$json$Json$Decode$string,
+													'createdAt',
+													$author$project$Punch$timeDecoder,
 													A3(
 														$NoRedInk$elm_json_decode_pipeline$Json$Decode$Pipeline$required,
-														'tag',
+														'description',
 														$elm$json$Json$Decode$string,
 														A3(
 															$NoRedInk$elm_json_decode_pipeline$Json$Decode$Pipeline$required,
-															'id',
-															$elm$json$Json$Decode$int,
-															$elm$json$Json$Decode$succeed($author$project$Punch$Punch))))))))))))))));
+															'tagDescription',
+															$elm$json$Json$Decode$string,
+															A3(
+																$NoRedInk$elm_json_decode_pipeline$Json$Decode$Pipeline$required,
+																'tag',
+																$elm$json$Json$Decode$string,
+																A3(
+																	$NoRedInk$elm_json_decode_pipeline$Json$Decode$Pipeline$required,
+																	'id',
+																	$elm$json$Json$Decode$int,
+																	$elm$json$Json$Decode$succeed($author$project$Punch$Punch))))))))))))))))));
 var $elm$json$Json$Decode$list = _Json_decodeList;
 var $author$project$Punch$Types$TokenSuccess = F2(
 	function (refNo, token) {
@@ -11749,13 +11761,13 @@ var $author$project$Punch$Update$apiRequest = F2(
 								])))
 					])));
 	});
-var $author$project$Punch$Messages$ClearResult = F2(
-	function (a, b) {
-		return {$: 'ClearResult', a: a, b: b};
-	});
 var $author$project$Punch$Messages$GotApiResult = function (a) {
 	return {$: 'GotApiResult', a: a};
 };
+var $author$project$Punch$Messages$GotAttachment = F2(
+	function (a, b) {
+		return {$: 'GotAttachment', a: a, b: b};
+	});
 var $elm$url$Url$Builder$QueryParameter = F2(
 	function (a, b) {
 		return {$: 'QueryParameter', a: a, b: b};
@@ -12169,6 +12181,7 @@ var $elm$core$Dict$update = F3(
 			return A2($elm$core$Dict$remove, targetKey, dictionary);
 		}
 	});
+var $elm$http$Http$emptyBody = _Http_emptyBody;
 var $elm$http$Http$expectBytesResponse = F2(
 	function (toMsg, toResult) {
 		return A3(
@@ -12236,12 +12249,13 @@ var $elm$http$Http$Header = F2(
 		return {$: 'Header', a: a, b: b};
 	});
 var $elm$http$Http$header = $elm$http$Http$Header;
-var $elm$http$Http$jsonBody = function (value) {
-	return A2(
-		_Http_pair,
-		'application/json',
-		A2($elm$json$Json$Encode$encode, 0, value));
-};
+var $elm$url$Url$Builder$int = F2(
+	function (key, value) {
+		return A2(
+			$elm$url$Url$Builder$QueryParameter,
+			$elm$url$Url$percentEncode(key),
+			$elm$core$String$fromInt(value));
+	});
 var $elm$http$Http$Request = function (a) {
 	return {$: 'Request', a: a};
 };
@@ -12430,6 +12444,46 @@ var $author$project$Punch$Api$url = F2(
 				A2($elm$core$List$cons, $author$project$Punch$Api$apiVersion, queryParams));
 		}
 	});
+var $author$project$Punch$Api$attachment = F4(
+	function (punch, att, plantId, token) {
+		return $elm$http$Http$request(
+			{
+				body: $elm$http$Http$emptyBody,
+				expect: $elm$http$Http$expectWhatever(
+					A2(
+						$elm$core$Basics$composeL,
+						$author$project$Punch$Messages$GotApiResult,
+						$author$project$Punch$Messages$GotAttachment(punch))),
+				headers: _List_fromArray(
+					[
+						A2($elm$http$Http$header, 'Authorization', 'Bearer ' + token)
+					]),
+				method: 'GET',
+				timeout: $elm$core$Maybe$Nothing,
+				tracker: $elm$core$Maybe$Nothing,
+				url: A2(
+					$author$project$Punch$Api$url,
+					_List_fromArray(
+						['PunchListItem', 'Attachment']),
+					_List_fromArray(
+						[
+							A2($elm$url$Url$Builder$string, 'plantId', plantId),
+							A2($elm$url$Url$Builder$int, 'punchItemId', punch.id),
+							A2($elm$url$Url$Builder$int, 'attachmentId', att.id),
+							$author$project$Punch$Api$apiVersion
+						]))
+			});
+	});
+var $author$project$Punch$Messages$ClearResult = F2(
+	function (a, b) {
+		return {$: 'ClearResult', a: a, b: b};
+	});
+var $elm$http$Http$jsonBody = function (value) {
+	return A2(
+		_Http_pair,
+		'application/json',
+		A2($elm$json$Json$Encode$encode, 0, value));
+};
 var $author$project$Punch$Api$clear = F3(
 	function (punch, plantId, token) {
 		return $elm$http$Http$request(
@@ -12468,14 +12522,88 @@ var $author$project$Punch$Update$closeDropDowns = function (_v0) {
 			{dropDown: $author$project$Punch$Types$NoDropDown}),
 		c);
 };
-var $author$project$Equinor$Types$Loading = F2(
-	function (a, b) {
-		return {$: 'Loading', a: a, b: b};
+var $author$project$Punch$Messages$DeleteAttachmentResult = F3(
+	function (a, b, c) {
+		return {$: 'DeleteAttachmentResult', a: a, b: b, c: c};
 	});
-var $author$project$Punch$Messages$GotCategories = function (a) {
-	return {$: 'GotCategories', a: a};
-};
-var $elm$http$Http$emptyBody = _Http_emptyBody;
+var $author$project$Punch$Api$deleteAttachment = F4(
+	function (punch, att, plantId, token) {
+		return $elm$http$Http$request(
+			{
+				body: $elm$http$Http$jsonBody(
+					$elm$json$Json$Encode$object(
+						_List_fromArray(
+							[
+								_Utils_Tuple2(
+								'PunchItemId',
+								$elm$json$Json$Encode$int(punch.id)),
+								_Utils_Tuple2(
+								'AttachmentId',
+								$elm$json$Json$Encode$int(att.id))
+							]))),
+				expect: $elm$http$Http$expectWhatever(
+					A2(
+						$elm$core$Basics$composeL,
+						$author$project$Punch$Messages$GotApiResult,
+						A2($author$project$Punch$Messages$DeleteAttachmentResult, punch, att))),
+				headers: _List_fromArray(
+					[
+						A2($elm$http$Http$header, 'Authorization', 'Bearer ' + token)
+					]),
+				method: 'DELETE',
+				timeout: $elm$core$Maybe$Nothing,
+				tracker: $elm$core$Maybe$Nothing,
+				url: A2(
+					$author$project$Punch$Api$url,
+					_List_fromArray(
+						['PunchListItem', 'Attachment']),
+					_List_fromArray(
+						[
+							A2($elm$url$Url$Builder$string, 'plantId', plantId),
+							$author$project$Punch$Api$apiVersion
+						]))
+			});
+	});
+var $author$project$Punch$Messages$GotAttachments = F2(
+	function (a, b) {
+		return {$: 'GotAttachments', a: a, b: b};
+	});
+var $author$project$Punch$Attachment = F6(
+	function (id, uri, title, mimeType, thumbnailAsBase64, hasFile) {
+		return {hasFile: hasFile, id: id, mimeType: mimeType, thumbnailAsBase64: thumbnailAsBase64, title: title, uri: uri};
+	});
+var $elm$json$Json$Decode$bool = _Json_decodeBool;
+var $author$project$Punch$nullString = $elm$json$Json$Decode$oneOf(
+	_List_fromArray(
+		[
+			$elm$json$Json$Decode$string,
+			$elm$json$Json$Decode$null('')
+		]));
+var $author$project$Punch$attachmentDecoder = A3(
+	$NoRedInk$elm_json_decode_pipeline$Json$Decode$Pipeline$required,
+	'HasFile',
+	$elm$json$Json$Decode$bool,
+	A3(
+		$NoRedInk$elm_json_decode_pipeline$Json$Decode$Pipeline$required,
+		'ThumbnailAsBase64',
+		$author$project$Punch$nullString,
+		A3(
+			$NoRedInk$elm_json_decode_pipeline$Json$Decode$Pipeline$required,
+			'MimeType',
+			$author$project$Punch$nullString,
+			A3(
+				$NoRedInk$elm_json_decode_pipeline$Json$Decode$Pipeline$required,
+				'Title',
+				$author$project$Punch$nullString,
+				A3(
+					$NoRedInk$elm_json_decode_pipeline$Json$Decode$Pipeline$required,
+					'Uri',
+					$author$project$Punch$nullString,
+					A3(
+						$NoRedInk$elm_json_decode_pipeline$Json$Decode$Pipeline$required,
+						'Id',
+						$elm$json$Json$Decode$int,
+						$elm$json$Json$Decode$succeed($author$project$Punch$Attachment)))))));
 var $elm$json$Json$Decode$decodeString = _Json_runOnString;
 var $elm$http$Http$expectStringResponse = F2(
 	function (toMsg, toResult) {
@@ -12498,6 +12626,52 @@ var $elm$http$Http$expectJson = F2(
 						A2($elm$json$Json$Decode$decodeString, decoder, string));
 				}));
 	});
+var $author$project$Punch$Api$attachments = F3(
+	function (punch, plantId, token) {
+		return $elm$http$Http$request(
+			{
+				body: $elm$http$Http$emptyBody,
+				expect: A2(
+					$elm$http$Http$expectJson,
+					A2(
+						$elm$core$Basics$composeL,
+						$author$project$Punch$Messages$GotApiResult,
+						$author$project$Punch$Messages$GotAttachments(punch)),
+					$elm$json$Json$Decode$list($author$project$Punch$attachmentDecoder)),
+				headers: _List_fromArray(
+					[
+						A2($elm$http$Http$header, 'Authorization', 'Bearer ' + token)
+					]),
+				method: 'GET',
+				timeout: $elm$core$Maybe$Nothing,
+				tracker: $elm$core$Maybe$Nothing,
+				url: A2(
+					$author$project$Punch$Api$url,
+					_List_fromArray(
+						['PunchListItem', 'Attachments']),
+					_List_fromArray(
+						[
+							A2($elm$url$Url$Builder$string, 'plantId', plantId),
+							A2($elm$url$Url$Builder$int, 'punchItemId', punch.id),
+							A2($elm$url$Url$Builder$int, 'thumbnailSize', 100),
+							$author$project$Punch$Api$apiVersion
+						]))
+			});
+	});
+var $author$project$Punch$Update$getAttachments = function (punch) {
+	return $author$project$Punch$Update$apiRequest(
+		_List_fromArray(
+			[
+				$author$project$Punch$Api$attachments(punch)
+			]));
+};
+var $author$project$Equinor$Types$Loading = F2(
+	function (a, b) {
+		return {$: 'Loading', a: a, b: b};
+	});
+var $author$project$Punch$Messages$GotCategories = function (a) {
+	return {$: 'GotCategories', a: a};
+};
 var $author$project$Punch$Types$SelectItem = F3(
 	function (id, code, description) {
 		return {code: code, description: description, id: id};
@@ -12559,24 +12733,10 @@ var $author$project$Punch$Messages$GotPunchDetails = F2(
 	function (a, b) {
 		return {$: 'GotPunchDetails', a: a, b: b};
 	});
-var $elm$url$Url$Builder$int = F2(
-	function (key, value) {
-		return A2(
-			$elm$url$Url$Builder$QueryParameter,
-			$elm$url$Url$percentEncode(key),
-			$elm$core$String$fromInt(value));
-	});
 var $author$project$Punch$ApiPunch = F8(
 	function (clearedAt, clearedByFirstName, clearedByLastName, verifiedAt, verifiedByFirstName, verifiedByLastName, isRestrictedForUser, statusControlledBySwcr) {
 		return {clearedAt: clearedAt, clearedByFirstName: clearedByFirstName, clearedByLastName: clearedByLastName, isRestrictedForUser: isRestrictedForUser, statusControlledBySwcr: statusControlledBySwcr, verifiedAt: verifiedAt, verifiedByFirstName: verifiedByFirstName, verifiedByLastName: verifiedByLastName};
 	});
-var $elm$json$Json$Decode$bool = _Json_decodeBool;
-var $author$project$Punch$nullString = $elm$json$Json$Decode$oneOf(
-	_List_fromArray(
-		[
-			$elm$json$Json$Decode$string,
-			$elm$json$Json$Decode$null('')
-		]));
 var $author$project$Punch$webApiDecoder = A3(
 	$NoRedInk$elm_json_decode_pipeline$Json$Decode$Pipeline$required,
 	'StatusControlledBySwcr',
@@ -12840,6 +13000,42 @@ var $author$project$Punch$Update$handleApiResult = F2(
 								m.punch)
 						}),
 					c);
+			case 'GotAttachments':
+				var oldPunch = apiResult.a;
+				var result = apiResult.b;
+				var updater = function (punch) {
+					if (result.$ === 'Ok') {
+						var attachments = result.a;
+						return _Utils_update(
+							punch,
+							{
+								attachmentCount: $elm$core$List$length(attachments),
+								attachments: A2($author$project$Equinor$Types$Loaded, '', attachments)
+							});
+					} else {
+						var err = result.a;
+						return _Utils_update(
+							punch,
+							{
+								attachments: A2($author$project$Equinor$Types$DataError, '', $elm$core$Maybe$Nothing)
+							});
+					}
+				};
+				return _Utils_Tuple2(
+					_Utils_update(
+						m,
+						{
+							punch: A3(
+								$elm$core$Dict$update,
+								oldPunch.id,
+								$elm$core$Maybe$map(updater),
+								m.punch)
+						}),
+					c);
+			case 'GotAttachment':
+				var oldPunch = apiResult.a;
+				var result = apiResult.b;
+				return _Utils_Tuple2(m, c);
 			case 'PunchDescriptionResult':
 				var punch = apiResult.a;
 				var result = apiResult.b;
@@ -13087,13 +13283,26 @@ var $author$project$Punch$Update$handleApiResult = F2(
 					$author$project$Punch$Update$getDetails,
 					punch,
 					_Utils_Tuple2(m, c));
-			default:
+			case 'UnverifyResult':
 				var punch = apiResult.a;
 				var result = apiResult.b;
 				return A2(
 					$author$project$Punch$Update$getDetails,
 					punch,
 					_Utils_Tuple2(m, c));
+			default:
+				var punch = apiResult.a;
+				var att = apiResult.b;
+				var result = apiResult.c;
+				if (result.$ === 'Ok') {
+					return A2(
+						$author$project$Punch$Update$getAttachments,
+						punch,
+						_Utils_Tuple2(m, c));
+				} else {
+					var err = result.a;
+					return _Utils_Tuple2(m, c);
+				}
 		}
 	});
 var $elm$json$Json$Encode$null = _Json_encodeNull;
@@ -13538,12 +13747,35 @@ var $author$project$Punch$Update$update = F2(
 					model.selectedPunch,
 					$elm$core$Maybe$Just(punch)) ? $author$project$Punch$Update$unSelectPunch(
 					$author$project$Punch$Update$closeDropDowns(mc)) : A2(
-					$author$project$Punch$Update$getDetails,
+					$author$project$Punch$Update$getAttachments,
 					punch,
 					A2(
-						$author$project$Punch$Update$selectPunch,
+						$author$project$Punch$Update$getDetails,
 						punch,
-						$author$project$Punch$Update$closeDropDowns(mc)));
+						A2(
+							$author$project$Punch$Update$selectPunch,
+							punch,
+							$author$project$Punch$Update$closeDropDowns(mc))));
+			case 'AttachmentPressed':
+				var punch = msg.a;
+				var attachment = msg.b;
+				return A2(
+					$author$project$Punch$Update$apiRequest,
+					_List_fromArray(
+						[
+							A2($author$project$Punch$Api$attachment, punch, attachment)
+						]),
+					mc);
+			case 'DeleteAttachmentButtonPressed':
+				var punch = msg.a;
+				var attachment = msg.b;
+				return A2(
+					$author$project$Punch$Update$apiRequest,
+					_List_fromArray(
+						[
+							A2($author$project$Punch$Api$deleteAttachment, punch, attachment)
+						]),
+					mc);
 			case 'NeverHappens':
 				return _Utils_Tuple2(
 					model,
@@ -14536,6 +14768,143 @@ var $mdgriffith$elm_ui$Internal$Model$Px = function (a) {
 };
 var $mdgriffith$elm_ui$Element$px = $mdgriffith$elm_ui$Internal$Model$Px;
 var $author$project$Equinor$Palette$red = A3($mdgriffith$elm_ui$Element$rgb255, 255, 59, 59);
+var $author$project$Punch$Messages$AttachmentPressed = F2(
+	function (a, b) {
+		return {$: 'AttachmentPressed', a: a, b: b};
+	});
+var $author$project$Punch$Messages$DeleteAttachmentButtonPressed = F2(
+	function (a, b) {
+		return {$: 'DeleteAttachmentButtonPressed', a: a, b: b};
+	});
+var $mdgriffith$elm_ui$Internal$Model$AlignX = function (a) {
+	return {$: 'AlignX', a: a};
+};
+var $mdgriffith$elm_ui$Internal$Model$Right = {$: 'Right'};
+var $mdgriffith$elm_ui$Element$alignRight = $mdgriffith$elm_ui$Internal$Model$AlignX($mdgriffith$elm_ui$Internal$Model$Right);
+var $author$project$Equinor$Palette$energyRed = A3($mdgriffith$elm_ui$Element$rgb255, 255, 18, 67);
+var $mdgriffith$elm_ui$Internal$Model$AsRow = {$: 'AsRow'};
+var $mdgriffith$elm_ui$Internal$Model$asRow = $mdgriffith$elm_ui$Internal$Model$AsRow;
+var $mdgriffith$elm_ui$Element$row = F2(
+	function (attrs, children) {
+		return A4(
+			$mdgriffith$elm_ui$Internal$Model$element,
+			$mdgriffith$elm_ui$Internal$Model$asRow,
+			$mdgriffith$elm_ui$Internal$Model$div,
+			A2(
+				$elm$core$List$cons,
+				$mdgriffith$elm_ui$Internal$Model$htmlClass($mdgriffith$elm_ui$Internal$Style$classes.contentLeft + (' ' + $mdgriffith$elm_ui$Internal$Style$classes.contentCenterY)),
+				A2(
+					$elm$core$List$cons,
+					$mdgriffith$elm_ui$Element$width($mdgriffith$elm_ui$Element$shrink),
+					A2(
+						$elm$core$List$cons,
+						$mdgriffith$elm_ui$Element$height($mdgriffith$elm_ui$Element$shrink),
+						attrs))),
+			$mdgriffith$elm_ui$Internal$Model$Unkeyed(children));
+	});
+var $author$project$Punch$View$renderAttachmentItem = F3(
+	function (size, punch, a) {
+		return A2(
+			$mdgriffith$elm_ui$Element$row,
+			_List_fromArray(
+				[
+					$mdgriffith$elm_ui$Element$width($mdgriffith$elm_ui$Element$fill),
+					$mdgriffith$elm_ui$Element$padding(10)
+				]),
+			_List_fromArray(
+				[
+					A2(
+					$mdgriffith$elm_ui$Element$el,
+					_List_fromArray(
+						[
+							$mdgriffith$elm_ui$Element$width($mdgriffith$elm_ui$Element$fill),
+							$mdgriffith$elm_ui$Element$pointer,
+							$author$project$Punch$View$onClick(
+							A2($author$project$Punch$Messages$AttachmentPressed, punch, a))
+						]),
+					$mdgriffith$elm_ui$Element$text(a.title)),
+					A2(
+					$mdgriffith$elm_ui$Element$el,
+					_List_fromArray(
+						[
+							$mdgriffith$elm_ui$Element$alignRight,
+							$mdgriffith$elm_ui$Element$Font$color($author$project$Equinor$Palette$energyRed),
+							$mdgriffith$elm_ui$Element$pointer,
+							$author$project$Punch$View$onClick(
+							A2($author$project$Punch$Messages$DeleteAttachmentButtonPressed, punch, a))
+						]),
+					$mdgriffith$elm_ui$Element$text('X'))
+				]));
+	});
+var $author$project$Punch$View$attachmentPreview = F3(
+	function (size, model, punch) {
+		var _v0 = punch.attachments;
+		switch (_v0.$) {
+			case 'Loaded':
+				var attachments = _v0.b;
+				return A2(
+					$mdgriffith$elm_ui$Element$column,
+					_List_fromArray(
+						[
+							$mdgriffith$elm_ui$Element$width($mdgriffith$elm_ui$Element$fill)
+						]),
+					A2(
+						$elm$core$List$map,
+						A2($author$project$Punch$View$renderAttachmentItem, size, punch),
+						attachments));
+			case 'Loading':
+				return $mdgriffith$elm_ui$Element$text('Loading attachments');
+			case 'DataError':
+				return $mdgriffith$elm_ui$Element$text('Problem getting attachments');
+			default:
+				return $mdgriffith$elm_ui$Element$none;
+		}
+	});
+var $elm$core$Basics$pow = _Basics_pow;
+var $mdgriffith$elm_ui$Element$modular = F3(
+	function (normal, ratio, rescale) {
+		return (!rescale) ? normal : ((rescale < 0) ? (normal * A2($elm$core$Basics$pow, ratio, rescale)) : (normal * A2($elm$core$Basics$pow, ratio, rescale - 1)));
+	});
+var $author$project$Equinor$Palette$scaled = function (size) {
+	return A2($mdgriffith$elm_ui$Element$modular, size, 1.15);
+};
+var $author$project$Equinor$Palette$scaledInt = function (size) {
+	return A2(
+		$elm$core$Basics$composeR,
+		$author$project$Equinor$Palette$scaled(size),
+		$elm$core$Basics$round);
+};
+var $mdgriffith$elm_ui$Element$rgb = F3(
+	function (r, g, b) {
+		return A4($mdgriffith$elm_ui$Internal$Model$Rgba, r, g, b, 1);
+	});
+var $author$project$Equinor$Palette$white = A3($mdgriffith$elm_ui$Element$rgb, 1, 1, 1);
+var $author$project$Punch$View$renderAttachments = F4(
+	function (size, model, readOnly, punch) {
+		return A2(
+			$mdgriffith$elm_ui$Element$column,
+			_List_fromArray(
+				[
+					$mdgriffith$elm_ui$Element$width($mdgriffith$elm_ui$Element$fill)
+				]),
+			_List_fromArray(
+				[
+					A2(
+					$mdgriffith$elm_ui$Element$el,
+					_List_fromArray(
+						[
+							$mdgriffith$elm_ui$Element$width($mdgriffith$elm_ui$Element$fill),
+							$mdgriffith$elm_ui$Element$Background$color($author$project$Equinor$Palette$blue),
+							$mdgriffith$elm_ui$Element$Font$color($author$project$Equinor$Palette$white),
+							$mdgriffith$elm_ui$Element$padding(8),
+							$mdgriffith$elm_ui$Element$Font$size(
+							A2($author$project$Equinor$Palette$scaledInt, size, -1))
+						]),
+					$mdgriffith$elm_ui$Element$text(
+						'Attachments (' + ($elm$core$String$fromInt(punch.attachmentCount) + ')'))),
+					A3($author$project$Punch$View$attachmentPreview, size, model, punch)
+				]));
+	});
 var $author$project$Punch$Messages$DescriptionFieldInput = F2(
 	function (a, b) {
 		return {$: 'DescriptionFieldInput', a: a, b: b};
@@ -14543,8 +14912,6 @@ var $author$project$Punch$Messages$DescriptionFieldInput = F2(
 var $author$project$Punch$Messages$DescriptionFieldLostFocus = function (a) {
 	return {$: 'DescriptionFieldLostFocus', a: a};
 };
-var $mdgriffith$elm_ui$Internal$Flag$fontWeight = $mdgriffith$elm_ui$Internal$Flag$flag(13);
-var $mdgriffith$elm_ui$Element$Font$bold = A2($mdgriffith$elm_ui$Internal$Model$Class, $mdgriffith$elm_ui$Internal$Flag$fontWeight, $mdgriffith$elm_ui$Internal$Style$classes.bold);
 var $mdgriffith$elm_ui$Element$Input$HiddenLabel = function (a) {
 	return {$: 'HiddenLabel', a: a};
 };
@@ -14552,8 +14919,6 @@ var $mdgriffith$elm_ui$Element$Input$labelHidden = $mdgriffith$elm_ui$Element$In
 var $mdgriffith$elm_ui$Element$Input$TextArea = {$: 'TextArea'};
 var $mdgriffith$elm_ui$Internal$Model$LivePolite = {$: 'LivePolite'};
 var $mdgriffith$elm_ui$Element$Region$announce = $mdgriffith$elm_ui$Internal$Model$Describe($mdgriffith$elm_ui$Internal$Model$LivePolite);
-var $mdgriffith$elm_ui$Internal$Model$AsRow = {$: 'AsRow'};
-var $mdgriffith$elm_ui$Internal$Model$asRow = $mdgriffith$elm_ui$Internal$Model$AsRow;
 var $mdgriffith$elm_ui$Element$Input$applyLabel = F3(
 	function (attrs, label, input) {
 		if (label.$ === 'HiddenLabel') {
@@ -14689,10 +15054,6 @@ var $mdgriffith$elm_ui$Element$Border$color = function (clr) {
 			'border-color',
 			clr));
 };
-var $mdgriffith$elm_ui$Element$rgb = F3(
-	function (r, g, b) {
-		return A4($mdgriffith$elm_ui$Internal$Model$Rgba, r, g, b, 1);
-	});
 var $mdgriffith$elm_ui$Element$Input$darkGrey = A3($mdgriffith$elm_ui$Element$rgb, 186 / 255, 189 / 255, 182 / 255);
 var $mdgriffith$elm_ui$Element$Input$defaultTextPadding = A2($mdgriffith$elm_ui$Element$paddingXY, 12, 12);
 var $mdgriffith$elm_ui$Internal$Flag$borderRound = $mdgriffith$elm_ui$Internal$Flag$flag(17);
@@ -15476,20 +15837,6 @@ var $mdgriffith$elm_ui$Element$Input$Placeholder = F2(
 		return {$: 'Placeholder', a: a, b: b};
 	});
 var $mdgriffith$elm_ui$Element$Input$placeholder = $mdgriffith$elm_ui$Element$Input$Placeholder;
-var $elm$core$Basics$pow = _Basics_pow;
-var $mdgriffith$elm_ui$Element$modular = F3(
-	function (normal, ratio, rescale) {
-		return (!rescale) ? normal : ((rescale < 0) ? (normal * A2($elm$core$Basics$pow, ratio, rescale)) : (normal * A2($elm$core$Basics$pow, ratio, rescale - 1)));
-	});
-var $author$project$Equinor$Palette$scaled = function (size) {
-	return A2($mdgriffith$elm_ui$Element$modular, size, 1.15);
-};
-var $author$project$Equinor$Palette$scaledInt = function (size) {
-	return A2(
-		$elm$core$Basics$composeR,
-		$author$project$Equinor$Palette$scaled(size),
-		$elm$core$Basics$round);
-};
 var $author$project$Punch$View$renderDescription = F4(
 	function (textToHighlight, size, readOnly, punch) {
 		return A2(
@@ -15504,12 +15851,14 @@ var $author$project$Punch$View$renderDescription = F4(
 					$mdgriffith$elm_ui$Element$el,
 					_List_fromArray(
 						[
-							$mdgriffith$elm_ui$Element$Font$color($author$project$Equinor$Palette$mossGreen),
+							$mdgriffith$elm_ui$Element$width($mdgriffith$elm_ui$Element$fill),
+							$mdgriffith$elm_ui$Element$Background$color($author$project$Equinor$Palette$blue),
+							$mdgriffith$elm_ui$Element$Font$color($author$project$Equinor$Palette$white),
+							$mdgriffith$elm_ui$Element$padding(8),
 							$mdgriffith$elm_ui$Element$Font$size(
-							A2($author$project$Equinor$Palette$scaledInt, size, -3)),
-							$mdgriffith$elm_ui$Element$Font$bold
+							A2($author$project$Equinor$Palette$scaledInt, size, -1))
 						]),
-					$mdgriffith$elm_ui$Element$text('Punch description:')),
+					$mdgriffith$elm_ui$Element$text('Description')),
 					readOnly ? A2(
 					$mdgriffith$elm_ui$Element$column,
 					_List_fromArray(
@@ -15592,6 +15941,8 @@ var $author$project$Equinor$Icon$arrow_up = A2(
 				]),
 			_List_Nil)
 		]));
+var $mdgriffith$elm_ui$Internal$Flag$fontWeight = $mdgriffith$elm_ui$Internal$Flag$flag(13);
+var $mdgriffith$elm_ui$Element$Font$bold = A2($mdgriffith$elm_ui$Internal$Model$Class, $mdgriffith$elm_ui$Internal$Flag$fontWeight, $mdgriffith$elm_ui$Internal$Style$classes.bold);
 var $mdgriffith$elm_ui$Element$Border$widthXY = F2(
 	function (x, y) {
 		return A2(
@@ -15861,24 +16212,6 @@ var $author$project$Equinor$Palette$kv = F4(
 						]))
 				]));
 	});
-var $mdgriffith$elm_ui$Element$row = F2(
-	function (attrs, children) {
-		return A4(
-			$mdgriffith$elm_ui$Internal$Model$element,
-			$mdgriffith$elm_ui$Internal$Model$asRow,
-			$mdgriffith$elm_ui$Internal$Model$div,
-			A2(
-				$elm$core$List$cons,
-				$mdgriffith$elm_ui$Internal$Model$htmlClass($mdgriffith$elm_ui$Internal$Style$classes.contentLeft + (' ' + $mdgriffith$elm_ui$Internal$Style$classes.contentCenterY)),
-				A2(
-					$elm$core$List$cons,
-					$mdgriffith$elm_ui$Element$width($mdgriffith$elm_ui$Element$shrink),
-					A2(
-						$elm$core$List$cons,
-						$mdgriffith$elm_ui$Element$height($mdgriffith$elm_ui$Element$shrink),
-						attrs))),
-			$mdgriffith$elm_ui$Internal$Model$Unkeyed(children));
-	});
 var $author$project$Punch$Messages$DropDownItemPressed = F2(
 	function (a, b) {
 		return {$: 'DropDownItemPressed', a: a, b: b};
@@ -15890,9 +16223,6 @@ var $mdgriffith$elm_ui$Internal$Model$PseudoSelector = F2(
 		return {$: 'PseudoSelector', a: a, b: b};
 	});
 var $mdgriffith$elm_ui$Internal$Flag$hover = $mdgriffith$elm_ui$Internal$Flag$flag(33);
-var $mdgriffith$elm_ui$Internal$Model$AlignX = function (a) {
-	return {$: 'AlignX', a: a};
-};
 var $mdgriffith$elm_ui$Internal$Model$AlignY = function (a) {
 	return {$: 'AlignY', a: a};
 };
@@ -16019,7 +16349,6 @@ var $mdgriffith$elm_ui$Element$mouseOver = function (decs) {
 			$mdgriffith$elm_ui$Internal$Model$Hover,
 			$mdgriffith$elm_ui$Internal$Model$unwrapDecorations(decs)));
 };
-var $author$project$Equinor$Palette$white = A3($mdgriffith$elm_ui$Element$rgb, 1, 1, 1);
 var $author$project$Punch$View$selectItem = F4(
 	function (size, current, punch, item) {
 		return _Utils_Tuple2(
@@ -16321,69 +16650,91 @@ var $author$project$Punch$View$renderDetails = F4(
 			_List_fromArray(
 				[
 					$mdgriffith$elm_ui$Element$width($mdgriffith$elm_ui$Element$fill),
-					$mdgriffith$elm_ui$Element$spacing(2),
-					$mdgriffith$elm_ui$Element$padding(4)
+					$mdgriffith$elm_ui$Element$spacing(2)
 				]),
 			_List_fromArray(
 				[
 					A2(
+					$mdgriffith$elm_ui$Element$el,
+					_List_fromArray(
+						[
+							$mdgriffith$elm_ui$Element$width($mdgriffith$elm_ui$Element$fill),
+							$mdgriffith$elm_ui$Element$Background$color($author$project$Equinor$Palette$blue),
+							$mdgriffith$elm_ui$Element$Font$color($author$project$Equinor$Palette$white),
+							$mdgriffith$elm_ui$Element$padding(8),
+							$mdgriffith$elm_ui$Element$Font$size(
+							A2($author$project$Equinor$Palette$scaledInt, size, -1))
+						]),
+					$mdgriffith$elm_ui$Element$text('Details')),
+					A2(
 					$mdgriffith$elm_ui$Element$column,
 					_List_fromArray(
 						[
-							$mdgriffith$elm_ui$Element$spacing(6)
+							$mdgriffith$elm_ui$Element$width($mdgriffith$elm_ui$Element$fill),
+							$mdgriffith$elm_ui$Element$spacing(2),
+							$mdgriffith$elm_ui$Element$padding(4)
 						]),
 					_List_fromArray(
 						[
-							A4(
-							$author$project$Equinor$Palette$kv,
-							size,
-							'No',
-							$elm$core$String$fromInt(punch.id),
-							''),
-							_Utils_eq(model.context, $author$project$Punch$Types$TagContext) ? $mdgriffith$elm_ui$Element$none : A4($author$project$Equinor$Palette$kv, size, 'Tag', punch.tag, '')
-						])),
-					A3(
-					dd,
-					$author$project$Punch$Types$CategoryDropDown,
-					function () {
-						var _v0 = punch.status;
-						if (_v0.$ === 'PA') {
-							return 'PA';
-						} else {
-							return 'PB';
-						}
-					}(),
-					function ($) {
-						return $.categories;
-					}),
-					A3(
-					dd,
-					$author$project$Punch$Types$RaisedByDropDown,
-					punch.raisedByOrg,
-					function ($) {
-						return $.organizations;
-					}),
-					A3(
-					dd,
-					$author$project$Punch$Types$ClearingByDropDown,
-					punch.clearingByOrg,
-					function ($) {
-						return $.organizations;
-					}),
-					A3(
-					dd,
-					$author$project$Punch$Types$TypeDropDown,
-					punch.typeDescription,
-					function ($) {
-						return $.types;
-					}),
-					A3(
-					dd,
-					$author$project$Punch$Types$SortingDropDown,
-					punch.sortingDescription,
-					function ($) {
-						return $.sorts;
-					})
+							A2(
+							$mdgriffith$elm_ui$Element$column,
+							_List_fromArray(
+								[
+									$mdgriffith$elm_ui$Element$spacing(6)
+								]),
+							_List_fromArray(
+								[
+									A4(
+									$author$project$Equinor$Palette$kv,
+									size,
+									'No',
+									$elm$core$String$fromInt(punch.id),
+									''),
+									_Utils_eq(model.context, $author$project$Punch$Types$TagContext) ? $mdgriffith$elm_ui$Element$none : A4($author$project$Equinor$Palette$kv, size, 'Tag', punch.tag, '')
+								])),
+							A3(
+							dd,
+							$author$project$Punch$Types$CategoryDropDown,
+							function () {
+								var _v0 = punch.status;
+								if (_v0.$ === 'PA') {
+									return 'PA';
+								} else {
+									return 'PB';
+								}
+							}(),
+							function ($) {
+								return $.categories;
+							}),
+							A3(
+							dd,
+							$author$project$Punch$Types$RaisedByDropDown,
+							punch.raisedByOrg,
+							function ($) {
+								return $.organizations;
+							}),
+							A3(
+							dd,
+							$author$project$Punch$Types$ClearingByDropDown,
+							punch.clearingByOrg,
+							function ($) {
+								return $.organizations;
+							}),
+							A3(
+							dd,
+							$author$project$Punch$Types$TypeDropDown,
+							punch.typeDescription,
+							function ($) {
+								return $.types;
+							}),
+							A3(
+							dd,
+							$author$project$Punch$Types$SortingDropDown,
+							punch.sortingDescription,
+							function ($) {
+								return $.sorts;
+							})
+						]))
 				]));
 	});
 var $author$project$Punch$Messages$ClearPunchButtonPressed = function (a) {
@@ -16398,8 +16749,6 @@ var $author$project$Punch$Messages$UnverifyPunchButtonPressed = function (a) {
 var $author$project$Punch$Messages$VerifyPunchButtonPressed = function (a) {
 	return {$: 'VerifyPunchButtonPressed', a: a};
 };
-var $mdgriffith$elm_ui$Internal$Model$Right = {$: 'Right'};
-var $mdgriffith$elm_ui$Element$alignRight = $mdgriffith$elm_ui$Internal$Model$AlignX($mdgriffith$elm_ui$Internal$Model$Right);
 var $elm$html$Html$Attributes$title = $elm$html$Html$Attributes$stringProperty('title');
 var $author$project$Punch$View$signButton = F4(
 	function (size, name, maybeDisabled, msg) {
@@ -17073,6 +17422,7 @@ var $author$project$Punch$View$renderPunchListItem = F3(
 							_List_fromArray(
 								[
 									isSelected ? A4($author$project$Punch$View$renderDescription, model.highlight, size, readOnly, item) : $mdgriffith$elm_ui$Element$none,
+									A4($author$project$Punch$View$renderAttachments, size, model, readOnly, item),
 									A4($author$project$Punch$View$renderDetails, size, model, readOnly, item),
 									A2($author$project$Punch$View$renderSignatures, size, item),
 									$elm$core$String$isEmpty(model.errorMsg) ? $mdgriffith$elm_ui$Element$none : A2(

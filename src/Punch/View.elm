@@ -189,6 +189,7 @@ renderPunchListItem size model item =
                         none
 
                     --, renderComments size item
+                    , renderAttachments size model readOnly item
                     , renderDetails size model readOnly item
                     , renderSignatures size item
                     , if String.isEmpty model.errorMsg then
@@ -207,7 +208,14 @@ renderPunchListItem size model item =
 renderDescription : String -> Float -> Bool -> Punch -> Element Msg
 renderDescription textToHighlight size readOnly punch =
     column [ width fill ]
-        [ el [ Font.color Palette.mossGreen, Font.size <| scaledInt size -3, Font.bold ] <| text "Punch description:"
+        [ el
+            [ width fill
+            , Background.color Palette.blue
+            , Font.color Palette.white
+            , padding 8
+            , Font.size (scaledInt size -1)
+            ]
+            (text "Description")
         , if readOnly then
             punch.description
                 |> String.lines
@@ -235,40 +243,91 @@ renderDescription textToHighlight size readOnly punch =
         ]
 
 
+renderAttachments : Float -> Model -> Bool -> Punch -> Element Msg
+renderAttachments size model readOnly punch =
+    column [ width fill ]
+        [ el
+            [ width fill
+            , Background.color Palette.blue
+            , Font.color Palette.white
+            , padding 8
+            , Font.size (scaledInt size -1)
+            ]
+            (text <| "Attachments (" ++ String.fromInt punch.attachmentCount ++ ")")
+        , attachmentPreview size model punch
+        ]
+
+
+attachmentPreview : Float -> Model -> Punch -> Element Msg
+attachmentPreview size model punch =
+    case punch.attachments of
+        Loaded _ attachments ->
+            attachments
+                |> List.map (renderAttachmentItem size punch)
+                |> column [ width fill ]
+
+        Loading _ _ ->
+            text "Loading attachments"
+
+        DataError _ _ ->
+            text "Problem getting attachments"
+
+        NotLoaded ->
+            none
+
+
+renderAttachmentItem : Float -> Punch -> Punch.Attachment -> Element Msg
+renderAttachmentItem size punch a =
+    row [ width fill, padding 10 ]
+        [ el [ width fill, pointer, onClick <| AttachmentPressed punch a ] (text a.title)
+        , el [ alignRight, Font.color Palette.energyRed, pointer, onClick <| DeleteAttachmentButtonPressed punch a ] (text "X")
+        ]
+
+
 renderDetails : Float -> Model -> Bool -> Punch -> Element Msg
 renderDetails size model readOnly punch =
     let
         dd =
             dropDown size readOnly punch model
     in
-    column [ width fill, spacing 2, padding 4 ]
-        [ column [ spacing 6 ]
-            [ kv size "No" (String.fromInt punch.id) ""
-            , if model.context == TagContext then
-                none
-
-              else
-                kv size "Tag" punch.tag ""
-
-            --, kv size "Type" punch.typeDescription ""
-            --, kv size "Commissioning package" punch.commPk ""
-            --, kv size "MC package" punch.mcPk ""
-            --, kv size "Location" punch.location ""
+    column [ width fill, spacing 2 ]
+        [ el
+            [ width fill
+            , Background.color Palette.blue
+            , Font.color Palette.white
+            , padding 8
+            , Font.size (scaledInt size -1)
             ]
-        , dd
-            CategoryDropDown
-            (case punch.status of
-                PA ->
-                    "PA"
+            (text "Details")
+        , column [ width fill, spacing 2, padding 4 ]
+            [ column [ spacing 6 ]
+                [ kv size "No" (String.fromInt punch.id) ""
+                , if model.context == TagContext then
+                    none
 
-                _ ->
-                    "PB"
-            )
-            .categories
-        , dd RaisedByDropDown punch.raisedByOrg .organizations
-        , dd ClearingByDropDown punch.clearingByOrg .organizations
-        , dd TypeDropDown punch.typeDescription .types
-        , dd SortingDropDown punch.sortingDescription .sorts
+                  else
+                    kv size "Tag" punch.tag ""
+
+                --, kv size "Type" punch.typeDescription ""
+                --, kv size "Commissioning package" punch.commPk ""
+                --, kv size "MC package" punch.mcPk ""
+                --, kv size "Location" punch.location ""
+                ]
+            , dd
+                CategoryDropDown
+                (case punch.status of
+                    PA ->
+                        "PA"
+
+                    _ ->
+                        "PB"
+                )
+                .categories
+            , dd RaisedByDropDown punch.raisedByOrg .organizations
+            , dd ClearingByDropDown punch.clearingByOrg .organizations
+            , dd TypeDropDown punch.typeDescription .types
+            , dd SortingDropDown punch.sortingDescription .sorts
+            ]
         ]
 
 

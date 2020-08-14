@@ -1,4 +1,4 @@
-module Punch.Api exposing (categories, clear, clientId, details, organizations, setCategory, setClearingBy, setRaisedBy, setSorting, setType, sorts, types, unClear, unVerify, updateDescription, verify)
+module Punch.Api exposing (attachment, attachments, categories, clear, clientId, deleteAttachment, details, organizations, setCategory, setClearingBy, setRaisedBy, setSorting, setType, sorts, types, unClear, unVerify, updateDescription, verify)
 
 import Http
 import Json.Decode as D
@@ -411,6 +411,78 @@ details punch plantId token =
             Http.expectJson
                 (GotApiResult << GotPunchDetails punch)
                 Punch.webApiDecoder
+        , timeout = Nothing
+        , tracker = Nothing
+        }
+
+
+attachments : Punch -> String -> String -> Cmd Msg
+attachments punch plantId token =
+    Http.request
+        { method = "GET"
+        , url =
+            url
+                [ "PunchListItem"
+                , "Attachments"
+                ]
+                [ string "plantId" plantId
+                , int "punchItemId" punch.id
+                , int "thumbnailSize" 100
+                , apiVersion
+                ]
+        , headers = [ Http.header "Authorization" ("Bearer " ++ token) ]
+        , body = Http.emptyBody
+        , expect =
+            Http.expectJson
+                (GotApiResult << GotAttachments punch)
+                (D.list Punch.attachmentDecoder)
+        , timeout = Nothing
+        , tracker = Nothing
+        }
+
+
+attachment : Punch -> Punch.Attachment -> String -> String -> Cmd Msg
+attachment punch att plantId token =
+    Http.request
+        { method = "GET"
+        , url =
+            url
+                [ "PunchListItem"
+                , "Attachment"
+                ]
+                [ string "plantId" plantId
+                , int "punchItemId" punch.id
+                , int "attachmentId" att.id
+                , apiVersion
+                ]
+        , headers = [ Http.header "Authorization" ("Bearer " ++ token) ]
+        , body = Http.emptyBody
+        , expect = Http.expectWhatever (GotApiResult << GotAttachment punch)
+        , timeout = Nothing
+        , tracker = Nothing
+        }
+
+
+deleteAttachment : Punch -> Punch.Attachment -> String -> String -> Cmd Msg
+deleteAttachment punch att plantId token =
+    Http.request
+        { method = "DELETE"
+        , url =
+            url
+                [ "PunchListItem"
+                , "Attachment"
+                ]
+                [ string "plantId" plantId
+                , apiVersion
+                ]
+        , headers = [ Http.header "Authorization" ("Bearer " ++ token) ]
+        , body =
+            Http.jsonBody <|
+                E.object
+                    [ ( "PunchItemId", E.int punch.id )
+                    , ( "AttachmentId", E.int att.id )
+                    ]
+        , expect = Http.expectWhatever (GotApiResult << DeleteAttachmentResult punch att)
         , timeout = Nothing
         , tracker = Nothing
         }
