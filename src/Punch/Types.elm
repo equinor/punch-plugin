@@ -1,5 +1,6 @@
 module Punch.Types exposing (..)
 
+import Bytes exposing (Bytes)
 import File exposing (File)
 import Json.Decode as D
 
@@ -52,4 +53,10 @@ type alias AttachmentUpload =
     , punchId : Int
     , uri : String
     , name : String
+    }
+
+
+type alias Blob =
+    { contentType : String
+    , bytes : Bytes
     }

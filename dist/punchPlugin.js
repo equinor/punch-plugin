@@ -12670,21 +12670,54 @@ var $author$project$Punch$Update$apiRequest = F2(
 								])))
 					])));
 	});
-var $author$project$Punch$Messages$GotAttachment = F2(
-	function (a, b) {
-		return {$: 'GotAttachment', a: a, b: b};
+var $author$project$Punch$Messages$GotAttachment = F3(
+	function (a, b, c) {
+		return {$: 'GotAttachment', a: a, b: b, c: c};
 	});
+var $author$project$Punch$Types$Blob = F2(
+	function (contentType, bytes) {
+		return {bytes: bytes, contentType: contentType};
+	});
+var $author$project$Punch$Api$base64Decoder = function (response) {
+	switch (response.$) {
+		case 'BadUrl_':
+			var u = response.a;
+			return $elm$core$Result$Err(
+				$elm$http$Http$BadUrl(u));
+		case 'Timeout_':
+			return $elm$core$Result$Err($elm$http$Http$Timeout);
+		case 'NetworkError_':
+			return $elm$core$Result$Err($elm$http$Http$NetworkError);
+		case 'BadStatus_':
+			var metadata = response.a;
+			return $elm$core$Result$Err(
+				$elm$http$Http$BadStatus(metadata.statusCode));
+		default:
+			var meta = response.a;
+			var body = response.b;
+			return $elm$core$Result$Ok(
+				A2(
+					$author$project$Punch$Types$Blob,
+					A2(
+						$elm$core$Maybe$withDefault,
+						'',
+						A2($elm$core$Dict$get, 'content-type', meta.headers)),
+					body));
+	}
+};
 var $elm$http$Http$emptyBody = _Http_emptyBody;
 var $author$project$Punch$Api$attachment = F4(
 	function (punch, att, plantId, token) {
 		return $elm$http$Http$request(
 			{
 				body: $elm$http$Http$emptyBody,
-				expect: $elm$http$Http$expectWhatever(
+				expect: A2(
+					$elm$http$Http$expectBytesResponse,
 					A2(
 						$elm$core$Basics$composeL,
 						$author$project$Punch$Messages$GotApiResult,
-						$author$project$Punch$Messages$GotAttachment(punch))),
+						A2($author$project$Punch$Messages$GotAttachment, punch, att)),
+					$author$project$Punch$Api$base64Decoder),
 				headers: _List_fromArray(
 					[
 						A2($elm$http$Http$header, 'Authorization', 'Bearer ' + token)
@@ -13213,6 +13246,17 @@ var $author$project$Equinor$Types$Loaded = F2(
 	function (a, b) {
 		return {$: 'Loaded', a: a, b: b};
 	});
+var $elm$file$File$Download$bytes = F3(
+	function (name, mime, content) {
+		return A2(
+			$elm$core$Task$perform,
+			$elm$core$Basics$never,
+			A3(
+				_File_download,
+				name,
+				mime,
+				_File_makeBytesSafeForInternetExplorer(content)));
+	});
 var $author$project$Punch$Update$handleApiResult = F2(
 	function (apiResult, _v0) {
 		var m = _v0.a;
@@ -13281,8 +13325,17 @@ var $author$project$Punch$Update$handleApiResult = F2(
 					c);
 			case 'GotAttachment':
 				var oldPunch = apiResult.a;
-				var result = apiResult.b;
-				return _Utils_Tuple2(m, c);
+				var attachment = apiResult.b;
+				var result = apiResult.c;
+				if (result.$ === 'Ok') {
+					var data = result.a;
+					return _Utils_Tuple2(
+						m,
+						A3($elm$file$File$Download$bytes, attachment.title, data.contentType, data.bytes));
+				} else {
+					var err = result.a;
+					return _Utils_Tuple2(m, c);
+				}
 			case 'PunchDescriptionResult':
 				var punch = apiResult.a;
 				var result = apiResult.b;

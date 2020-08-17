@@ -1,5 +1,9 @@
 module Punch.Api exposing (addAttachment, attachment, attachments, categories, clear, clientId, deleteAttachment, details, organizations, setCategory, setClearingBy, setRaisedBy, setSorting, setType, sorts, types, unClear, unVerify, updateDescription, verify)
 
+import Base64
+import Bytes
+import Dict exposing (Dict)
+import File
 import Http
 import Json.Decode as D
 import Json.Encode as E
@@ -457,10 +461,29 @@ attachment punch att plantId token =
                 ]
         , headers = [ Http.header "Authorization" ("Bearer " ++ token) ]
         , body = Http.emptyBody
-        , expect = Http.expectWhatever (GotApiResult << GotAttachment punch)
+        , expect = Http.expectBytesResponse (GotApiResult << GotAttachment punch att) base64Decoder
         , timeout = Nothing
         , tracker = Nothing
         }
+
+
+base64Decoder : Http.Response Bytes.Bytes -> Result Http.Error Blob
+base64Decoder response =
+    case response of
+        Http.BadUrl_ u ->
+            Err (Http.BadUrl u)
+
+        Http.Timeout_ ->
+            Err Http.Timeout
+
+        Http.NetworkError_ ->
+            Err Http.NetworkError
+
+        Http.BadStatus_ metadata _ ->
+            Err (Http.BadStatus metadata.statusCode)
+
+        Http.GoodStatus_ meta body ->
+            Ok (Blob (Dict.get "content-type" meta.headers |> Maybe.withDefault "") body)
 
 
 deleteAttachment : Punch -> Punch.Attachment -> String -> String -> Cmd Msg

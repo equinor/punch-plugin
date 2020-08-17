@@ -4,6 +4,7 @@ import Dict exposing (Dict)
 import Equinor.Data.Procosys.Status as Status exposing (Status(..))
 import Equinor.Types exposing (..)
 import File exposing (File)
+import File.Download
 import File.Select
 import Http
 import Json.Encode as E
@@ -406,8 +407,26 @@ handleApiResult apiResult ( m, c ) =
             , c
             )
 
-        GotAttachment oldPunch result ->
-            ( m, c )
+        GotAttachment oldPunch attachment result ->
+            case result of
+                Ok data ->
+                    {- ( m
+                       , E.object
+                           [ ( "topic", E.string "openFile" )
+                           , ( "payload"
+                             , E.object
+                                   [ ( "contentType", E.string data.contentType )
+                                   , ( "base64", E.string data.base64 )
+                                   ]
+                             )
+                           ]
+                           |> Ports.toJs
+                       )
+                    -}
+                    ( m, File.Download.bytes attachment.title data.contentType data.bytes )
+
+                Err err ->
+                    ( m, c )
 
         PunchDescriptionResult punch result ->
             case result of

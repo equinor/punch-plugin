@@ -39,7 +39,7 @@ type Msg
 type ApiResult
     = GotPunchDetails Punch (Result Http.Error Punch.ApiPunch)
     | GotAttachments Punch (Result Http.Error (List Punch.Attachment))
-    | GotAttachment Punch (Result Http.Error ())
+    | GotAttachment Punch Punch.Attachment (Result Http.Error Blob)
     | GotOrganizations (Result Http.Error (List SelectItem))
     | GotCategories (Result Http.Error (List SelectItem))
     | GotTypes (Result Http.Error (List SelectItem))
