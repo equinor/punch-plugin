@@ -4,12 +4,14 @@ import File exposing (File)
 import Http
 import Json.Decode as D
 import Punch exposing (Punch)
+import Punch.Checklist exposing (Checklist)
 import Punch.Types exposing (..)
 
 
 type Msg
     = NoOp
     | NeverHappens
+    | NeedToLoadChecklists String
       -- Data Handling
     | GotPunchList (List Punch)
     | GotToken TokenSuccess
@@ -28,8 +30,11 @@ type Msg
       -- Form
     | DescriptionFieldLostFocus Punch
     | DescriptionFieldInput Punch String
+    | ChecklistSelected Int
+    | CreatePunchDescriptionFieldInput String
+    | SubmitCreatedPunchButtonPressed Int
     | DropDownPressed DropDown
-    | DropDownItemPressed Punch SelectItem
+    | DropDownItemPressed Int SelectItem
     | ClearPunchButtonPressed Punch
     | UnclearPunchButtonPressed Punch
     | VerifyPunchButtonPressed Punch
@@ -56,3 +61,6 @@ type ApiResult
     | UnverifyResult Punch (Result Http.Error ())
     | DeleteAttachmentResult Punch Punch.Attachment (Result Http.Error ())
     | AddAttachmentResult Punch AttachmentUpload (Result Http.Error ())
+    | GotChecklists (Result Http.Error (List Checklist))
+    | AddPunchResult (Result Http.Error Int)
+    | GotPunch (Result Http.Error Punch.ApiPunch)

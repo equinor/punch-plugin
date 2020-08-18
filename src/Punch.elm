@@ -1,4 +1,4 @@
-module Punch exposing (ApiPunch, Attachment, Dict, Punch, PunchLists, Status, apiDecoder, attachmentDecoder, decoder, encoder, filterByTimeFrame, sort, webApiDecoder)
+module Punch exposing (ApiPunch, Attachment, CreatePunch, Dict, Punch, PunchLists, Status, apiDecoder, attachmentDecoder, decoder, encoder, filterByTimeFrame, initialCreate, sort, webApiDecoder)
 
 import Date exposing (Date)
 import Dict as CoreDict
@@ -8,6 +8,7 @@ import Iso8601
 import Json.Decode as D
 import Json.Decode.Pipeline exposing (custom, hardcoded, optional, required)
 import Json.Encode as E
+import Punch.Checklist exposing (Checklist)
 import Punch.Types exposing (..)
 import Time exposing (Posix)
 
@@ -41,8 +42,39 @@ type alias Punch =
     }
 
 
+type alias CreatePunch =
+    { checklistId : Int
+    , description : String
+    , categoryId : Int
+    , raisedByOrg : Int
+    , clearingByOrg : Int
+    , categoryDescription : String
+    , raisedByDescription : String
+    , clearingByDescription : String
+    , checklists : WebData (List Checklist)
+    }
+
+
+initialCreate : CreatePunch
+initialCreate =
+    { checklistId = -1
+    , description = ""
+    , categoryId = -1
+    , raisedByOrg = -1
+    , clearingByOrg = -1
+    , categoryDescription = ""
+    , raisedByDescription = ""
+    , clearingByDescription = ""
+    , checklists = NotLoaded
+    }
+
+
 type alias ApiPunch =
-    { clearedAt : String
+    { id : Int
+    , tagNo : String
+    , tagDescription : String
+    , description : String
+    , clearedAt : String
     , clearedByFirstName : String
     , clearedByLastName : String
     , verifiedAt : String
@@ -50,6 +82,12 @@ type alias ApiPunch =
     , verifiedByLastName : String
     , isRestrictedForUser : Bool
     , statusControlledBySwcr : Bool
+    , status : Status
+    , raisedByOrg : String
+    , clearingByOrg : String
+    , typeDescription : String
+    , sortingDescription : String
+    , attachmentCount : Int
     }
 
 
@@ -66,6 +104,10 @@ type alias Attachment =
 webApiDecoder : D.Decoder ApiPunch
 webApiDecoder =
     D.succeed ApiPunch
+        |> required "Id" D.int
+        |> required "TagNo" D.string
+        |> required "TagDescription" nullString
+        |> required "Description" nullString
         |> required "ClearedAt" nullString
         |> required "ClearedByFirstName" nullString
         |> required "ClearedByLastName" nullString
@@ -74,6 +116,12 @@ webApiDecoder =
         |> required "VerifiedByLastName" nullString
         |> required "IsRestrictedForUser" D.bool
         |> required "StatusControlledBySwcr" D.bool
+        |> required "Status" Status.decoder
+        |> required "RaisedByDescription" nullString
+        |> required "ClearingByDescription" nullString
+        |> required "TypeDescription" nullString
+        |> required "Sorting" nullString
+        |> required "AttachmentCount" D.int
 
 
 attachmentDecoder : D.Decoder Attachment

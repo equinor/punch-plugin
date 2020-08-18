@@ -19,11 +19,21 @@ import Punch.View as View
 
 view : Model -> Element Msg
 view model =
-    if Dict.isEmpty model.punch then
-        text "No Punch"
+    case model.context of
+        CreateContext maybeChecklistId ->
+            case maybeChecklistId of
+                Just checklistId ->
+                    View.renderCreatePunch 16 model checklistId
 
-    else
-        View.renderPunchList 16 model
+                Nothing ->
+                    View.renderSelectChecklist 16 model
+
+        _ ->
+            if Dict.isEmpty model.punch then
+                text "No Punch"
+
+            else
+                View.renderPunchList 16 model
 
 
 main : Program D.Value Model Msg

@@ -16,6 +16,7 @@ import Punch.Ports as Ports
 import Punch.Types as Types exposing (..)
 import Svg.Attributes exposing (z)
 import Task
+import Time
 
 
 type alias MC =
@@ -35,6 +36,18 @@ update msg model =
         -- Data Handling
         GotToken tokenSuccess ->
             mc |> sendRequestsWaitingForToken tokenSuccess
+
+        NeedToLoadChecklists tagNo ->
+            if String.isEmpty tagNo then
+                mc
+
+            else
+                let
+                    create =
+                        model.currentCreate
+                in
+                ( { model | currentCreate = { create | checklists = Loading "Loading..." Nothing } }, Cmd.none )
+                    |> apiRequest [ Api.checklists tagNo ]
 
         GotPunchList punchList ->
             let
@@ -127,6 +140,13 @@ update msg model =
                         mc
                             |> apiRequest [ Api.updateDescription punch ]
 
+        CreatePunchDescriptionFieldInput str ->
+            let
+                oldCreate =
+                    model.currentCreate
+            in
+            ( { model | currentCreate = { oldCreate | description = str } }, Cmd.none )
+
         DescriptionFieldInput punch str ->
             let
                 updater p =
@@ -165,60 +185,114 @@ update msg model =
         CloseDropDownButtonPressed ->
             mc |> closeDropDowns
 
-        DropDownItemPressed punch item ->
-            let
-                updated =
-                    case model.dropDown of
-                        NoDropDown ->
-                            punch
+        DropDownItemPressed punchId item ->
+            case model.context of
+                CreateContext _ ->
+                    let
+                        updated create =
+                            case model.dropDown of
+                                CategoryDropDown ->
+                                    { create
+                                        | categoryId = item.id
+                                        , categoryDescription = item.description
+                                    }
 
-                        CategoryDropDown ->
-                            { punch
-                                | status =
-                                    if item.code == "PA" then
-                                        PA
+                                RaisedByDropDown ->
+                                    { create
+                                        | raisedByOrg = item.id
+                                        , raisedByDescription = item.description
+                                    }
 
-                                    else
-                                        PB
-                            }
+                                ClearingByDropDown ->
+                                    { create
+                                        | clearingByOrg = item.id
+                                        , clearingByDescription = item.description
+                                    }
 
-                        RaisedByDropDown ->
-                            { punch | raisedByOrg = item.description }
+                                _ ->
+                                    create
+                    in
+                    ( { model
+                        | currentCreate = updated model.currentCreate
+                        , dropDown = NoDropDown
+                      }
+                    , Cmd.none
+                    )
 
-                        ClearingByDropDown ->
-                            { punch | clearingByOrg = item.description }
+                _ ->
+                    case Dict.get punchId model.punch of
+                        Nothing ->
+                            mc
 
-                        TypeDropDown ->
-                            { punch | typeDescription = item.description }
+                        Just punch ->
+                            let
+                                updated =
+                                    case model.dropDown of
+                                        NoDropDown ->
+                                            punch
 
-                        SortingDropDown ->
-                            { punch | sortingDescription = item.description }
-            in
+                                        CategoryDropDown ->
+                                            { punch
+                                                | status =
+                                                    if item.code == "PA" then
+                                                        PA
+
+                                                    else
+                                                        PB
+                                            }
+
+                                        RaisedByDropDown ->
+                                            { punch | raisedByOrg = item.description }
+
+                                        ClearingByDropDown ->
+                                            { punch | clearingByOrg = item.description }
+
+                                        TypeDropDown ->
+                                            { punch | typeDescription = item.description }
+
+                                        SortingDropDown ->
+                                            { punch | sortingDescription = item.description }
+                            in
+                            ( { model
+                                | punch = Dict.insert punch.id updated model.punch
+                                , dropDown = NoDropDown
+                              }
+                            , Cmd.none
+                            )
+                                |> (case model.dropDown of
+                                        NoDropDown ->
+                                            identity
+
+                                        CategoryDropDown ->
+                                            apiRequest [ Api.setCategory punch item ]
+
+                                        Types.RaisedByDropDown ->
+                                            apiRequest [ Api.setRaisedBy punch item ]
+
+                                        Types.ClearingByDropDown ->
+                                            apiRequest [ Api.setClearingBy punch item ]
+
+                                        Types.TypeDropDown ->
+                                            apiRequest [ Api.setType punch item ]
+
+                                        Types.SortingDropDown ->
+                                            apiRequest [ Api.setSorting punch item ]
+                                   )
+
+        ChecklistSelected checklistId ->
             ( { model
-                | punch = Dict.insert punch.id updated model.punch
-                , dropDown = NoDropDown
+                | context = CreateContext (Just checklistId)
+                , currentCreate = Punch.initialCreate
               }
             , Cmd.none
             )
-                |> (case model.dropDown of
-                        NoDropDown ->
-                            identity
 
-                        CategoryDropDown ->
-                            apiRequest [ Api.setCategory punch item ]
-
-                        Types.RaisedByDropDown ->
-                            apiRequest [ Api.setRaisedBy punch item ]
-
-                        Types.ClearingByDropDown ->
-                            apiRequest [ Api.setClearingBy punch item ]
-
-                        Types.TypeDropDown ->
-                            apiRequest [ Api.setType punch item ]
-
-                        Types.SortingDropDown ->
-                            apiRequest [ Api.setSorting punch item ]
-                   )
+        SubmitCreatedPunchButtonPressed checklistId ->
+            let
+                create =
+                    model.currentCreate
+            in
+            mc |> apiRequest [ Api.submitNewPunch { create | checklistId = checklistId } ]
 
         ClearPunchButtonPressed punch ->
             mc |> apiRequest [ Api.clear punch ]
@@ -587,3 +661,68 @@ handleApiResult apiResult ( m, c ) =
 
                 Err err ->
                     ( { m | errorMsg = "Cound not add Attachment" }, c )
+
+        GotChecklists result ->
+            let
+                create =
+                    m.currentCreate
+            in
+            ( { m
+                | currentCreate =
+                    { create
+                        | checklists =
+                            case result of
+                                Ok checklists ->
+                                    Loaded "" checklists
+
+                                Err _ ->
+                                    DataError "" Nothing
+                    }
+              }
+            , c
+            )
+
+        AddPunchResult result ->
+            case result of
+                Ok punchId ->
+                    ( m, c ) |> apiRequest [ Api.onlyDetails punchId ]
+
+                Err _ ->
+                    ( { m | errorMsg = "Error creating Punch" }, Cmd.none )
+
+        GotPunch result ->
+            case result of
+                Ok x ->
+                    let
+                        newPunch : Punch
+                        newPunch =
+                            { id = x.id
+                            , tag = x.tagNo
+                            , tagDescription = x.tagDescription
+                            , description = x.description
+                            , createdAt = Time.millisToPosix 0
+                            , updatedAt = ""
+                            , status = x.status
+                            , commPk = ""
+                            , mcPk = ""
+                            , raisedByOrg = x.raisedByOrg
+                            , clearingByOrg = x.clearingByOrg
+                            , location = ""
+                            , typeDescription = x.typeDescription
+                            , sortingDescription = x.sortingDescription
+                            , attachmentCount = x.attachmentCount
+                            , apiPunch = Loaded "" x
+                            , attachments = NotLoaded
+                            }
+                    in
+                    ( { m
+                        | punch = Dict.insert x.id newPunch m.punch
+                        , selectedPunch = Just newPunch
+                        , context = TagContext
+                        , currentCreate = Punch.initialCreate
+                      }
+                    , createEvent "punchCreated" (Punch.encoder newPunch)
+                    )
+
+                Err _ ->
+                    ( m, c )

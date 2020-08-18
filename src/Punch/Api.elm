@@ -1,4 +1,4 @@
-module Punch.Api exposing (addAttachment, attachment, attachments, categories, clear, clientId, deleteAttachment, details, organizations, setCategory, setClearingBy, setRaisedBy, setSorting, setType, sorts, types, unClear, unVerify, updateDescription, verify)
+module Punch.Api exposing (addAttachment, attachment, attachments, categories, checklists, clear, clientId, deleteAttachment, details, onlyDetails, organizations, setCategory, setClearingBy, setRaisedBy, setSorting, setType, sorts, submitNewPunch, types, unClear, unVerify, updateDescription, verify)
 
 import Base64
 import Bytes
@@ -8,6 +8,7 @@ import Http
 import Json.Decode as D
 import Json.Encode as E
 import Punch exposing (Punch)
+import Punch.Checklist
 import Punch.Messages exposing (..)
 import Punch.Types as Types exposing (..)
 import Url.Builder exposing (QueryParameter, int, string)
@@ -420,6 +421,29 @@ details punch plantId token =
         }
 
 
+onlyDetails : Int -> String -> String -> Cmd Msg
+onlyDetails punchId plantId token =
+    Http.request
+        { method = "GET"
+        , url =
+            url
+                [ "PunchListItem"
+                ]
+                [ string "plantId" plantId
+                , int "punchItemId" punchId
+                , apiVersion
+                ]
+        , headers = [ Http.header "Authorization" ("Bearer " ++ token) ]
+        , body = Http.emptyBody
+        , expect =
+            Http.expectJson
+                (GotApiResult << GotPunch)
+                Punch.webApiDecoder
+        , timeout = Nothing
+        , tracker = Nothing
+        }
+
+
 attachments : Punch -> String -> String -> Cmd Msg
 attachments punch plantId token =
     Http.request
@@ -533,3 +557,69 @@ addAttachment punch att plantId token =
         , timeout = Nothing
         , tracker = Nothing
         }
+
+
+submitNewPunch : Punch.CreatePunch -> String -> String -> Cmd Msg
+submitNewPunch create plantId token =
+    Http.request
+        { method = "POST"
+        , url =
+            url
+                [ "PunchListItem" ]
+                [ string "plantId" plantId ]
+        , headers = [ Http.header "Authorization" ("Bearer " ++ token) ]
+        , body =
+            Http.jsonBody
+                (E.object
+                    [ ( "CheckListId", E.int create.checklistId )
+                    , ( "Description", E.string create.description )
+                    , ( "CategoryId", E.int create.categoryId )
+                    , ( "RaisedByOrganizationId", E.int create.raisedByOrg )
+                    , ( "ClearingByOrganizationId", E.int create.clearingByOrg )
+
+                    {- , ( "TemporaryFileIds", E.list identity [] )
+                       , ( "DueDate", E.string "" )
+                       , ( "Estimate", E.int 0 )
+                       , ( "PriorityId", E.int 0 )
+                       , ( "ActionByPerson", E.int 0 )
+                       , ( "TypeId", E.int 0 )
+                       , ( "SortingId", E.int 0 )
+                       , ( "MaterialRequired", E.bool False )
+                       , ( "MaterialEta", E.string "" )
+                       , ( "MaterialNo", E.string "" )
+                    -}
+                    ]
+                )
+        , expect = Http.expectJson (GotApiResult << AddPunchResult) (D.field "Id" D.int)
+        , timeout = Nothing
+        , tracker = Nothing
+        }
+
+
+checklists : String -> String -> String -> Cmd Msg
+checklists tagNo plantId token =
+    Http.request
+        { method = "POST"
+        , url =
+            url
+                [ "Search" ]
+                [ string "plantId" plantId
+                , int "savedSearchId" 85537
+                ]
+        , headers = [ Http.header "Authorization" ("Bearer " ++ token) ]
+        , body = Http.jsonBody (E.list dto [ ( "TagTagNo", E.string tagNo ) ])
+        , expect =
+            Http.expectJson
+                (GotApiResult << GotChecklists)
+                (D.list Punch.Checklist.decoder)
+        , timeout = Nothing
+        , tracker = Nothing
+        }
+
+
+dto : ( String, E.Value ) -> E.Value
+dto ( k, v ) =
+    E.object
+        [ ( "Key", E.string k )
+        , ( "Value", v )
+        ]

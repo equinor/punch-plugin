@@ -1,4 +1,4 @@
-module Punch.View exposing (renderPunchList)
+module Punch.View exposing (renderCreatePunch, renderPunchList, renderSelectChecklist)
 
 import Dict
 import Element exposing (..)
@@ -18,10 +18,90 @@ import Html.Attributes as HA
 import Html.Events as HE
 import Json.Decode as D
 import Punch exposing (Punch)
+import Punch.Checklist exposing (Checklist)
 import Punch.Messages exposing (Msg(..))
 import Punch.Model exposing (Model)
 import Punch.Types as Types exposing (..)
 import String.Extra
+
+
+renderSelectChecklist : Float -> Model -> Element Msg
+renderSelectChecklist size model =
+    column [ width fill, padding 4, spacing 6 ]
+        [ el [ Font.bold, centerX ] (text "Select checklist for your punch")
+        , SelectionList.webDataSelectionList (SelectionList.selectionList (selectChecklistItem size)) model.currentCreate.checklists
+        ]
+
+
+selectChecklistItem : Float -> Checklist -> ( String, Element Msg )
+selectChecklistItem size checklist =
+    ( checklist.id |> String.fromInt
+    , el [ width fill, paddingXY 0 1 ] <|
+        row
+            [ width fill
+            , padding 10
+            , spacing 10
+            , Border.widthEach { left = 0, top = 0, right = 0, bottom = 1 }
+            , Border.color Palette.mistBlue
+            , mouseOver [ Background.color Palette.mistBlue ]
+            , pointer
+            , onClick <| ChecklistSelected checklist.id
+            ]
+            [ paragraph [ Font.size (scaledInt size -4), width <| px <| round <| size * 4 ] [ text checklist.responsibleCode ]
+            , paragraph [ Font.size (scaledInt size -2), width fill ] [ text checklist.formularType ]
+            , paragraph [ alignRight, Font.size (scaledInt size -2) ] [ Status.toString checklist.status |> text ]
+            ]
+    )
+
+
+renderCreatePunch : Float -> Model -> Int -> Element Msg
+renderCreatePunch size model checklistId =
+    let
+        dd =
+            dropDown size False -1 model
+    in
+    column [ width fill, height fill, spacing 6, padding 4 ]
+        [ el [ Font.bold, centerX ] (text "New punch")
+        , Input.multiline [ width fill ]
+            { label = Input.labelHidden ""
+            , onChange = CreatePunchDescriptionFieldInput
+            , placeholder = Just <| Input.placeholder [] (text "No Description")
+            , spellcheck = True
+            , text = model.currentCreate.description
+            }
+        , dd CategoryDropDown model.currentCreate.categoryDescription .categories
+        , dd RaisedByDropDown model.currentCreate.raisedByDescription .organizations
+        , dd ClearingByDropDown model.currentCreate.clearingByDescription .organizations
+        , el [ alignRight ] <| createButton size model checklistId
+        ]
+
+
+createButton : Float -> Model -> Int -> Element Msg
+createButton size model checklistId =
+    let
+        x =
+            model.currentCreate
+
+        disabledMessage =
+            if String.isEmpty x.description then
+                Just "Missing description"
+
+            else if x.categoryId < 0 then
+                Just "Category must be set"
+
+            else if x.raisedByOrg < 0 then
+                Just "RaisedBy must be set"
+
+            else if x.clearingByOrg < 0 then
+                Just "ClearingBy must be set"
+
+            else
+                Nothing
+    in
+    signButton size
+        "Create"
+        disabledMessage
+        (SubmitCreatedPunchButtonPressed checklistId)
 
 
 renderPunchList : Float -> Model -> Element Msg
@@ -332,7 +412,7 @@ renderDetails : Float -> Model -> Bool -> Punch -> Element Msg
 renderDetails size model readOnly punch =
     let
         dd =
-            dropDown size readOnly punch model
+            dropDown size readOnly punch.id model
     in
     column [ width fill, spacing 2 ]
         [ el
@@ -375,8 +455,8 @@ renderDetails size model readOnly punch =
         ]
 
 
-dropDown : Float -> Bool -> Punch -> Model -> DropDown -> String -> (Model -> WebData (List SelectItem)) -> Element Msg
-dropDown size readOnly punch model dropDownType current field =
+dropDown : Float -> Bool -> Int -> Model -> DropDown -> String -> (Model -> WebData (List SelectItem)) -> Element Msg
+dropDown size readOnly punchId model dropDownType current field =
     let
         name =
             case dropDownType of
@@ -441,7 +521,7 @@ dropDown size readOnly punch model dropDownType current field =
                         , Font.color Palette.blue
                         ]
                 ]
-            , selectionList size current punch (field model)
+            , selectionList size current punchId (field model)
             ]
 
     else
@@ -469,13 +549,13 @@ dropDown size readOnly punch model dropDownType current field =
             ]
 
 
-selectionList : Float -> String -> Punch -> WebData (List SelectItem) -> Element Msg
-selectionList size current punch webData =
-    SelectionList.webDataSelectionList (SelectionList.selectionList (selectItem size current punch)) webData
+selectionList : Float -> String -> Int -> WebData (List SelectItem) -> Element Msg
+selectionList size current punchId webData =
+    SelectionList.webDataSelectionList (SelectionList.selectionList (selectItem size current punchId)) webData
 
 
-selectItem : Float -> String -> Punch -> SelectItem -> ( String, Element Msg )
-selectItem size current punch item =
+selectItem : Float -> String -> Int -> SelectItem -> ( String, Element Msg )
+selectItem size current punchId item =
     ( item.id |> String.fromInt
     , el [ width fill, paddingXY 0 1 ] <|
         row
@@ -492,7 +572,7 @@ selectItem size current punch item =
                 else
                     Palette.white
             , pointer
-            , onClick <| DropDownItemPressed punch item
+            , onClick <| DropDownItemPressed punchId item
             ]
             [ paragraph [ Font.size (scaledInt size -4), width <| px <| round <| size * 4 ] [ text item.code ]
             , paragraph [ Font.size (scaledInt size -2), width fill ] [ text item.description ]

@@ -6,12 +6,14 @@ import Json.Decode as D
 import Punch exposing (Punch)
 import Punch.Messages exposing (Msg)
 import Punch.Types exposing (..)
+import Task
 
 
 type alias Flags =
     { procosysPlantId : String
     , context : Context
     , textToHighlight : String
+    , tagNo : String
     }
 
 
@@ -22,7 +24,7 @@ decodeFlags val =
             flags
 
         Err _ ->
-            Flags "" NoContext ""
+            Flags "" NoContext "" ""
 
 
 contextDecoder : D.Decoder Context
@@ -42,6 +44,9 @@ contextDecoder =
                             "comm" ->
                                 D.succeed CommContext
 
+                            "create" ->
+                                D.succeed (CreateContext Nothing)
+
                             _ ->
                                 D.succeed NoContext
 
@@ -52,14 +57,16 @@ contextDecoder =
 
 flagsDecoder : D.Decoder Flags
 flagsDecoder =
-    D.map3 Flags
+    D.map4 Flags
         (D.field "procosysPlantId" D.string)
         contextDecoder
         (D.field "textToHighlight" D.string)
+        (D.field "tagNo" (D.oneOf [ D.string, D.succeed "" ]))
 
 
 type alias Model =
     { procosysPlantId : String
+    , tagNo : String
     , apiToken : String
     , punch : Dict Int Punch
     , context : Context
@@ -72,6 +79,7 @@ type alias Model =
     , categories : WebData (List SelectItem)
     , types : WebData (List SelectItem)
     , sorts : WebData (List SelectItem)
+    , currentCreate : Punch.CreatePunch
     , currentAttachment : Maybe AttachmentUpload
     }
 
@@ -79,6 +87,7 @@ type alias Model =
 initialModel : Flags -> ( Model, Cmd Msg )
 initialModel flags =
     ( { procosysPlantId = flags.procosysPlantId
+      , tagNo = flags.tagNo
       , apiToken = ""
       , punch = Dict.empty
       , context = flags.context
@@ -91,9 +100,16 @@ initialModel flags =
       , categories = NotLoaded
       , types = NotLoaded
       , sorts = NotLoaded
+      , currentCreate = Punch.initialCreate
       , currentAttachment = Nothing
       }
-    , Cmd.none
+    , case flags.context of
+        CreateContext _ ->
+            Punch.Messages.NeedToLoadChecklists flags.tagNo
+                |> (Task.perform identity << Task.succeed)
+
+        _ ->
+            Cmd.none
     )
 
 

@@ -10,6 +10,7 @@ type Context
     | TagContext
     | McContext
     | CommContext
+    | CreateContext (Maybe Int)
 
 
 type alias TokenSuccess =
