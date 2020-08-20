@@ -4587,6 +4587,136 @@ function _Http_track(router, xhr, tracker)
 }
 
 
+
+// STRINGS
+
+
+var _Parser_isSubString = F5(function(smallString, offset, row, col, bigString)
+{
+	var smallLength = smallString.length;
+	var isGood = offset + smallLength <= bigString.length;
+
+	for (var i = 0; isGood && i < smallLength; )
+	{
+		var code = bigString.charCodeAt(offset);
+		isGood =
+			smallString[i++] === bigString[offset++]
+			&& (
+				code === 0x000A /* \n */
+					? ( row++, col=1 )
+					: ( col++, (code & 0xF800) === 0xD800 ? smallString[i++] === bigString[offset++] : 1 )
+			)
+	}
+
+	return _Utils_Tuple3(isGood ? offset : -1, row, col);
+});
+
+
+
+// CHARS
+
+
+var _Parser_isSubChar = F3(function(predicate, offset, string)
+{
+	return (
+		string.length <= offset
+			? -1
+			:
+		(string.charCodeAt(offset) & 0xF800) === 0xD800
+			? (predicate(_Utils_chr(string.substr(offset, 2))) ? offset + 2 : -1)
+			:
+		(predicate(_Utils_chr(string[offset]))
+			? ((string[offset] === '\n') ? -2 : (offset + 1))
+			: -1
+		)
+	);
+});
+
+
+var _Parser_isAsciiCode = F3(function(code, offset, string)
+{
+	return string.charCodeAt(offset) === code;
+});
+
+
+
+// NUMBERS
+
+
+var _Parser_chompBase10 = F2(function(offset, string)
+{
+	for (; offset < string.length; offset++)
+	{
+		var code = string.charCodeAt(offset);
+		if (code < 0x30 || 0x39 < code)
+		{
+			return offset;
+		}
+	}
+	return offset;
+});
+
+
+var _Parser_consumeBase = F3(function(base, offset, string)
+{
+	for (var total = 0; offset < string.length; offset++)
+	{
+		var digit = string.charCodeAt(offset) - 0x30;
+		if (digit < 0 || base <= digit) break;
+		total = base * total + digit;
+	}
+	return _Utils_Tuple2(offset, total);
+});
+
+
+var _Parser_consumeBase16 = F2(function(offset, string)
+{
+	for (var total = 0; offset < string.length; offset++)
+	{
+		var code = string.charCodeAt(offset);
+		if (0x30 <= code && code <= 0x39)
+		{
+			total = 16 * total + code - 0x30;
+		}
+		else if (0x41 <= code && code <= 0x46)
+		{
+			total = 16 * total + code - 55;
+		}
+		else if (0x61 <= code && code <= 0x66)
+		{
+			total = 16 * total + code - 87;
+		}
+		else
+		{
+			break;
+		}
+	}
+	return _Utils_Tuple2(offset, total);
+});
+
+
+
+// FIND STRING
+
+
+var _Parser_findSubString = F5(function(smallString, offset, row, col, bigString)
+{
+	var newOffset = bigString.indexOf(smallString, offset);
+	var target = newOffset < 0 ? bigString.length : newOffset + smallString.length;
+
+	while (offset < target)
+	{
+		var code = bigString.charCodeAt(offset++);
+		code === 0x000A /* \n */
+			? ( col=1, row++ )
+			: ( col++, (code & 0xF800) === 0xD800 && offset++ )
+	}
+
+	return _Utils_Tuple3(newOffset, row, col);
+});
+
+
+
 // DECODER
 
 var _File_decoder = _Json_decodePrim(function(value) {
@@ -5396,60 +5526,107 @@ var $author$project$Punch$Types$CreateContext = function (a) {
 };
 var $author$project$Punch$Types$McContext = {$: 'McContext'};
 var $author$project$Punch$Types$TagContext = {$: 'TagContext'};
+var $author$project$Punch$Types$ToggleButton = {$: 'ToggleButton'};
 var $elm$json$Json$Decode$andThen = _Json_andThen;
-var $elm$json$Json$Decode$field = _Json_decodeField;
-var $elm$json$Json$Decode$map = _Json_map1;
-var $elm$json$Json$Decode$oneOf = _Json_oneOf;
-var $elm$json$Json$Decode$succeed = _Json_succeed;
-var $elm$json$Json$Decode$maybe = function (decoder) {
-	return $elm$json$Json$Decode$oneOf(
-		_List_fromArray(
-			[
-				A2($elm$json$Json$Decode$map, $elm$core$Maybe$Just, decoder),
-				$elm$json$Json$Decode$succeed($elm$core$Maybe$Nothing)
-			]));
-};
 var $elm$json$Json$Decode$string = _Json_decodeString;
+var $elm$json$Json$Decode$succeed = _Json_succeed;
 var $author$project$Punch$Model$contextDecoder = A2(
 	$elm$json$Json$Decode$andThen,
-	function (maybeStr) {
-		if (maybeStr.$ === 'Just') {
-			var str = maybeStr.a;
-			switch (str) {
-				case 'tag':
-					return $elm$json$Json$Decode$succeed($author$project$Punch$Types$TagContext);
-				case 'mc':
-					return $elm$json$Json$Decode$succeed($author$project$Punch$Types$McContext);
-				case 'comm':
-					return $elm$json$Json$Decode$succeed($author$project$Punch$Types$CommContext);
-				case 'create':
-					return $elm$json$Json$Decode$succeed(
-						$author$project$Punch$Types$CreateContext($elm$core$Maybe$Nothing));
-				default:
-					return $elm$json$Json$Decode$succeed($author$project$Punch$Types$NoContext);
-			}
-		} else {
-			return $elm$json$Json$Decode$succeed($author$project$Punch$Types$NoContext);
+	function (str) {
+		switch (str) {
+			case 'tag':
+				return $elm$json$Json$Decode$succeed($author$project$Punch$Types$TagContext);
+			case 'mc':
+				return $elm$json$Json$Decode$succeed($author$project$Punch$Types$McContext);
+			case 'comm':
+				return $elm$json$Json$Decode$succeed($author$project$Punch$Types$CommContext);
+			case 'create':
+				return $elm$json$Json$Decode$succeed(
+					$author$project$Punch$Types$CreateContext($elm$core$Maybe$Nothing));
+			case 'toggleButton':
+				return $elm$json$Json$Decode$succeed($author$project$Punch$Types$ToggleButton);
+			default:
+				return $elm$json$Json$Decode$succeed($author$project$Punch$Types$NoContext);
 		}
 	},
-	$elm$json$Json$Decode$maybe(
-		A2($elm$json$Json$Decode$field, 'context', $elm$json$Json$Decode$string)));
-var $elm$json$Json$Decode$map4 = _Json_map4;
-var $author$project$Punch$Model$flagsDecoder = A5(
-	$elm$json$Json$Decode$map4,
-	$author$project$Punch$Model$Flags,
-	A2($elm$json$Json$Decode$field, 'procosysPlantId', $elm$json$Json$Decode$string),
-	$author$project$Punch$Model$contextDecoder,
-	A2($elm$json$Json$Decode$field, 'textToHighlight', $elm$json$Json$Decode$string),
-	A2(
-		$elm$json$Json$Decode$field,
-		'tagNo',
-		$elm$json$Json$Decode$oneOf(
-			_List_fromArray(
-				[
-					$elm$json$Json$Decode$string,
-					$elm$json$Json$Decode$succeed('')
-				]))));
+	$elm$json$Json$Decode$string);
+var $elm$json$Json$Decode$map2 = _Json_map2;
+var $NoRedInk$elm_json_decode_pipeline$Json$Decode$Pipeline$custom = $elm$json$Json$Decode$map2($elm$core$Basics$apR);
+var $elm$json$Json$Decode$field = _Json_decodeField;
+var $elm$json$Json$Decode$fail = _Json_fail;
+var $elm$json$Json$Decode$null = _Json_decodeNull;
+var $elm$json$Json$Decode$oneOf = _Json_oneOf;
+var $elm$json$Json$Decode$value = _Json_decodeValue;
+var $NoRedInk$elm_json_decode_pipeline$Json$Decode$Pipeline$optionalDecoder = F3(
+	function (pathDecoder, valDecoder, fallback) {
+		var nullOr = function (decoder) {
+			return $elm$json$Json$Decode$oneOf(
+				_List_fromArray(
+					[
+						decoder,
+						$elm$json$Json$Decode$null(fallback)
+					]));
+		};
+		var handleResult = function (input) {
+			var _v0 = A2($elm$json$Json$Decode$decodeValue, pathDecoder, input);
+			if (_v0.$ === 'Ok') {
+				var rawValue = _v0.a;
+				var _v1 = A2(
+					$elm$json$Json$Decode$decodeValue,
+					nullOr(valDecoder),
+					rawValue);
+				if (_v1.$ === 'Ok') {
+					var finalResult = _v1.a;
+					return $elm$json$Json$Decode$succeed(finalResult);
+				} else {
+					var finalErr = _v1.a;
+					return $elm$json$Json$Decode$fail(
+						$elm$json$Json$Decode$errorToString(finalErr));
+				}
+			} else {
+				return $elm$json$Json$Decode$succeed(fallback);
+			}
+		};
+		return A2($elm$json$Json$Decode$andThen, handleResult, $elm$json$Json$Decode$value);
+	});
+var $NoRedInk$elm_json_decode_pipeline$Json$Decode$Pipeline$optional = F4(
+	function (key, valDecoder, fallback, decoder) {
+		return A2(
+			$NoRedInk$elm_json_decode_pipeline$Json$Decode$Pipeline$custom,
+			A3(
+				$NoRedInk$elm_json_decode_pipeline$Json$Decode$Pipeline$optionalDecoder,
+				A2($elm$json$Json$Decode$field, key, $elm$json$Json$Decode$value),
+				valDecoder,
+				fallback),
+			decoder);
+	});
+var $NoRedInk$elm_json_decode_pipeline$Json$Decode$Pipeline$required = F3(
+	function (key, valDecoder, decoder) {
+		return A2(
+			$NoRedInk$elm_json_decode_pipeline$Json$Decode$Pipeline$custom,
+			A2($elm$json$Json$Decode$field, key, valDecoder),
+			decoder);
+	});
+var $author$project$Punch$Model$flagsDecoder = A4(
+	$NoRedInk$elm_json_decode_pipeline$Json$Decode$Pipeline$optional,
+	'tagNo',
+	$elm$json$Json$Decode$string,
+	'',
+	A4(
+		$NoRedInk$elm_json_decode_pipeline$Json$Decode$Pipeline$optional,
+		'textToHighlight',
+		$elm$json$Json$Decode$string,
+		'',
+		A4(
+			$NoRedInk$elm_json_decode_pipeline$Json$Decode$Pipeline$optional,
+			'context',
+			$author$project$Punch$Model$contextDecoder,
+			$author$project$Punch$Types$NoContext,
+			A3(
+				$NoRedInk$elm_json_decode_pipeline$Json$Decode$Pipeline$required,
+				'procosysPlantId',
+				$elm$json$Json$Decode$string,
+				$elm$json$Json$Decode$succeed($author$project$Punch$Model$Flags)))));
 var $author$project$Punch$Model$decodeFlags = function (val) {
 	var _v0 = A2($elm$json$Json$Decode$decodeValue, $author$project$Punch$Model$flagsDecoder, val);
 	if (_v0.$ === 'Ok') {
@@ -5459,7 +5636,7 @@ var $author$project$Punch$Model$decodeFlags = function (val) {
 		return A4($author$project$Punch$Model$Flags, '', $author$project$Punch$Types$NoContext, '', '');
 	}
 };
-var $elm$json$Json$Decode$map2 = _Json_map2;
+var $elm$json$Json$Decode$map = _Json_map1;
 var $elm$virtual_dom$VirtualDom$toHandlerInt = function (handler) {
 	switch (handler.$) {
 		case 'Normal':
@@ -5775,7 +5952,6 @@ var $mdgriffith$elm_ui$Internal$Model$Fill = function (a) {
 	return {$: 'Fill', a: a};
 };
 var $mdgriffith$elm_ui$Element$fill = $mdgriffith$elm_ui$Internal$Model$Fill(1);
-var $elm$json$Json$Decode$value = _Json_decodeValue;
 var $author$project$Punch$Ports$fromJs = _Platform_incomingPort('fromJs', $elm$json$Json$Decode$value);
 var $author$project$Punch$Messages$DecodeError = function (a) {
 	return {$: 'DecodeError', a: a};
@@ -5785,6 +5961,9 @@ var $author$project$Punch$Messages$GotPunchList = function (a) {
 };
 var $author$project$Punch$Messages$GotToken = function (a) {
 	return {$: 'GotToken', a: a};
+};
+var $author$project$Punch$Messages$SyncStatusUpdated = function (a) {
+	return {$: 'SyncStatusUpdated', a: a};
 };
 var $author$project$Equinor$Types$NotLoaded = {$: 'NotLoaded'};
 var $author$project$Punch$Punch = function (id) {
@@ -5838,7 +6017,6 @@ var $author$project$Equinor$Data$Procosys$Status$fromString = function (str) {
 			return $author$project$Equinor$Data$Procosys$Status$OS;
 	}
 };
-var $elm$json$Json$Decode$null = _Json_decodeNull;
 var $author$project$Equinor$Data$Procosys$Status$decoder = $elm$json$Json$Decode$oneOf(
 	_List_fromArray(
 		[
@@ -5848,60 +6026,8 @@ var $author$project$Equinor$Data$Procosys$Status$decoder = $elm$json$Json$Decode
 			$elm$json$Json$Decode$string),
 			$elm$json$Json$Decode$null($author$project$Equinor$Data$Procosys$Status$OS)
 		]));
-var $NoRedInk$elm_json_decode_pipeline$Json$Decode$Pipeline$custom = $elm$json$Json$Decode$map2($elm$core$Basics$apR);
 var $NoRedInk$elm_json_decode_pipeline$Json$Decode$Pipeline$hardcoded = A2($elm$core$Basics$composeR, $elm$json$Json$Decode$succeed, $NoRedInk$elm_json_decode_pipeline$Json$Decode$Pipeline$custom);
 var $elm$json$Json$Decode$int = _Json_decodeInt;
-var $elm$json$Json$Decode$fail = _Json_fail;
-var $NoRedInk$elm_json_decode_pipeline$Json$Decode$Pipeline$optionalDecoder = F3(
-	function (pathDecoder, valDecoder, fallback) {
-		var nullOr = function (decoder) {
-			return $elm$json$Json$Decode$oneOf(
-				_List_fromArray(
-					[
-						decoder,
-						$elm$json$Json$Decode$null(fallback)
-					]));
-		};
-		var handleResult = function (input) {
-			var _v0 = A2($elm$json$Json$Decode$decodeValue, pathDecoder, input);
-			if (_v0.$ === 'Ok') {
-				var rawValue = _v0.a;
-				var _v1 = A2(
-					$elm$json$Json$Decode$decodeValue,
-					nullOr(valDecoder),
-					rawValue);
-				if (_v1.$ === 'Ok') {
-					var finalResult = _v1.a;
-					return $elm$json$Json$Decode$succeed(finalResult);
-				} else {
-					var finalErr = _v1.a;
-					return $elm$json$Json$Decode$fail(
-						$elm$json$Json$Decode$errorToString(finalErr));
-				}
-			} else {
-				return $elm$json$Json$Decode$succeed(fallback);
-			}
-		};
-		return A2($elm$json$Json$Decode$andThen, handleResult, $elm$json$Json$Decode$value);
-	});
-var $NoRedInk$elm_json_decode_pipeline$Json$Decode$Pipeline$optional = F4(
-	function (key, valDecoder, fallback, decoder) {
-		return A2(
-			$NoRedInk$elm_json_decode_pipeline$Json$Decode$Pipeline$custom,
-			A3(
-				$NoRedInk$elm_json_decode_pipeline$Json$Decode$Pipeline$optionalDecoder,
-				A2($elm$json$Json$Decode$field, key, $elm$json$Json$Decode$value),
-				valDecoder,
-				fallback),
-			decoder);
-	});
-var $NoRedInk$elm_json_decode_pipeline$Json$Decode$Pipeline$required = F3(
-	function (key, valDecoder, decoder) {
-		return A2(
-			$NoRedInk$elm_json_decode_pipeline$Json$Decode$Pipeline$custom,
-			A2($elm$json$Json$Decode$field, key, valDecoder),
-			decoder);
-	});
 var $elm$core$Basics$composeL = F3(
 	function (g, f, x) {
 		return g(
@@ -5989,6 +6115,33 @@ var $author$project$Punch$decoder = A2(
 																	$elm$json$Json$Decode$int,
 																	$elm$json$Json$Decode$succeed($author$project$Punch$Punch))))))))))))))))));
 var $elm$json$Json$Decode$list = _Json_decodeList;
+var $author$project$Punch$Types$DownloadingFromApi = {$: 'DownloadingFromApi'};
+var $author$project$Punch$Types$Inactive = {$: 'Inactive'};
+var $author$project$Punch$Types$LoadingFromStorage = {$: 'LoadingFromStorage'};
+var $author$project$Punch$Types$SavingToStorage = {$: 'SavingToStorage'};
+var $author$project$Punch$Types$Synchronized = {$: 'Synchronized'};
+var $author$project$Punch$Types$UpdatingFromApi = {$: 'UpdatingFromApi'};
+var $author$project$Punch$Main$syncStatusDecoder = A2(
+	$elm$json$Json$Decode$andThen,
+	function (str) {
+		switch (str) {
+			case 'Inactive':
+				return $elm$json$Json$Decode$succeed($author$project$Punch$Types$Inactive);
+			case 'DownloadingFromApi':
+				return $elm$json$Json$Decode$succeed($author$project$Punch$Types$DownloadingFromApi);
+			case 'SavingToStorage':
+				return $elm$json$Json$Decode$succeed($author$project$Punch$Types$SavingToStorage);
+			case 'UpdatingFromApi':
+				return $elm$json$Json$Decode$succeed($author$project$Punch$Types$UpdatingFromApi);
+			case 'LoadingFromStorage':
+				return $elm$json$Json$Decode$succeed($author$project$Punch$Types$LoadingFromStorage);
+			case 'Synchronized':
+				return $elm$json$Json$Decode$succeed($author$project$Punch$Types$Synchronized);
+			default:
+				return $elm$json$Json$Decode$fail('Unknown syncstatus');
+		}
+	},
+	$elm$json$Json$Decode$string);
 var $author$project$Punch$Types$TokenSuccess = F2(
 	function (refNo, token) {
 		return {refNo: refNo, token: token};
@@ -6002,13 +6155,15 @@ var $author$project$Punch$Main$decoder = function (topic) {
 	switch (topic) {
 		case 'token':
 			return A2($elm$json$Json$Decode$map, $author$project$Punch$Messages$GotToken, $author$project$Punch$Main$tokenDecoder);
-		case 'punchlist':
+		case 'punchList':
 			return A2(
 				$elm$json$Json$Decode$map,
 				$author$project$Punch$Messages$GotPunchList,
 				$elm$json$Json$Decode$list($author$project$Punch$decoder));
+		case 'syncStatusUpdated':
+			return A2($elm$json$Json$Decode$map, $author$project$Punch$Messages$SyncStatusUpdated, $author$project$Punch$Main$syncStatusDecoder);
 		default:
-			return $elm$json$Json$Decode$fail('Unknown msg received from Js');
+			return $elm$json$Json$Decode$fail('Unknown msg received from Js: ' + topic);
 	}
 };
 var $author$project$Punch$Main$jsValueDecoder = A2(
@@ -6048,7 +6203,7 @@ var $elm$core$Platform$Cmd$batch = _Platform_batch;
 var $elm$core$Platform$Cmd$none = $elm$core$Platform$Cmd$batch(_List_Nil);
 var $author$project$Punch$Model$initialModel = function (flags) {
 	return _Utils_Tuple2(
-		{apiToken: '', categories: $author$project$Equinor$Types$NotLoaded, context: flags.context, currentAttachment: $elm$core$Maybe$Nothing, currentCreate: $author$project$Punch$initialCreate, dropDown: $author$project$Punch$Types$NoDropDown, errorMsg: '', highlight: flags.textToHighlight, organizations: $author$project$Equinor$Types$NotLoaded, procosysPlantId: flags.procosysPlantId, punch: $elm$core$Dict$empty, requests: $elm$core$Dict$empty, selectedPunch: $elm$core$Maybe$Nothing, sorts: $author$project$Equinor$Types$NotLoaded, tagNo: flags.tagNo, types: $author$project$Equinor$Types$NotLoaded},
+		{apiToken: '', categories: $author$project$Equinor$Types$NotLoaded, context: flags.context, currentAttachment: $elm$core$Maybe$Nothing, currentCreate: $author$project$Punch$initialCreate, dropDown: $author$project$Punch$Types$NoDropDown, errorMsg: '', highlight: flags.textToHighlight, organizations: $author$project$Equinor$Types$NotLoaded, procosysPlantId: flags.procosysPlantId, punch: $elm$core$Dict$empty, requests: $elm$core$Dict$empty, selectedPunch: $elm$core$Maybe$Nothing, sorts: $author$project$Equinor$Types$NotLoaded, syncStatus: $author$project$Punch$Types$Inactive, tagNo: flags.tagNo, types: $author$project$Equinor$Types$NotLoaded},
 		function () {
 			var _v0 = flags.context;
 			if (_v0.$ === 'CreateContext') {
@@ -12779,6 +12934,7 @@ var $author$project$Punch$Checklist$Checklist = F4(
 	function (id, responsibleCode, status, formularType) {
 		return {formularType: formularType, id: id, responsibleCode: responsibleCode, status: status};
 	});
+var $elm$json$Json$Decode$map4 = _Json_map4;
 var $author$project$Punch$Checklist$decoder = A5(
 	$elm$json$Json$Decode$map4,
 	$author$project$Punch$Checklist$Checklist,
@@ -12955,6 +13111,945 @@ var $author$project$Punch$Api$deleteAttachment = F4(
 						]))
 			});
 	});
+var $author$project$Punch$Messages$GotAllPunch = function (a) {
+	return {$: 'GotAllPunch', a: a};
+};
+var $elm$parser$Parser$Advanced$Bad = F2(
+	function (a, b) {
+		return {$: 'Bad', a: a, b: b};
+	});
+var $elm$parser$Parser$Advanced$Good = F3(
+	function (a, b, c) {
+		return {$: 'Good', a: a, b: b, c: c};
+	});
+var $elm$parser$Parser$Advanced$Parser = function (a) {
+	return {$: 'Parser', a: a};
+};
+var $elm$parser$Parser$Advanced$andThen = F2(
+	function (callback, _v0) {
+		var parseA = _v0.a;
+		return $elm$parser$Parser$Advanced$Parser(
+			function (s0) {
+				var _v1 = parseA(s0);
+				if (_v1.$ === 'Bad') {
+					var p = _v1.a;
+					var x = _v1.b;
+					return A2($elm$parser$Parser$Advanced$Bad, p, x);
+				} else {
+					var p1 = _v1.a;
+					var a = _v1.b;
+					var s1 = _v1.c;
+					var _v2 = callback(a);
+					var parseB = _v2.a;
+					var _v3 = parseB(s1);
+					if (_v3.$ === 'Bad') {
+						var p2 = _v3.a;
+						var x = _v3.b;
+						return A2($elm$parser$Parser$Advanced$Bad, p1 || p2, x);
+					} else {
+						var p2 = _v3.a;
+						var b = _v3.b;
+						var s2 = _v3.c;
+						return A3($elm$parser$Parser$Advanced$Good, p1 || p2, b, s2);
+					}
+				}
+			});
+	});
+var $elm$parser$Parser$andThen = $elm$parser$Parser$Advanced$andThen;
+var $elm$parser$Parser$ExpectingEnd = {$: 'ExpectingEnd'};
+var $elm$parser$Parser$Advanced$AddRight = F2(
+	function (a, b) {
+		return {$: 'AddRight', a: a, b: b};
+	});
+var $elm$parser$Parser$Advanced$DeadEnd = F4(
+	function (row, col, problem, contextStack) {
+		return {col: col, contextStack: contextStack, problem: problem, row: row};
+	});
+var $elm$parser$Parser$Advanced$Empty = {$: 'Empty'};
+var $elm$parser$Parser$Advanced$fromState = F2(
+	function (s, x) {
+		return A2(
+			$elm$parser$Parser$Advanced$AddRight,
+			$elm$parser$Parser$Advanced$Empty,
+			A4($elm$parser$Parser$Advanced$DeadEnd, s.row, s.col, x, s.context));
+	});
+var $elm$parser$Parser$Advanced$end = function (x) {
+	return $elm$parser$Parser$Advanced$Parser(
+		function (s) {
+			return _Utils_eq(
+				$elm$core$String$length(s.src),
+				s.offset) ? A3($elm$parser$Parser$Advanced$Good, false, _Utils_Tuple0, s) : A2(
+				$elm$parser$Parser$Advanced$Bad,
+				false,
+				A2($elm$parser$Parser$Advanced$fromState, s, x));
+		});
+};
+var $elm$parser$Parser$end = $elm$parser$Parser$Advanced$end($elm$parser$Parser$ExpectingEnd);
+var $elm$parser$Parser$Advanced$isSubChar = _Parser_isSubChar;
+var $elm$parser$Parser$Advanced$chompWhileHelp = F5(
+	function (isGood, offset, row, col, s0) {
+		chompWhileHelp:
+		while (true) {
+			var newOffset = A3($elm$parser$Parser$Advanced$isSubChar, isGood, offset, s0.src);
+			if (_Utils_eq(newOffset, -1)) {
+				return A3(
+					$elm$parser$Parser$Advanced$Good,
+					_Utils_cmp(s0.offset, offset) < 0,
+					_Utils_Tuple0,
+					{col: col, context: s0.context, indent: s0.indent, offset: offset, row: row, src: s0.src});
+			} else {
+				if (_Utils_eq(newOffset, -2)) {
+					var $temp$isGood = isGood,
+						$temp$offset = offset + 1,
+						$temp$row = row + 1,
+						$temp$col = 1,
+						$temp$s0 = s0;
+					isGood = $temp$isGood;
+					offset = $temp$offset;
+					row = $temp$row;
+					col = $temp$col;
+					s0 = $temp$s0;
+					continue chompWhileHelp;
+				} else {
+					var $temp$isGood = isGood,
+						$temp$offset = newOffset,
+						$temp$row = row,
+						$temp$col = col + 1,
+						$temp$s0 = s0;
+					isGood = $temp$isGood;
+					offset = $temp$offset;
+					row = $temp$row;
+					col = $temp$col;
+					s0 = $temp$s0;
+					continue chompWhileHelp;
+				}
+			}
+		}
+	});
+var $elm$parser$Parser$Advanced$chompWhile = function (isGood) {
+	return $elm$parser$Parser$Advanced$Parser(
+		function (s) {
+			return A5($elm$parser$Parser$Advanced$chompWhileHelp, isGood, s.offset, s.row, s.col, s);
+		});
+};
+var $elm$parser$Parser$chompWhile = $elm$parser$Parser$Advanced$chompWhile;
+var $elm$core$Basics$always = F2(
+	function (a, _v0) {
+		return a;
+	});
+var $elm$parser$Parser$Advanced$mapChompedString = F2(
+	function (func, _v0) {
+		var parse = _v0.a;
+		return $elm$parser$Parser$Advanced$Parser(
+			function (s0) {
+				var _v1 = parse(s0);
+				if (_v1.$ === 'Bad') {
+					var p = _v1.a;
+					var x = _v1.b;
+					return A2($elm$parser$Parser$Advanced$Bad, p, x);
+				} else {
+					var p = _v1.a;
+					var a = _v1.b;
+					var s1 = _v1.c;
+					return A3(
+						$elm$parser$Parser$Advanced$Good,
+						p,
+						A2(
+							func,
+							A3($elm$core$String$slice, s0.offset, s1.offset, s0.src),
+							a),
+						s1);
+				}
+			});
+	});
+var $elm$parser$Parser$Advanced$getChompedString = function (parser) {
+	return A2($elm$parser$Parser$Advanced$mapChompedString, $elm$core$Basics$always, parser);
+};
+var $elm$parser$Parser$getChompedString = $elm$parser$Parser$Advanced$getChompedString;
+var $elm$parser$Parser$Problem = function (a) {
+	return {$: 'Problem', a: a};
+};
+var $elm$parser$Parser$Advanced$problem = function (x) {
+	return $elm$parser$Parser$Advanced$Parser(
+		function (s) {
+			return A2(
+				$elm$parser$Parser$Advanced$Bad,
+				false,
+				A2($elm$parser$Parser$Advanced$fromState, s, x));
+		});
+};
+var $elm$parser$Parser$problem = function (msg) {
+	return $elm$parser$Parser$Advanced$problem(
+		$elm$parser$Parser$Problem(msg));
+};
+var $elm$parser$Parser$Advanced$succeed = function (a) {
+	return $elm$parser$Parser$Advanced$Parser(
+		function (s) {
+			return A3($elm$parser$Parser$Advanced$Good, false, a, s);
+		});
+};
+var $elm$parser$Parser$succeed = $elm$parser$Parser$Advanced$succeed;
+var $elm$core$String$toFloat = _String_toFloat;
+var $rtfeldman$elm_iso8601_date_strings$Iso8601$fractionsOfASecondInMs = A2(
+	$elm$parser$Parser$andThen,
+	function (str) {
+		if ($elm$core$String$length(str) <= 9) {
+			var _v0 = $elm$core$String$toFloat('0.' + str);
+			if (_v0.$ === 'Just') {
+				var floatVal = _v0.a;
+				return $elm$parser$Parser$succeed(
+					$elm$core$Basics$round(floatVal * 1000));
+			} else {
+				return $elm$parser$Parser$problem('Invalid float: \"' + (str + '\"'));
+			}
+		} else {
+			return $elm$parser$Parser$problem(
+				'Expected at most 9 digits, but got ' + $elm$core$String$fromInt(
+					$elm$core$String$length(str)));
+		}
+	},
+	$elm$parser$Parser$getChompedString(
+		$elm$parser$Parser$chompWhile($elm$core$Char$isDigit)));
+var $rtfeldman$elm_iso8601_date_strings$Iso8601$fromParts = F6(
+	function (monthYearDayMs, hour, minute, second, ms, utcOffsetMinutes) {
+		return $elm$time$Time$millisToPosix((((monthYearDayMs + (((hour * 60) * 60) * 1000)) + (((minute - utcOffsetMinutes) * 60) * 1000)) + (second * 1000)) + ms);
+	});
+var $elm$parser$Parser$Advanced$map2 = F3(
+	function (func, _v0, _v1) {
+		var parseA = _v0.a;
+		var parseB = _v1.a;
+		return $elm$parser$Parser$Advanced$Parser(
+			function (s0) {
+				var _v2 = parseA(s0);
+				if (_v2.$ === 'Bad') {
+					var p = _v2.a;
+					var x = _v2.b;
+					return A2($elm$parser$Parser$Advanced$Bad, p, x);
+				} else {
+					var p1 = _v2.a;
+					var a = _v2.b;
+					var s1 = _v2.c;
+					var _v3 = parseB(s1);
+					if (_v3.$ === 'Bad') {
+						var p2 = _v3.a;
+						var x = _v3.b;
+						return A2($elm$parser$Parser$Advanced$Bad, p1 || p2, x);
+					} else {
+						var p2 = _v3.a;
+						var b = _v3.b;
+						var s2 = _v3.c;
+						return A3(
+							$elm$parser$Parser$Advanced$Good,
+							p1 || p2,
+							A2(func, a, b),
+							s2);
+					}
+				}
+			});
+	});
+var $elm$parser$Parser$Advanced$ignorer = F2(
+	function (keepParser, ignoreParser) {
+		return A3($elm$parser$Parser$Advanced$map2, $elm$core$Basics$always, keepParser, ignoreParser);
+	});
+var $elm$parser$Parser$ignorer = $elm$parser$Parser$Advanced$ignorer;
+var $elm$parser$Parser$Advanced$keeper = F2(
+	function (parseFunc, parseArg) {
+		return A3($elm$parser$Parser$Advanced$map2, $elm$core$Basics$apL, parseFunc, parseArg);
+	});
+var $elm$parser$Parser$keeper = $elm$parser$Parser$Advanced$keeper;
+var $elm$parser$Parser$Advanced$Append = F2(
+	function (a, b) {
+		return {$: 'Append', a: a, b: b};
+	});
+var $elm$parser$Parser$Advanced$oneOfHelp = F3(
+	function (s0, bag, parsers) {
+		oneOfHelp:
+		while (true) {
+			if (!parsers.b) {
+				return A2($elm$parser$Parser$Advanced$Bad, false, bag);
+			} else {
+				var parse = parsers.a.a;
+				var remainingParsers = parsers.b;
+				var _v1 = parse(s0);
+				if (_v1.$ === 'Good') {
+					var step = _v1;
+					return step;
+				} else {
+					var step = _v1;
+					var p = step.a;
+					var x = step.b;
+					if (p) {
+						return step;
+					} else {
+						var $temp$s0 = s0,
+							$temp$bag = A2($elm$parser$Parser$Advanced$Append, bag, x),
+							$temp$parsers = remainingParsers;
+						s0 = $temp$s0;
+						bag = $temp$bag;
+						parsers = $temp$parsers;
+						continue oneOfHelp;
+					}
+				}
+			}
+		}
+	});
+var $elm$parser$Parser$Advanced$oneOf = function (parsers) {
+	return $elm$parser$Parser$Advanced$Parser(
+		function (s) {
+			return A3($elm$parser$Parser$Advanced$oneOfHelp, s, $elm$parser$Parser$Advanced$Empty, parsers);
+		});
+};
+var $elm$parser$Parser$oneOf = $elm$parser$Parser$Advanced$oneOf;
+var $elm$parser$Parser$Done = function (a) {
+	return {$: 'Done', a: a};
+};
+var $elm$parser$Parser$Loop = function (a) {
+	return {$: 'Loop', a: a};
+};
+var $elm$core$String$append = _String_append;
+var $elm$parser$Parser$UnexpectedChar = {$: 'UnexpectedChar'};
+var $elm$parser$Parser$Advanced$chompIf = F2(
+	function (isGood, expecting) {
+		return $elm$parser$Parser$Advanced$Parser(
+			function (s) {
+				var newOffset = A3($elm$parser$Parser$Advanced$isSubChar, isGood, s.offset, s.src);
+				return _Utils_eq(newOffset, -1) ? A2(
+					$elm$parser$Parser$Advanced$Bad,
+					false,
+					A2($elm$parser$Parser$Advanced$fromState, s, expecting)) : (_Utils_eq(newOffset, -2) ? A3(
+					$elm$parser$Parser$Advanced$Good,
+					true,
+					_Utils_Tuple0,
+					{col: 1, context: s.context, indent: s.indent, offset: s.offset + 1, row: s.row + 1, src: s.src}) : A3(
+					$elm$parser$Parser$Advanced$Good,
+					true,
+					_Utils_Tuple0,
+					{col: s.col + 1, context: s.context, indent: s.indent, offset: newOffset, row: s.row, src: s.src}));
+			});
+	});
+var $elm$parser$Parser$chompIf = function (isGood) {
+	return A2($elm$parser$Parser$Advanced$chompIf, isGood, $elm$parser$Parser$UnexpectedChar);
+};
+var $elm$parser$Parser$Advanced$loopHelp = F4(
+	function (p, state, callback, s0) {
+		loopHelp:
+		while (true) {
+			var _v0 = callback(state);
+			var parse = _v0.a;
+			var _v1 = parse(s0);
+			if (_v1.$ === 'Good') {
+				var p1 = _v1.a;
+				var step = _v1.b;
+				var s1 = _v1.c;
+				if (step.$ === 'Loop') {
+					var newState = step.a;
+					var $temp$p = p || p1,
+						$temp$state = newState,
+						$temp$callback = callback,
+						$temp$s0 = s1;
+					p = $temp$p;
+					state = $temp$state;
+					callback = $temp$callback;
+					s0 = $temp$s0;
+					continue loopHelp;
+				} else {
+					var result = step.a;
+					return A3($elm$parser$Parser$Advanced$Good, p || p1, result, s1);
+				}
+			} else {
+				var p1 = _v1.a;
+				var x = _v1.b;
+				return A2($elm$parser$Parser$Advanced$Bad, p || p1, x);
+			}
+		}
+	});
+var $elm$parser$Parser$Advanced$loop = F2(
+	function (state, callback) {
+		return $elm$parser$Parser$Advanced$Parser(
+			function (s) {
+				return A4($elm$parser$Parser$Advanced$loopHelp, false, state, callback, s);
+			});
+	});
+var $elm$parser$Parser$Advanced$map = F2(
+	function (func, _v0) {
+		var parse = _v0.a;
+		return $elm$parser$Parser$Advanced$Parser(
+			function (s0) {
+				var _v1 = parse(s0);
+				if (_v1.$ === 'Good') {
+					var p = _v1.a;
+					var a = _v1.b;
+					var s1 = _v1.c;
+					return A3(
+						$elm$parser$Parser$Advanced$Good,
+						p,
+						func(a),
+						s1);
+				} else {
+					var p = _v1.a;
+					var x = _v1.b;
+					return A2($elm$parser$Parser$Advanced$Bad, p, x);
+				}
+			});
+	});
+var $elm$parser$Parser$map = $elm$parser$Parser$Advanced$map;
+var $elm$parser$Parser$Advanced$Done = function (a) {
+	return {$: 'Done', a: a};
+};
+var $elm$parser$Parser$Advanced$Loop = function (a) {
+	return {$: 'Loop', a: a};
+};
+var $elm$parser$Parser$toAdvancedStep = function (step) {
+	if (step.$ === 'Loop') {
+		var s = step.a;
+		return $elm$parser$Parser$Advanced$Loop(s);
+	} else {
+		var a = step.a;
+		return $elm$parser$Parser$Advanced$Done(a);
+	}
+};
+var $elm$parser$Parser$loop = F2(
+	function (state, callback) {
+		return A2(
+			$elm$parser$Parser$Advanced$loop,
+			state,
+			function (s) {
+				return A2(
+					$elm$parser$Parser$map,
+					$elm$parser$Parser$toAdvancedStep,
+					callback(s));
+			});
+	});
+var $rtfeldman$elm_iso8601_date_strings$Iso8601$paddedInt = function (quantity) {
+	var helper = function (str) {
+		if (_Utils_eq(
+			$elm$core$String$length(str),
+			quantity)) {
+			var _v0 = $elm$core$String$toInt(str);
+			if (_v0.$ === 'Just') {
+				var intVal = _v0.a;
+				return A2(
+					$elm$parser$Parser$map,
+					$elm$parser$Parser$Done,
+					$elm$parser$Parser$succeed(intVal));
+			} else {
+				return $elm$parser$Parser$problem('Invalid integer: \"' + (str + '\"'));
+			}
+		} else {
+			return A2(
+				$elm$parser$Parser$map,
+				function (nextChar) {
+					return $elm$parser$Parser$Loop(
+						A2($elm$core$String$append, str, nextChar));
+				},
+				$elm$parser$Parser$getChompedString(
+					$elm$parser$Parser$chompIf($elm$core$Char$isDigit)));
+		}
+	};
+	return A2($elm$parser$Parser$loop, '', helper);
+};
+var $elm$parser$Parser$ExpectingSymbol = function (a) {
+	return {$: 'ExpectingSymbol', a: a};
+};
+var $elm$parser$Parser$Advanced$Token = F2(
+	function (a, b) {
+		return {$: 'Token', a: a, b: b};
+	});
+var $elm$parser$Parser$Advanced$isSubString = _Parser_isSubString;
+var $elm$parser$Parser$Advanced$token = function (_v0) {
+	var str = _v0.a;
+	var expecting = _v0.b;
+	var progress = !$elm$core$String$isEmpty(str);
+	return $elm$parser$Parser$Advanced$Parser(
+		function (s) {
+			var _v1 = A5($elm$parser$Parser$Advanced$isSubString, str, s.offset, s.row, s.col, s.src);
+			var newOffset = _v1.a;
+			var newRow = _v1.b;
+			var newCol = _v1.c;
+			return _Utils_eq(newOffset, -1) ? A2(
+				$elm$parser$Parser$Advanced$Bad,
+				false,
+				A2($elm$parser$Parser$Advanced$fromState, s, expecting)) : A3(
+				$elm$parser$Parser$Advanced$Good,
+				progress,
+				_Utils_Tuple0,
+				{col: newCol, context: s.context, indent: s.indent, offset: newOffset, row: newRow, src: s.src});
+		});
+};
+var $elm$parser$Parser$Advanced$symbol = $elm$parser$Parser$Advanced$token;
+var $elm$parser$Parser$symbol = function (str) {
+	return $elm$parser$Parser$Advanced$symbol(
+		A2(
+			$elm$parser$Parser$Advanced$Token,
+			str,
+			$elm$parser$Parser$ExpectingSymbol(str)));
+};
+var $rtfeldman$elm_iso8601_date_strings$Iso8601$epochYear = 1970;
+var $rtfeldman$elm_iso8601_date_strings$Iso8601$invalidDay = function (day) {
+	return $elm$parser$Parser$problem(
+		'Invalid day: ' + $elm$core$String$fromInt(day));
+};
+var $elm$core$Basics$modBy = _Basics_modBy;
+var $rtfeldman$elm_iso8601_date_strings$Iso8601$isLeapYear = function (year) {
+	return (!A2($elm$core$Basics$modBy, 4, year)) && ((!(!A2($elm$core$Basics$modBy, 100, year))) || (!A2($elm$core$Basics$modBy, 400, year)));
+};
+var $rtfeldman$elm_iso8601_date_strings$Iso8601$leapYearsBefore = function (y1) {
+	var y = y1 - 1;
+	return (((y / 4) | 0) - ((y / 100) | 0)) + ((y / 400) | 0);
+};
+var $rtfeldman$elm_iso8601_date_strings$Iso8601$msPerDay = 86400000;
+var $rtfeldman$elm_iso8601_date_strings$Iso8601$msPerYear = 31536000000;
+var $rtfeldman$elm_iso8601_date_strings$Iso8601$yearMonthDay = function (_v0) {
+	var year = _v0.a;
+	var month = _v0.b;
+	var dayInMonth = _v0.c;
+	if (dayInMonth < 0) {
+		return $rtfeldman$elm_iso8601_date_strings$Iso8601$invalidDay(dayInMonth);
+	} else {
+		var succeedWith = function (extraMs) {
+			var yearMs = $rtfeldman$elm_iso8601_date_strings$Iso8601$msPerYear * (year - $rtfeldman$elm_iso8601_date_strings$Iso8601$epochYear);
+			var days = ((month < 3) || (!$rtfeldman$elm_iso8601_date_strings$Iso8601$isLeapYear(year))) ? (dayInMonth - 1) : dayInMonth;
+			var dayMs = $rtfeldman$elm_iso8601_date_strings$Iso8601$msPerDay * (days + ($rtfeldman$elm_iso8601_date_strings$Iso8601$leapYearsBefore(year) - $rtfeldman$elm_iso8601_date_strings$Iso8601$leapYearsBefore($rtfeldman$elm_iso8601_date_strings$Iso8601$epochYear)));
+			return $elm$parser$Parser$succeed((extraMs + yearMs) + dayMs);
+		};
+		switch (month) {
+			case 1:
+				return (dayInMonth > 31) ? $rtfeldman$elm_iso8601_date_strings$Iso8601$invalidDay(dayInMonth) : succeedWith(0);
+			case 2:
+				return ((dayInMonth > 29) || ((dayInMonth === 29) && (!$rtfeldman$elm_iso8601_date_strings$Iso8601$isLeapYear(year)))) ? $rtfeldman$elm_iso8601_date_strings$Iso8601$invalidDay(dayInMonth) : succeedWith(2678400000);
+			case 3:
+				return (dayInMonth > 31) ? $rtfeldman$elm_iso8601_date_strings$Iso8601$invalidDay(dayInMonth) : succeedWith(5097600000);
+			case 4:
+				return (dayInMonth > 30) ? $rtfeldman$elm_iso8601_date_strings$Iso8601$invalidDay(dayInMonth) : succeedWith(7776000000);
+			case 5:
+				return (dayInMonth > 31) ? $rtfeldman$elm_iso8601_date_strings$Iso8601$invalidDay(dayInMonth) : succeedWith(10368000000);
+			case 6:
+				return (dayInMonth > 30) ? $rtfeldman$elm_iso8601_date_strings$Iso8601$invalidDay(dayInMonth) : succeedWith(13046400000);
+			case 7:
+				return (dayInMonth > 31) ? $rtfeldman$elm_iso8601_date_strings$Iso8601$invalidDay(dayInMonth) : succeedWith(15638400000);
+			case 8:
+				return (dayInMonth > 31) ? $rtfeldman$elm_iso8601_date_strings$Iso8601$invalidDay(dayInMonth) : succeedWith(18316800000);
+			case 9:
+				return (dayInMonth > 30) ? $rtfeldman$elm_iso8601_date_strings$Iso8601$invalidDay(dayInMonth) : succeedWith(20995200000);
+			case 10:
+				return (dayInMonth > 31) ? $rtfeldman$elm_iso8601_date_strings$Iso8601$invalidDay(dayInMonth) : succeedWith(23587200000);
+			case 11:
+				return (dayInMonth > 30) ? $rtfeldman$elm_iso8601_date_strings$Iso8601$invalidDay(dayInMonth) : succeedWith(26265600000);
+			case 12:
+				return (dayInMonth > 31) ? $rtfeldman$elm_iso8601_date_strings$Iso8601$invalidDay(dayInMonth) : succeedWith(28857600000);
+			default:
+				return $elm$parser$Parser$problem(
+					'Invalid month: \"' + ($elm$core$String$fromInt(month) + '\"'));
+		}
+	}
+};
+var $rtfeldman$elm_iso8601_date_strings$Iso8601$monthYearDayInMs = A2(
+	$elm$parser$Parser$andThen,
+	$rtfeldman$elm_iso8601_date_strings$Iso8601$yearMonthDay,
+	A2(
+		$elm$parser$Parser$keeper,
+		A2(
+			$elm$parser$Parser$keeper,
+			A2(
+				$elm$parser$Parser$keeper,
+				$elm$parser$Parser$succeed(
+					F3(
+						function (year, month, day) {
+							return _Utils_Tuple3(year, month, day);
+						})),
+				$rtfeldman$elm_iso8601_date_strings$Iso8601$paddedInt(4)),
+			$elm$parser$Parser$oneOf(
+				_List_fromArray(
+					[
+						A2(
+						$elm$parser$Parser$keeper,
+						A2(
+							$elm$parser$Parser$ignorer,
+							$elm$parser$Parser$succeed($elm$core$Basics$identity),
+							$elm$parser$Parser$symbol('-')),
+						$rtfeldman$elm_iso8601_date_strings$Iso8601$paddedInt(2)),
+						$rtfeldman$elm_iso8601_date_strings$Iso8601$paddedInt(2)
+					]))),
+		$elm$parser$Parser$oneOf(
+			_List_fromArray(
+				[
+					A2(
+					$elm$parser$Parser$keeper,
+					A2(
+						$elm$parser$Parser$ignorer,
+						$elm$parser$Parser$succeed($elm$core$Basics$identity),
+						$elm$parser$Parser$symbol('-')),
+					$rtfeldman$elm_iso8601_date_strings$Iso8601$paddedInt(2)),
+					$rtfeldman$elm_iso8601_date_strings$Iso8601$paddedInt(2)
+				]))));
+var $rtfeldman$elm_iso8601_date_strings$Iso8601$utcOffsetInMinutes = function () {
+	var utcOffsetMinutesFromParts = F3(
+		function (multiplier, hours, minutes) {
+			return (multiplier * (hours * 60)) + minutes;
+		});
+	return A2(
+		$elm$parser$Parser$keeper,
+		$elm$parser$Parser$succeed($elm$core$Basics$identity),
+		$elm$parser$Parser$oneOf(
+			_List_fromArray(
+				[
+					A2(
+					$elm$parser$Parser$map,
+					function (_v0) {
+						return 0;
+					},
+					$elm$parser$Parser$symbol('Z')),
+					A2(
+					$elm$parser$Parser$keeper,
+					A2(
+						$elm$parser$Parser$keeper,
+						A2(
+							$elm$parser$Parser$keeper,
+							$elm$parser$Parser$succeed(utcOffsetMinutesFromParts),
+							$elm$parser$Parser$oneOf(
+								_List_fromArray(
+									[
+										A2(
+										$elm$parser$Parser$map,
+										function (_v1) {
+											return 1;
+										},
+										$elm$parser$Parser$symbol('+')),
+										A2(
+										$elm$parser$Parser$map,
+										function (_v2) {
+											return -1;
+										},
+										$elm$parser$Parser$symbol('-'))
+									]))),
+						$rtfeldman$elm_iso8601_date_strings$Iso8601$paddedInt(2)),
+					$elm$parser$Parser$oneOf(
+						_List_fromArray(
+							[
+								A2(
+								$elm$parser$Parser$keeper,
+								A2(
+									$elm$parser$Parser$ignorer,
+									$elm$parser$Parser$succeed($elm$core$Basics$identity),
+									$elm$parser$Parser$symbol(':')),
+								$rtfeldman$elm_iso8601_date_strings$Iso8601$paddedInt(2)),
+								$rtfeldman$elm_iso8601_date_strings$Iso8601$paddedInt(2),
+								$elm$parser$Parser$succeed(0)
+							]))),
+					A2(
+					$elm$parser$Parser$ignorer,
+					$elm$parser$Parser$succeed(0),
+					$elm$parser$Parser$end)
+				])));
+}();
+var $rtfeldman$elm_iso8601_date_strings$Iso8601$iso8601 = A2(
+	$elm$parser$Parser$andThen,
+	function (datePart) {
+		return $elm$parser$Parser$oneOf(
+			_List_fromArray(
+				[
+					A2(
+					$elm$parser$Parser$keeper,
+					A2(
+						$elm$parser$Parser$keeper,
+						A2(
+							$elm$parser$Parser$keeper,
+							A2(
+								$elm$parser$Parser$keeper,
+								A2(
+									$elm$parser$Parser$keeper,
+									A2(
+										$elm$parser$Parser$ignorer,
+										$elm$parser$Parser$succeed(
+											$rtfeldman$elm_iso8601_date_strings$Iso8601$fromParts(datePart)),
+										$elm$parser$Parser$symbol('T')),
+									$rtfeldman$elm_iso8601_date_strings$Iso8601$paddedInt(2)),
+								$elm$parser$Parser$oneOf(
+									_List_fromArray(
+										[
+											A2(
+											$elm$parser$Parser$keeper,
+											A2(
+												$elm$parser$Parser$ignorer,
+												$elm$parser$Parser$succeed($elm$core$Basics$identity),
+												$elm$parser$Parser$symbol(':')),
+											$rtfeldman$elm_iso8601_date_strings$Iso8601$paddedInt(2)),
+											$rtfeldman$elm_iso8601_date_strings$Iso8601$paddedInt(2)
+										]))),
+							$elm$parser$Parser$oneOf(
+								_List_fromArray(
+									[
+										A2(
+										$elm$parser$Parser$keeper,
+										A2(
+											$elm$parser$Parser$ignorer,
+											$elm$parser$Parser$succeed($elm$core$Basics$identity),
+											$elm$parser$Parser$symbol(':')),
+										$rtfeldman$elm_iso8601_date_strings$Iso8601$paddedInt(2)),
+										$rtfeldman$elm_iso8601_date_strings$Iso8601$paddedInt(2)
+									]))),
+						$elm$parser$Parser$oneOf(
+							_List_fromArray(
+								[
+									A2(
+									$elm$parser$Parser$keeper,
+									A2(
+										$elm$parser$Parser$ignorer,
+										$elm$parser$Parser$succeed($elm$core$Basics$identity),
+										$elm$parser$Parser$symbol('.')),
+									$rtfeldman$elm_iso8601_date_strings$Iso8601$fractionsOfASecondInMs),
+									$elm$parser$Parser$succeed(0)
+								]))),
+					A2($elm$parser$Parser$ignorer, $rtfeldman$elm_iso8601_date_strings$Iso8601$utcOffsetInMinutes, $elm$parser$Parser$end)),
+					A2(
+					$elm$parser$Parser$ignorer,
+					$elm$parser$Parser$succeed(
+						A6($rtfeldman$elm_iso8601_date_strings$Iso8601$fromParts, datePart, 0, 0, 0, 0, 0)),
+					$elm$parser$Parser$end)
+				]));
+	},
+	$rtfeldman$elm_iso8601_date_strings$Iso8601$monthYearDayInMs);
+var $elm$parser$Parser$DeadEnd = F3(
+	function (row, col, problem) {
+		return {col: col, problem: problem, row: row};
+	});
+var $elm$parser$Parser$problemToDeadEnd = function (p) {
+	return A3($elm$parser$Parser$DeadEnd, p.row, p.col, p.problem);
+};
+var $elm$parser$Parser$Advanced$bagToList = F2(
+	function (bag, list) {
+		bagToList:
+		while (true) {
+			switch (bag.$) {
+				case 'Empty':
+					return list;
+				case 'AddRight':
+					var bag1 = bag.a;
+					var x = bag.b;
+					var $temp$bag = bag1,
+						$temp$list = A2($elm$core$List$cons, x, list);
+					bag = $temp$bag;
+					list = $temp$list;
+					continue bagToList;
+				default:
+					var bag1 = bag.a;
+					var bag2 = bag.b;
+					var $temp$bag = bag1,
+						$temp$list = A2($elm$parser$Parser$Advanced$bagToList, bag2, list);
+					bag = $temp$bag;
+					list = $temp$list;
+					continue bagToList;
+			}
+		}
+	});
+var $elm$parser$Parser$Advanced$run = F2(
+	function (_v0, src) {
+		var parse = _v0.a;
+		var _v1 = parse(
+			{col: 1, context: _List_Nil, indent: 1, offset: 0, row: 1, src: src});
+		if (_v1.$ === 'Good') {
+			var value = _v1.b;
+			return $elm$core$Result$Ok(value);
+		} else {
+			var bag = _v1.b;
+			return $elm$core$Result$Err(
+				A2($elm$parser$Parser$Advanced$bagToList, bag, _List_Nil));
+		}
+	});
+var $elm$parser$Parser$run = F2(
+	function (parser, source) {
+		var _v0 = A2($elm$parser$Parser$Advanced$run, parser, source);
+		if (_v0.$ === 'Ok') {
+			var a = _v0.a;
+			return $elm$core$Result$Ok(a);
+		} else {
+			var problems = _v0.a;
+			return $elm$core$Result$Err(
+				A2($elm$core$List$map, $elm$parser$Parser$problemToDeadEnd, problems));
+		}
+	});
+var $rtfeldman$elm_iso8601_date_strings$Iso8601$toTime = function (str) {
+	return A2($elm$parser$Parser$run, $rtfeldman$elm_iso8601_date_strings$Iso8601$iso8601, str);
+};
+var $author$project$Punch$apiTimeDecoder = $elm$json$Json$Decode$oneOf(
+	_List_fromArray(
+		[
+			A2(
+			$elm$json$Json$Decode$andThen,
+			function (str) {
+				var _v0 = $rtfeldman$elm_iso8601_date_strings$Iso8601$toTime(str + 'Z');
+				if (_v0.$ === 'Ok') {
+					var posix = _v0.a;
+					return $elm$json$Json$Decode$succeed(posix);
+				} else {
+					var err = _v0.a;
+					return $elm$json$Json$Decode$fail('Not valid date format');
+				}
+			},
+			$elm$json$Json$Decode$string),
+			$elm$json$Json$Decode$null(
+			$elm$time$Time$millisToPosix(0))
+		]));
+var $author$project$Punch$nullString = $elm$json$Json$Decode$oneOf(
+	_List_fromArray(
+		[
+			$elm$json$Json$Decode$string,
+			$elm$json$Json$Decode$null('')
+		]));
+var $author$project$Punch$apiDecoder = A2(
+	$NoRedInk$elm_json_decode_pipeline$Json$Decode$Pipeline$hardcoded,
+	$author$project$Equinor$Types$NotLoaded,
+	A2(
+		$NoRedInk$elm_json_decode_pipeline$Json$Decode$Pipeline$hardcoded,
+		$author$project$Equinor$Types$NotLoaded,
+		A3(
+			$NoRedInk$elm_json_decode_pipeline$Json$Decode$Pipeline$required,
+			'AttachmentCount',
+			$elm$json$Json$Decode$int,
+			A3(
+				$NoRedInk$elm_json_decode_pipeline$Json$Decode$Pipeline$required,
+				'PunchListSorting__Description',
+				$author$project$Punch$nullString,
+				A3(
+					$NoRedInk$elm_json_decode_pipeline$Json$Decode$Pipeline$required,
+					'PunchListType__Description',
+					$author$project$Punch$nullString,
+					A2(
+						$NoRedInk$elm_json_decode_pipeline$Json$Decode$Pipeline$custom,
+						$elm$json$Json$Decode$oneOf(
+							_List_fromArray(
+								[
+									A2($elm$json$Json$Decode$field, 'CheckList__TagFormularType__Tag__Area__Id', $elm$json$Json$Decode$string),
+									A2($elm$json$Json$Decode$field, 'CheckList__TagFormularType__Tag__McPkg__Area__Id', $author$project$Punch$nullString)
+								])),
+						A3(
+							$NoRedInk$elm_json_decode_pipeline$Json$Decode$Pipeline$required,
+							'RaisedByOrg__Description',
+							$author$project$Punch$nullString,
+							A3(
+								$NoRedInk$elm_json_decode_pipeline$Json$Decode$Pipeline$required,
+								'ClearedByOrg__Description',
+								$author$project$Punch$nullString,
+								A3(
+									$NoRedInk$elm_json_decode_pipeline$Json$Decode$Pipeline$required,
+									'CheckList__TagFormularType__Tag__McPkg__McPkgNo',
+									$author$project$Punch$nullString,
+									A3(
+										$NoRedInk$elm_json_decode_pipeline$Json$Decode$Pipeline$required,
+										'CheckList__TagFormularType__Tag__McPkg__CommPkg__CommPkgNo',
+										$author$project$Punch$nullString,
+										A3(
+											$NoRedInk$elm_json_decode_pipeline$Json$Decode$Pipeline$required,
+											'Status__Id',
+											$author$project$Equinor$Data$Procosys$Status$decoder,
+											A3(
+												$NoRedInk$elm_json_decode_pipeline$Json$Decode$Pipeline$required,
+												'UpdatedAt',
+												$author$project$Punch$nullString,
+												A3(
+													$NoRedInk$elm_json_decode_pipeline$Json$Decode$Pipeline$required,
+													'CreatedAt',
+													$author$project$Punch$apiTimeDecoder,
+													A3(
+														$NoRedInk$elm_json_decode_pipeline$Json$Decode$Pipeline$required,
+														'Description',
+														$author$project$Punch$nullString,
+														A3(
+															$NoRedInk$elm_json_decode_pipeline$Json$Decode$Pipeline$required,
+															'CheckList__TagFormularType__Tag__Description',
+															$author$project$Punch$nullString,
+															A3(
+																$NoRedInk$elm_json_decode_pipeline$Json$Decode$Pipeline$required,
+																'CheckList__TagFormularType__Tag__TagNo',
+																$author$project$Punch$nullString,
+																A3(
+																	$NoRedInk$elm_json_decode_pipeline$Json$Decode$Pipeline$required,
+																	'PunchListItemNo',
+																	$elm$json$Json$Decode$int,
+																	$elm$json$Json$Decode$succeed($author$project$Punch$Punch))))))))))))))))));
+var $author$project$Punch$Api$openPunch = F2(
+	function (plantId, token) {
+		return $elm$http$Http$request(
+			{
+				body: $elm$http$Http$jsonBody(
+					A2($elm$json$Json$Encode$list, $author$project$Punch$Api$dto, _List_Nil)),
+				expect: A2(
+					$elm$http$Http$expectJson,
+					A2($elm$core$Basics$composeL, $author$project$Punch$Messages$GotApiResult, $author$project$Punch$Messages$GotAllPunch),
+					$elm$json$Json$Decode$list($author$project$Punch$apiDecoder)),
+				headers: _List_fromArray(
+					[
+						A2($elm$http$Http$header, 'Authorization', 'Bearer ' + token)
+					]),
+				method: 'POST',
+				timeout: $elm$core$Maybe$Nothing,
+				tracker: $elm$core$Maybe$Nothing,
+				url: A2(
+					$author$project$Punch$Api$url,
+					_List_fromArray(
+						['Search']),
+					_List_fromArray(
+						[
+							A2($elm$url$Url$Builder$string, 'plantId', plantId),
+							A2($elm$url$Url$Builder$int, 'savedSearchId', 71271),
+							A2($elm$url$Url$Builder$string, 'paging', 'false')
+						]))
+			});
+	});
+var $author$project$Punch$Update$syncStatusToString = function (syncStatus) {
+	switch (syncStatus.$) {
+		case 'Inactive':
+			return 'Inactive';
+		case 'DownloadingFromApi':
+			return 'DownloadingFromApi';
+		case 'SavingToStorage':
+			return 'SavingToStorage';
+		case 'UpdatingFromApi':
+			return 'UpdatingFromApi';
+		case 'LoadingFromStorage':
+			return 'LoadingFromStorage';
+		default:
+			return 'Synchronized';
+	}
+};
+var $author$project$Punch$Update$setSyncStatusTo = F2(
+	function (syncStatus, _v0) {
+		var m = _v0.a;
+		var c = _v0.b;
+		return _Utils_Tuple2(
+			m,
+			$elm$core$Platform$Cmd$batch(
+				_List_fromArray(
+					[
+						c,
+						A2(
+						$author$project$Punch$Update$createEvent,
+						'putInStorage',
+						$elm$json$Json$Encode$object(
+							_List_fromArray(
+								[
+									_Utils_Tuple2(
+									'key',
+									$elm$json$Json$Encode$string('syncStatus')),
+									_Utils_Tuple2(
+									'val',
+									$elm$json$Json$Encode$string(
+										$author$project$Punch$Update$syncStatusToString(syncStatus)))
+								])))
+					])));
+	});
+var $author$project$Punch$Update$downloadAllOpenPunch = function (_v0) {
+	var m = _v0.a;
+	var c = _v0.b;
+	return A2(
+		$author$project$Punch$Update$apiRequest,
+		_List_fromArray(
+			[$author$project$Punch$Api$openPunch]),
+		A2(
+			$author$project$Punch$Update$setSyncStatusTo,
+			$author$project$Punch$Types$DownloadingFromApi,
+			_Utils_Tuple2(m, c)));
+};
 var $elm$file$File$Select$file = F2(
 	function (mimes, toMsg) {
 		return A2(
@@ -12971,12 +14066,6 @@ var $author$project$Punch$Attachment = F6(
 		return {hasFile: hasFile, id: id, mimeType: mimeType, thumbnailAsBase64: thumbnailAsBase64, title: title, uri: uri};
 	});
 var $elm$json$Json$Decode$bool = _Json_decodeBool;
-var $author$project$Punch$nullString = $elm$json$Json$Decode$oneOf(
-	_List_fromArray(
-		[
-			$elm$json$Json$Decode$string,
-			$elm$json$Json$Decode$null('')
-		]));
 var $author$project$Punch$attachmentDecoder = A3(
 	$NoRedInk$elm_json_decode_pipeline$Json$Decode$Pipeline$required,
 	'HasFile',
@@ -13494,6 +14583,7 @@ var $author$project$Punch$encoder = function (punch) {
 				$elm$json$Json$Encode$int(punch.attachmentCount))
 			]));
 };
+var $elm$core$Debug$log = _Debug_log;
 var $author$project$Punch$Messages$GotPunch = function (a) {
 	return {$: 'GotPunch', a: a};
 };
@@ -13931,7 +15021,7 @@ var $author$project$Punch$Update$handleApiResult = F2(
 							{errorMsg: 'Error creating Punch'}),
 						$elm$core$Platform$Cmd$none);
 				}
-			default:
+			case 'GotPunch':
 				var result = apiResult.a;
 				if (result.$ === 'Ok') {
 					var x = result.a;
@@ -13968,6 +15058,33 @@ var $author$project$Punch$Update$handleApiResult = F2(
 							'punchCreated',
 							$author$project$Punch$encoder(newPunch)));
 				} else {
+					return _Utils_Tuple2(m, c);
+				}
+			default:
+				var result = apiResult.a;
+				if (result.$ === 'Ok') {
+					var punchList = result.a;
+					return A2(
+						$author$project$Punch$Update$setSyncStatusTo,
+						$author$project$Punch$Types$SavingToStorage,
+						_Utils_Tuple2(
+							m,
+							A2(
+								$author$project$Punch$Update$createEvent,
+								'putInStorage',
+								$elm$json$Json$Encode$object(
+									_List_fromArray(
+										[
+											_Utils_Tuple2(
+											'key',
+											$elm$json$Json$Encode$string('punchList')),
+											_Utils_Tuple2(
+											'val',
+											A2($elm$json$Json$Encode$list, $author$project$Punch$encoder, punchList))
+										])))));
+				} else {
+					var err = result.a;
+					var _v21 = A2($elm$core$Debug$log, 'err', err);
 					return _Utils_Tuple2(m, c);
 				}
 		}
@@ -14424,14 +15541,25 @@ var $author$project$Punch$Api$verify = F3(
 var $author$project$Punch$Update$update = F2(
 	function (msg, model) {
 		var mc = _Utils_Tuple2(model, $elm$core$Platform$Cmd$none);
-		switch (msg.$) {
+		var _v0 = A2($elm$core$Debug$log, '', msg);
+		switch (_v0.$) {
 			case 'NoOp':
 				return mc;
 			case 'GotToken':
-				var tokenSuccess = msg.a;
+				var tokenSuccess = _v0.a;
 				return A2($author$project$Punch$Update$sendRequestsWaitingForToken, tokenSuccess, mc);
+			case 'ToggleButtonPressed':
+				var newValue = _v0.a;
+				return newValue ? $author$project$Punch$Update$downloadAllOpenPunch(mc) : A2($author$project$Punch$Update$setSyncStatusTo, $author$project$Punch$Types$Inactive, mc);
+			case 'SyncStatusUpdated':
+				var syncStatus = _v0.a;
+				return _Utils_Tuple2(
+					_Utils_update(
+						model,
+						{syncStatus: syncStatus}),
+					$elm$core$Platform$Cmd$none);
 			case 'NeedToLoadChecklists':
-				var tagNo = msg.a;
+				var tagNo = _v0.a;
 				if ($elm$core$String$isEmpty(tagNo)) {
 					return mc;
 				} else {
@@ -14455,7 +15583,7 @@ var $author$project$Punch$Update$update = F2(
 							$elm$core$Platform$Cmd$none));
 				}
 			case 'GotPunchList':
-				var punchList = msg.a;
+				var punchList = _v0.a;
 				var nextDict = A3(
 					$elm$core$List$foldl,
 					F2(
@@ -14477,13 +15605,13 @@ var $author$project$Punch$Update$update = F2(
 						{punch: nextDict}),
 					$elm$core$Platform$Cmd$none);
 			case 'GotApiResult':
-				var apiResult = msg.a;
+				var apiResult = _v0.a;
 				return A2($author$project$Punch$Update$handleApiResult, apiResult, mc);
 			case 'DecodeError':
-				var err = msg.a;
+				var err = _v0.a;
 				return mc;
 			case 'PunchItemPressed':
-				var punch = msg.a;
+				var punch = _v0.a;
 				return _Utils_eq(
 					model.selectedPunch,
 					$elm$core$Maybe$Just(punch)) ? $author$project$Punch$Update$clearAttachmentUpload(
@@ -14500,8 +15628,8 @@ var $author$project$Punch$Update$update = F2(
 							$author$project$Punch$Update$clearAttachmentUpload(
 								$author$project$Punch$Update$closeDropDowns(mc)))));
 			case 'AttachmentPressed':
-				var punch = msg.a;
-				var attachment = msg.b;
+				var punch = _v0.a;
+				var attachment = _v0.b;
 				return A2(
 					$author$project$Punch$Update$apiRequest,
 					_List_fromArray(
@@ -14510,8 +15638,8 @@ var $author$project$Punch$Update$update = F2(
 						]),
 					mc);
 			case 'DeleteAttachmentButtonPressed':
-				var punch = msg.a;
-				var attachment = msg.b;
+				var punch = _v0.a;
+				var attachment = _v0.b;
 				return A2(
 					$author$project$Punch$Update$apiRequest,
 					_List_fromArray(
@@ -14520,7 +15648,7 @@ var $author$project$Punch$Update$update = F2(
 						]),
 					mc);
 			case 'NewAttachmentButtonPressed':
-				var punch = msg.a;
+				var punch = _v0.a;
 				return _Utils_Tuple2(
 					model,
 					A2(
@@ -14528,8 +15656,8 @@ var $author$project$Punch$Update$update = F2(
 						_List_Nil,
 						$author$project$Punch$Messages$AttachmentFileLoaded(punch.id)));
 			case 'AttachmentFileLoaded':
-				var punchId = msg.a;
-				var file = msg.b;
+				var punchId = _v0.a;
+				var file = _v0.b;
 				var uri = $elm$file$File$toUrl(file);
 				var name = $elm$file$File$name(file);
 				return _Utils_Tuple2(
@@ -14539,10 +15667,10 @@ var $author$project$Punch$Update$update = F2(
 						A3($author$project$Punch$Messages$AttachmentDecoded, file, punchId, name),
 						uri));
 			case 'AttachmentDecoded':
-				var file = msg.a;
-				var punchId = msg.b;
-				var name = msg.c;
-				var uri = msg.d;
+				var file = _v0.a;
+				var punchId = _v0.b;
+				var name = _v0.c;
+				var uri = _v0.d;
 				return _Utils_Tuple2(
 					_Utils_update(
 						model,
@@ -14552,7 +15680,7 @@ var $author$project$Punch$Update$update = F2(
 						}),
 					$elm$core$Platform$Cmd$none);
 			case 'FileNameInputChanged':
-				var str = msg.a;
+				var str = _v0.a;
 				var _v1 = model.currentAttachment;
 				if (_v1.$ === 'Just') {
 					var currentAttachment = _v1.a;
@@ -14570,7 +15698,7 @@ var $author$project$Punch$Update$update = F2(
 					return mc;
 				}
 			case 'AddUploadedAttachmentToPunch':
-				var punch = msg.a;
+				var punch = _v0.a;
 				var _v2 = model.currentAttachment;
 				if (_v2.$ === 'Just') {
 					var currentAttachment = _v2.a;
@@ -14589,7 +15717,7 @@ var $author$project$Punch$Update$update = F2(
 					model,
 					A2($author$project$Punch$Update$createEvent, '', $elm$json$Json$Encode$null));
 			case 'DescriptionFieldLostFocus':
-				var punch = msg.a;
+				var punch = _v0.a;
 				var _v3 = model.selectedPunch;
 				if (_v3.$ === 'Nothing') {
 					return mc;
@@ -14604,7 +15732,7 @@ var $author$project$Punch$Update$update = F2(
 						mc);
 				}
 			case 'CreatePunchDescriptionFieldInput':
-				var str = msg.a;
+				var str = _v0.a;
 				var oldCreate = model.currentCreate;
 				return _Utils_Tuple2(
 					_Utils_update(
@@ -14616,8 +15744,8 @@ var $author$project$Punch$Update$update = F2(
 						}),
 					$elm$core$Platform$Cmd$none);
 			case 'DescriptionFieldInput':
-				var punch = msg.a;
-				var str = msg.b;
+				var punch = _v0.a;
+				var str = _v0.b;
 				var updater = function (p) {
 					return _Utils_update(
 						p,
@@ -14635,7 +15763,7 @@ var $author$project$Punch$Update$update = F2(
 						}),
 					$elm$core$Platform$Cmd$none);
 			case 'DropDownPressed':
-				var dropDown = msg.a;
+				var dropDown = _v0.a;
 				return _Utils_eq(model.dropDown, dropDown) ? _Utils_Tuple2(
 					_Utils_update(
 						model,
@@ -14664,8 +15792,8 @@ var $author$project$Punch$Update$update = F2(
 			case 'CloseDropDownButtonPressed':
 				return $author$project$Punch$Update$closeDropDowns(mc);
 			case 'DropDownItemPressed':
-				var punchId = msg.a;
-				var item = msg.b;
+				var punchId = _v0.a;
+				var item = _v0.b;
 				var _v5 = model.context;
 				if (_v5.$ === 'CreateContext') {
 					var updated = function (create) {
@@ -14778,7 +15906,7 @@ var $author$project$Punch$Update$update = F2(
 					}
 				}
 			case 'ChecklistSelected':
-				var checklistId = msg.a;
+				var checklistId = _v0.a;
 				return _Utils_Tuple2(
 					_Utils_update(
 						model,
@@ -14789,7 +15917,7 @@ var $author$project$Punch$Update$update = F2(
 						}),
 					$elm$core$Platform$Cmd$none);
 			case 'SubmitCreatedPunchButtonPressed':
-				var checklistId = msg.a;
+				var checklistId = _v0.a;
 				var create = model.currentCreate;
 				return A2(
 					$author$project$Punch$Update$apiRequest,
@@ -14802,7 +15930,7 @@ var $author$project$Punch$Update$update = F2(
 						]),
 					mc);
 			case 'ClearPunchButtonPressed':
-				var punch = msg.a;
+				var punch = _v0.a;
 				return A2(
 					$author$project$Punch$Update$apiRequest,
 					_List_fromArray(
@@ -14811,7 +15939,7 @@ var $author$project$Punch$Update$update = F2(
 						]),
 					mc);
 			case 'UnclearPunchButtonPressed':
-				var punch = msg.a;
+				var punch = _v0.a;
 				return A2(
 					$author$project$Punch$Update$apiRequest,
 					_List_fromArray(
@@ -14820,7 +15948,7 @@ var $author$project$Punch$Update$update = F2(
 						]),
 					mc);
 			case 'VerifyPunchButtonPressed':
-				var punch = msg.a;
+				var punch = _v0.a;
 				return A2(
 					$author$project$Punch$Update$apiRequest,
 					_List_fromArray(
@@ -14829,7 +15957,7 @@ var $author$project$Punch$Update$update = F2(
 						]),
 					mc);
 			default:
-				var punch = msg.a;
+				var punch = _v0.a;
 				return A2(
 					$author$project$Punch$Update$apiRequest,
 					_List_fromArray(
@@ -14839,13 +15967,6 @@ var $author$project$Punch$Update$update = F2(
 					mc);
 		}
 	});
-var $elm$core$Dict$isEmpty = function (dict) {
-	if (dict.$ === 'RBEmpty_elm_builtin') {
-		return true;
-	} else {
-		return false;
-	}
-};
 var $author$project$Punch$Types$CategoryDropDown = {$: 'CategoryDropDown'};
 var $author$project$Punch$Types$ClearingByDropDown = {$: 'ClearingByDropDown'};
 var $author$project$Punch$Messages$CreatePunchDescriptionFieldInput = function (a) {
@@ -15121,10 +16242,6 @@ var $mdgriffith$elm_ui$Element$Border$color = function (clr) {
 			'border-color',
 			clr));
 };
-var $elm$core$Basics$always = F2(
-	function (a, _v0) {
-		return a;
-	});
 var $mdgriffith$elm_ui$Internal$Model$unstyled = A2($elm$core$Basics$composeL, $mdgriffith$elm_ui$Internal$Model$Unstyled, $elm$core$Basics$always);
 var $mdgriffith$elm_ui$Element$html = $mdgriffith$elm_ui$Internal$Model$unstyled;
 var $author$project$Equinor$Palette$mistBlue = A3($mdgriffith$elm_ui$Element$rgb255, 213, 234, 244);
@@ -18735,18 +19852,230 @@ var $author$project$Punch$View$renderSelectChecklist = F2(
 					model.currentCreate.checklists)
 				]));
 	});
+var $author$project$Punch$Messages$ToggleButtonPressed = function (a) {
+	return {$: 'ToggleButtonPressed', a: a};
+};
+var $elm$html$Html$Attributes$classList = function (classes) {
+	return $elm$html$Html$Attributes$class(
+		A2(
+			$elm$core$String$join,
+			' ',
+			A2(
+				$elm$core$List$map,
+				$elm$core$Tuple$first,
+				A2($elm$core$List$filter, $elm$core$Tuple$second, classes))));
+};
+var $author$project$Equinor$Palette$lichenGreen = A3($mdgriffith$elm_ui$Element$rgb255, 230, 250, 236);
+var $author$project$Equinor$Palette$onClick = function (msg) {
+	return $mdgriffith$elm_ui$Element$htmlAttribute(
+		A2(
+			$elm$html$Html$Events$custom,
+			'click',
+			$elm$json$Json$Decode$succeed(
+				{message: msg, preventDefault: false, stopPropagation: true})));
+};
+var $author$project$Equinor$Palette$toggleButtonCircleMiddle = F2(
+	function (size, progress) {
+		return A2(
+			$mdgriffith$elm_ui$Element$el,
+			_List_fromArray(
+				[
+					$mdgriffith$elm_ui$Element$width(
+					$mdgriffith$elm_ui$Element$px(
+						$elm$core$Basics$round(size))),
+					$mdgriffith$elm_ui$Element$height(
+					$mdgriffith$elm_ui$Element$px(
+						$elm$core$Basics$round(size))),
+					$mdgriffith$elm_ui$Element$Background$color($author$project$Equinor$Palette$white),
+					$mdgriffith$elm_ui$Element$Border$rounded(
+					$elm$core$Basics$round(size)),
+					$mdgriffith$elm_ui$Element$centerX
+				]),
+			A2(
+				$mdgriffith$elm_ui$Element$el,
+				_List_fromArray(
+					[$mdgriffith$elm_ui$Element$centerX, $mdgriffith$elm_ui$Element$centerY]),
+				(progress > 100) ? $mdgriffith$elm_ui$Element$text('X') : A2(
+					$mdgriffith$elm_ui$Element$row,
+					_List_Nil,
+					_List_fromArray(
+						[
+							A2(
+							$mdgriffith$elm_ui$Element$el,
+							_List_fromArray(
+								[
+									$mdgriffith$elm_ui$Element$Font$size(
+									A2($author$project$Equinor$Palette$scaledInt, size / 2, -2))
+								]),
+							$mdgriffith$elm_ui$Element$text(
+								$elm$core$String$fromInt(progress))),
+							A2(
+							$mdgriffith$elm_ui$Element$el,
+							_List_fromArray(
+								[
+									$mdgriffith$elm_ui$Element$Font$size(
+									A2($author$project$Equinor$Palette$scaledInt, size / 2, -4))
+								]),
+							$mdgriffith$elm_ui$Element$text('%'))
+						]))));
+	});
+var $mdgriffith$elm_ui$Internal$Model$Left = {$: 'Left'};
+var $mdgriffith$elm_ui$Element$alignLeft = $mdgriffith$elm_ui$Internal$Model$AlignX($mdgriffith$elm_ui$Internal$Model$Left);
+var $author$project$Equinor$Palette$toggleButtonCircle = F2(
+	function (size, overrides) {
+		return A2(
+			$mdgriffith$elm_ui$Element$el,
+			_Utils_ap(
+				_List_fromArray(
+					[
+						$mdgriffith$elm_ui$Element$width(
+						$mdgriffith$elm_ui$Element$px(
+							$elm$core$Basics$round(size))),
+						$mdgriffith$elm_ui$Element$height(
+						$mdgriffith$elm_ui$Element$px(
+							$elm$core$Basics$round(size))),
+						$mdgriffith$elm_ui$Element$Background$color($author$project$Equinor$Palette$white),
+						$mdgriffith$elm_ui$Element$Border$rounded(
+						$elm$core$Basics$round(size)),
+						$mdgriffith$elm_ui$Element$alignRight
+					]),
+				overrides),
+			$mdgriffith$elm_ui$Element$none);
+	});
+var $author$project$Equinor$Palette$toggleButtonCircleOff = function (size) {
+	return A2(
+		$author$project$Equinor$Palette$toggleButtonCircle,
+		size,
+		_List_fromArray(
+			[$mdgriffith$elm_ui$Element$alignLeft]));
+};
+var $author$project$Equinor$Palette$toggleButtonCircleOn = function (size) {
+	return A2(
+		$author$project$Equinor$Palette$toggleButtonCircle,
+		size,
+		_List_fromArray(
+			[$mdgriffith$elm_ui$Element$alignRight]));
+};
+var $author$project$Equinor$Palette$toggleButton = F4(
+	function (originalSize, enabled, active, msg) {
+		var size = originalSize * 2;
+		var circleSize = size * 0.8;
+		return A2(
+			$mdgriffith$elm_ui$Element$el,
+			_List_fromArray(
+				[
+					$mdgriffith$elm_ui$Element$width(
+					$mdgriffith$elm_ui$Element$px(
+						$elm$core$Basics$round(size * 2))),
+					$mdgriffith$elm_ui$Element$height(
+					$mdgriffith$elm_ui$Element$px(
+						$elm$core$Basics$round(size))),
+					$mdgriffith$elm_ui$Element$Background$color(
+					function () {
+						if (enabled) {
+							if (active.$ === 'Nothing') {
+								return $author$project$Equinor$Palette$mistBlue;
+							} else {
+								if (!active.a) {
+									return $author$project$Equinor$Palette$yellow;
+								} else {
+									return $author$project$Equinor$Palette$green;
+								}
+							}
+						} else {
+							if (active.$ === 'Nothing') {
+								return $author$project$Equinor$Palette$lightGrey;
+							} else {
+								if (!active.a) {
+									return $author$project$Equinor$Palette$alphaYellow;
+								} else {
+									return $author$project$Equinor$Palette$lichenGreen;
+								}
+							}
+						}
+					}()),
+					$mdgriffith$elm_ui$Element$Border$rounded(
+					$elm$core$Basics$round(size)),
+					$mdgriffith$elm_ui$Element$padding(
+					$elm$core$Basics$round((size - circleSize) / 2)),
+					enabled ? $mdgriffith$elm_ui$Element$pointer : $mdgriffith$elm_ui$Element$htmlAttribute(
+					$elm$html$Html$Attributes$classList(_List_Nil)),
+					$author$project$Equinor$Palette$onClick(
+					msg(
+						function () {
+							if (active.$ === 'Just') {
+								if (active.a) {
+									return false;
+								} else {
+									return false;
+								}
+							} else {
+								return true;
+							}
+						}()))
+				]),
+			function () {
+				if (active.$ === 'Just') {
+					if (active.a) {
+						return $author$project$Equinor$Palette$toggleButtonCircleOn(circleSize);
+					} else {
+						return A2($author$project$Equinor$Palette$toggleButtonCircleMiddle, circleSize, 101);
+					}
+				} else {
+					return $author$project$Equinor$Palette$toggleButtonCircleOff(circleSize);
+				}
+			}());
+	});
+var $author$project$Punch$View$renderToggleButton = F2(
+	function (size, model) {
+		var state = function () {
+			var _v0 = model.syncStatus;
+			switch (_v0.$) {
+				case 'Inactive':
+					return $elm$core$Maybe$Nothing;
+				case 'Synchronized':
+					return $elm$core$Maybe$Just(true);
+				default:
+					return $elm$core$Maybe$Just(false);
+			}
+		}();
+		return A2(
+			$mdgriffith$elm_ui$Element$row,
+			_List_fromArray(
+				[
+					$mdgriffith$elm_ui$Element$width($mdgriffith$elm_ui$Element$fill)
+				]),
+			_List_fromArray(
+				[
+					$mdgriffith$elm_ui$Element$text('Punch'),
+					A2(
+					$mdgriffith$elm_ui$Element$el,
+					_List_fromArray(
+						[$mdgriffith$elm_ui$Element$alignRight]),
+					A4($author$project$Equinor$Palette$toggleButton, size, true, state, $author$project$Punch$Messages$ToggleButtonPressed))
+				]));
+	});
 var $author$project$Punch$Main$view = function (model) {
 	var _v0 = model.context;
-	if (_v0.$ === 'CreateContext') {
-		var maybeChecklistId = _v0.a;
-		if (maybeChecklistId.$ === 'Just') {
-			var checklistId = maybeChecklistId.a;
-			return A3($author$project$Punch$View$renderCreatePunch, 16, model, checklistId);
-		} else {
-			return A2($author$project$Punch$View$renderSelectChecklist, 16, model);
-		}
-	} else {
-		return $elm$core$Dict$isEmpty(model.punch) ? $mdgriffith$elm_ui$Element$text('No Punch') : A2($author$project$Punch$View$renderPunchList, 16, model);
+	switch (_v0.$) {
+		case 'CreateContext':
+			var maybeChecklistId = _v0.a;
+			if (maybeChecklistId.$ === 'Just') {
+				var checklistId = maybeChecklistId.a;
+				return A3($author$project$Punch$View$renderCreatePunch, 16, model, checklistId);
+			} else {
+				return A2($author$project$Punch$View$renderSelectChecklist, 16, model);
+			}
+		case 'NoContext':
+			return $mdgriffith$elm_ui$Element$text('No context provided!');
+		case 'TagContext':
+			return A2($author$project$Punch$View$renderPunchList, 16, model);
+		case 'McContext':
+			return A2($author$project$Punch$View$renderPunchList, 16, model);
+		case 'CommContext':
+			return A2($author$project$Punch$View$renderPunchList, 16, model);
+		default:
+			return A2($author$project$Punch$View$renderToggleButton, 16, model);
 	}
 };
 var $author$project$Punch$Main$main = $elm$browser$Browser$element(

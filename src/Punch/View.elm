@@ -1,4 +1,4 @@
-module Punch.View exposing (renderCreatePunch, renderPunchList, renderSelectChecklist)
+module Punch.View exposing (view)
 
 import Dict
 import Element exposing (..)
@@ -23,6 +23,20 @@ import Punch.Messages exposing (Msg(..))
 import Punch.Model exposing (Model)
 import Punch.Types as Types exposing (..)
 import String.Extra
+
+
+view : Float -> Model -> Element Msg
+view size model =
+    el [width fill,Font.size <| round size]<|  
+    case model.context of
+        CreateContext _ Nothing ->
+            renderSelectChecklist size model
+
+        CreateContext _ (Just checklistId) ->
+            renderCreatePunch size model checklistId
+
+        _ ->
+            renderPunchList size model
 
 
 renderSelectChecklist : Float -> Model -> Element Msg
@@ -62,7 +76,7 @@ renderCreatePunch size model checklistId =
     in
     column [ width fill, height fill, spacing 6, padding 4 ]
         [ el [ Font.bold, centerX ] (text "New punch")
-        , Input.multiline [ width fill ]
+        , Input.multiline [ width fill, Font.size <| round size ]
             { label = Input.labelHidden ""
             , onChange = CreatePunchDescriptionFieldInput
             , placeholder = Just <| Input.placeholder [] (text "No Description")
@@ -106,9 +120,45 @@ createButton size model checklistId =
 
 renderPunchList : Float -> Model -> Element Msg
 renderPunchList size model =
-    model.punch
-        |> Dict.values
-        |> List.map (renderPunchListItem size model)
+    let
+        textToHighlight =
+            case model.context of
+                SearchContext str _ ->
+                    str
+
+                _ ->
+                    ""
+
+        punchList =
+            case model.context of
+                NoContext ->
+                    []
+
+                TagContext tagNo ->
+                    Dict.filter (\_ p -> p.tag == tagNo) model.punch
+                        |> Dict.values
+
+                McContext mcPk ->
+                    Dict.filter (\_ p -> p.mcPk == mcPk) model.punch
+                        |> Dict.values
+
+                CommContext commPk ->
+                    Dict.filter (\_ p -> p.commPk == commPk) model.punch
+                        |> Dict.values
+
+                CreateContext _ _ ->
+                    []
+
+                CreatedContext id ->
+                    Dict.get id model.punch
+                        |> Maybe.map (\p -> [ p ])
+                        |> Maybe.withDefault []
+
+                SearchContext _ list ->
+                    list
+    in
+    punchList
+        |> List.map (renderPunchListItem size textToHighlight model)
         |> Keyed.column
             [ width fill
             , height fill
@@ -128,8 +178,8 @@ spacer =
         none
 
 
-renderPunchListItem : Float -> Model -> Punch -> ( String, Element Msg )
-renderPunchListItem size model item =
+renderPunchListItem : Float -> String -> Model -> Punch -> ( String, Element Msg )
+renderPunchListItem size textToHighlight model item =
     let
         readOnly =
             case item.apiPunch of
@@ -207,7 +257,7 @@ renderPunchListItem size model item =
             item.description
                 |> String.lines
                 |> List.take 2
-                |> List.map (\rowText -> row [] (Palette.highlight model.highlight rowText))
+                |> List.map (\rowText -> row [] (Palette.highlight textToHighlight rowText))
                 |> column [ width fill, clip ]
 
         tagNo =
@@ -238,17 +288,19 @@ renderPunchListItem size model item =
         [ column
             [ width fill
             , onClick <| PunchItemPressed item
+            , onContextMenu <| ContextMenuPressedOnPunch item
             , padding (round <| size / 2)
             , pointer
             ]
             [ toppLinje
             , shortDescription
-            , case model.context of
-                TagContext ->
-                    none
+            , {- case model.context of
+                 TagContext ->
+                     none
 
-                _ ->
-                    tagBeskrivelse item
+                 _ ->
+              -}
+              tagBeskrivelse item
             ]
         , if isSelected then
             el [ width fill, padding (round <| size / 2) ] <|
@@ -263,7 +315,7 @@ renderPunchListItem size model item =
                     , spacing 6
                     ]
                     [ if isSelected then
-                        renderDescription model.highlight size readOnly item
+                        renderDescription textToHighlight size readOnly item
 
                       else
                         none
@@ -426,11 +478,7 @@ renderDetails size model readOnly punch =
         , column [ width fill, spacing 2, padding 4 ]
             [ column [ spacing 6 ]
                 [ kv size "No" (String.fromInt punch.id) ""
-                , if model.context == TagContext then
-                    none
-
-                  else
-                    kv size "Tag" punch.tag ""
+                , kv size "Tag" punch.tag ""
 
                 --, kv size "Type" punch.typeDescription ""
                 --, kv size "Commissioning package" punch.commPk ""
@@ -809,3 +857,21 @@ signButton size name maybeDisabled msg =
         )
     <|
         el [ centerX, centerY, Font.size (round size) ] (text name)
+
+
+onContextMenu : ({ x : Float, y : Float } -> Msg) -> Element.Attribute Msg
+onContextMenu msg =
+    HE.custom "contextmenu"
+        (D.map2 (\x y -> { x = x, y = y })
+            (D.field "clientX" D.float)
+            (D.field "clientY" D.float)
+            |> D.andThen
+                (\position ->
+                    D.succeed
+                        { message = msg position
+                        , stopPropagation = True
+                        , preventDefault = True
+                        }
+                )
+        )
+        |> htmlAttribute

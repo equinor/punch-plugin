@@ -5,12 +5,31 @@ import File exposing (File)
 import Json.Decode as D
 
 
-type Context
+type Context punch
     = NoContext
-    | TagContext
-    | McContext
-    | CommContext
-    | CreateContext (Maybe Int)
+    | TagContext String
+    | McContext String
+    | CommContext String
+    | CreateContext TagNo (Maybe Int)
+    | CreatedContext Int
+    | SearchContext String (List punch)
+
+
+type alias TagNo =
+    String
+
+
+type alias TextToHighlight =
+    String
+
+
+type SyncStatus
+    = Inactive
+    | DownloadingFromApi
+    | SavingToStorage
+    | UpdatingFromApi
+    | LoadingFromStorage
+    | Synchronized
 
 
 type alias TokenSuccess =

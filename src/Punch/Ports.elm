@@ -1,9 +1,9 @@
-port module Punch.Ports exposing (fromJs, toJs)
+port module Punch.Ports exposing (punchFromJs, punchToJs)
 
 import Json.Encode as E
 
 
-port toJs : E.Value -> Cmd msg
+port punchToJs : E.Value -> Cmd msg
 
 
-port fromJs : (E.Value -> msg) -> Sub msg
+port punchFromJs : (E.Value -> msg) -> Sub msg

@@ -33,6 +33,9 @@ update msg model =
         NoOp ->
             mc
 
+        ContextMenuPressedOnPunch punch position ->
+            mc
+
         -- Data Handling
         GotToken tokenSuccess ->
             mc |> sendRequestsWaitingForToken tokenSuccess
@@ -69,21 +72,46 @@ update msg model =
         DecodeError err ->
             mc
 
-        -- User Interaction
-        PunchItemPressed punch ->
-            if model.selectedPunch == Just punch then
+        CreatePunchButtonPressed tagNo ->
+            if String.isEmpty tagNo then
                 mc
-                    |> closeDropDowns
-                    |> unSelectPunch
-                    |> clearAttachmentUpload
 
             else
-                mc
-                    |> closeDropDowns
-                    |> clearAttachmentUpload
-                    |> selectPunch punch
-                    |> getDetails punch
-                    |> getAttachments punch
+                let
+                    create =
+                        model.currentCreate
+                in
+                ( { model
+                    | context = CreateContext tagNo Nothing
+                    , currentCreate = { create | checklists = Loading "Loading..." Nothing }
+                  }
+                , Cmd.none
+                )
+                    |> apiRequest [ Api.checklists tagNo ]
+
+        -- User Interaction
+        PunchItemPressed punch ->
+            model.selectedPunch
+                |> Maybe.andThen
+                    (\selected ->
+                        if selected.id == punch.id then
+                            mc
+                                |> closeDropDowns
+                                |> unSelectPunch
+                                |> clearAttachmentUpload
+                                |> Just
+
+                        else
+                            Nothing
+                    )
+                |> Maybe.withDefault
+                    (mc
+                        |> closeDropDowns
+                        |> clearAttachmentUpload
+                        |> selectPunch punch
+                        |> getDetails punch
+                        |> getAttachments punch
+                    )
 
         AttachmentPressed punch attachment ->
             mc |> apiRequest [ Api.attachment punch attachment ]
@@ -187,7 +215,7 @@ update msg model =
 
         DropDownItemPressed punchId item ->
             case model.context of
-                CreateContext _ ->
+                CreateContext tagNo maybeChecklistId ->
                     let
                         updated create =
                             case model.dropDown of
@@ -281,7 +309,13 @@ update msg model =
 
         ChecklistSelected checklistId ->
             ( { model
-                | context = CreateContext (Just checklistId)
+                | context =
+                    case model.context of
+                        CreateContext tagNo _ ->
+                            CreateContext tagNo (Just checklistId)
+
+                        _ ->
+                            model.context
                 , currentCreate = Punch.initialCreate
               }
             , Cmd.none
@@ -305,6 +339,43 @@ update msg model =
 
         UnverifyPunchButtonPressed punch ->
             mc |> apiRequest [ Api.unVerify punch ]
+
+
+setSyncStatusTo : SyncStatus -> MC -> MC
+setSyncStatusTo syncStatus ( m, c ) =
+    ( m
+    , Cmd.batch
+        [ c
+        , createEvent "putInStorage"
+            (E.object
+                [ ( "key", E.string "syncStatus" )
+                , ( "val", E.string (syncStatusToString syncStatus) )
+                ]
+            )
+        ]
+    )
+
+
+syncStatusToString : SyncStatus -> String
+syncStatusToString syncStatus =
+    case syncStatus of
+        Inactive ->
+            "Inactive"
+
+        DownloadingFromApi ->
+            "DownloadingFromApi"
+
+        SavingToStorage ->
+            "SavingToStorage"
+
+        UpdatingFromApi ->
+            "UpdatingFromApi"
+
+        LoadingFromStorage ->
+            "LoadingFromStorage"
+
+        Synchronized ->
+            "Synchronized"
 
 
 getOrganizations : MC -> MC
@@ -426,7 +497,7 @@ sendRequestsWaitingForToken tokenSuccess ( m, c ) =
     , case maybeDoReq of
         Just doReqList ->
             doReqList
-                |> List.map (\fn -> fn m.procosysPlantId tokenSuccess.token)
+                |> List.map (\fn -> fn m.plantId tokenSuccess.token)
                 |> Cmd.batch
 
         Nothing ->
@@ -436,7 +507,7 @@ sendRequestsWaitingForToken tokenSuccess ( m, c ) =
 
 createEvent : String -> E.Value -> Cmd Msg
 createEvent topic payload =
-    Ports.toJs
+    Ports.punchToJs
         (E.object
             [ ( "topic", E.string topic )
             , ( "payload", payload )
@@ -651,7 +722,7 @@ handleApiResult apiResult ( m, c ) =
                         |> getAttachments punch
 
                 Err err ->
-                    ( m, c )
+                    ( { m | errorMsg = "Error deleting attachment" }, c )
 
         AddAttachmentResult punch att result ->
             case result of
@@ -718,11 +789,31 @@ handleApiResult apiResult ( m, c ) =
                     ( { m
                         | punch = Dict.insert x.id newPunch m.punch
                         , selectedPunch = Just newPunch
-                        , context = TagContext
                         , currentCreate = Punch.initialCreate
+                        , context = CreatedContext x.id
                       }
-                    , createEvent "punchCreated" (Punch.encoder newPunch)
+                    , Cmd.none
                     )
 
                 Err _ ->
                     ( m, c )
+
+        GotAllPunch result ->
+            case result of
+                Ok punchList ->
+                    ( m
+                    , createEvent "putInStorage"
+                        (E.object
+                            [ ( "key", E.string "punchList" )
+                            , ( "val", E.list Punch.encoder punchList )
+                            ]
+                        )
+                    )
+                        |> setSyncStatusTo SavingToStorage
+
+                Err err ->
+                    ( m, c )
+
+
+newUpdate =
+    Task.perform identity << Task.succeed

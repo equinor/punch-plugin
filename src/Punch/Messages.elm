@@ -12,8 +12,9 @@ type Msg
     = NoOp
     | NeverHappens
     | NeedToLoadChecklists String
-      -- Data Handling
+    | ContextMenuPressedOnPunch Punch { x : Float, y : Float }
     | GotPunchList (List Punch)
+    | CreatePunchButtonPressed String
     | GotToken TokenSuccess
     | DecodeError D.Error
       -- Screen Interaction
@@ -64,3 +65,4 @@ type ApiResult
     | GotChecklists (Result Http.Error (List Checklist))
     | AddPunchResult (Result Http.Error Int)
     | GotPunch (Result Http.Error Punch.ApiPunch)
+    | GotAllPunch (Result Http.Error (List Punch))
