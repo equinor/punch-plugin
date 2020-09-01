@@ -11,7 +11,7 @@ import Json.Encode as E
 import Punch exposing (Punch)
 import Punch.Api as Api
 import Punch.Messages exposing (..)
-import Punch.Model exposing (Model)
+import Punch.Model exposing (Model, Popup(..))
 import Punch.Ports as Ports
 import Punch.Types as Types exposing (..)
 import Svg.Attributes exposing (z)
@@ -117,7 +117,13 @@ update msg model =
             mc |> apiRequest [ Api.attachment punch attachment ]
 
         DeleteAttachmentButtonPressed punch attachment ->
-            mc |> apiRequest [ Api.deleteAttachment punch attachment ]
+            ( { model | popup = Just (DeleteAttachmentPopup punch attachment) }, Cmd.none )
+
+        ConfirmDeleteAttachment punch attachment ->
+            ( { model | popup = Nothing }, Cmd.none ) |> apiRequest [ Api.deleteAttachment punch attachment ]
+
+        CancelPopupPressed ->
+            ( { model | popup = Nothing }, Cmd.none )
 
         NewAttachmentButtonPressed punch ->
             ( model, File.Select.file [] (AttachmentFileLoaded punch.id) )

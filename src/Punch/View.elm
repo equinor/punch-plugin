@@ -20,23 +20,53 @@ import Json.Decode as D
 import Punch exposing (Punch)
 import Punch.Checklist exposing (Checklist)
 import Punch.Messages exposing (Msg(..))
-import Punch.Model exposing (Model)
+import Punch.Model exposing (Model, Popup(..))
 import Punch.Types as Types exposing (..)
 import String.Extra
 
 
 view : Float -> Model -> Element Msg
 view size model =
-    el [width fill,Font.size <| round size]<|  
-    case model.context of
-        CreateContext _ Nothing ->
-            renderSelectChecklist size model
+    el
+        [ width fill
+        , Font.size <| round size
+        ]
+    <|
+        case model.popup of
+            Just popup ->
+                case popup of
+                    DeleteAttachmentPopup punch attachment ->
+                        deleteAttachmentPopup punch attachment
 
-        CreateContext _ (Just checklistId) ->
-            renderCreatePunch size model checklistId
+            Nothing ->
+                case model.context of
+                    CreateContext _ Nothing ->
+                        renderSelectChecklist size model
 
-        _ ->
-            renderPunchList size model
+                    CreateContext _ (Just checklistId) ->
+                        renderCreatePunch size model checklistId
+
+                    _ ->
+                        renderPunchList size model
+
+
+deleteAttachmentPopup : Punch -> Punch.Attachment -> Element Msg
+deleteAttachmentPopup punch attachment =
+    el [ width fill, padding 10 ] <|
+        column
+            [ width fill
+            , Background.color Palette.white
+            , Border.rounded 10
+            , Border.width 1
+            , clip
+            ]
+            [ el [ width fill, padding 10, Background.color Palette.blue, Font.color Palette.white, Font.center ] (text "Confirm delete")
+            , paragraph [ padding 10, width fill, Font.center ] [ text "Are you sure you want to delete attachment?" ]
+            , row [ width fill, spacing 10, padding 10 ]
+                [ el [ width fill, padding 10, Border.width 1, Border.rounded 10, Font.center, Background.color Palette.blue, Font.color Palette.white, pointer, onClick CancelPopupPressed ] (text "Cancel")
+                , el [ width fill, padding 10, Border.rounded 10, Border.width 1, Font.center, Background.color Palette.blue, Font.color Palette.white, pointer, onClick <| ConfirmDeleteAttachment punch attachment ] (text "Confirm")
+                ]
+            ]
 
 
 renderSelectChecklist : Float -> Model -> Element Msg
@@ -442,19 +472,20 @@ attachmentPreview size model punch =
 
 renderAttachmentItem : Float -> Punch -> Punch.Attachment -> Element Msg
 renderAttachmentItem size punch a =
-    row [ width fill, padding 10, spacing <| round size ]
+    row [ width fill, padding 6, spacing 10 ]
         [ row
             [ width fill
+            , clip
             , pointer
             , spacing <| round size
             , onClick <| AttachmentPressed punch a
             ]
             [ if String.isEmpty a.thumbnailAsBase64 then
-                el [ width (px 100) ] <| el [ centerX ] (text "no preview")
+                el [ width (px 100) ] <| el [ centerX, Font.size <| scaledInt size -3 ] (text "no preview")
 
               else
                 image [ width (px 100) ] { description = "preview", src = String.concat [ "data:", a.mimeType, ";base64,", a.thumbnailAsBase64 ] }
-            , el [ width fill ] (text a.title)
+            , el [ width fill, Font.size <| scaledInt size -3 ] <| paragraph [] [ text a.title ]
             ]
         , el [ alignRight, Font.color Palette.energyRed, padding 6, Border.rounded 4, Border.width 1, Border.color Palette.energyRed, pointer, onClick <| DeleteAttachmentButtonPressed punch a ] (text "X")
         ]

@@ -1,4 +1,4 @@
-module Punch.Model exposing (Model, initialModel)
+module Punch.Model exposing (Model, Popup(..), initialModel)
 
 import Dict exposing (Dict)
 import Equinor.Types exposing (..)
@@ -24,6 +24,7 @@ type alias Model =
     , currentAttachment : Maybe AttachmentUpload
     , requests : Dict Int (List (String -> String -> Cmd Msg))
     , context : Context Punch
+    , popup : Maybe Popup
     }
 
 
@@ -42,6 +43,7 @@ initialModel =
     , currentAttachment = Nothing
     , requests = Dict.empty
     , context = NoContext
+    , popup = Nothing
     }
 
 
@@ -53,3 +55,7 @@ decodePunchList jsonString =
 
         Err err ->
             []
+
+
+type Popup
+    = DeleteAttachmentPopup Punch Punch.Attachment

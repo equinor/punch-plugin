@@ -23,6 +23,8 @@ type Msg
     | CloseDropDownButtonPressed
     | AttachmentPressed Punch Punch.Attachment
     | DeleteAttachmentButtonPressed Punch Punch.Attachment
+    | ConfirmDeleteAttachment Punch Punch.Attachment
+    | CancelPopupPressed
     | NewAttachmentButtonPressed Punch
     | AttachmentFileLoaded Int File
     | AttachmentDecoded File Int String String
