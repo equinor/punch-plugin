@@ -39,6 +39,7 @@ type alias Punch =
     , attachmentCount : Int
     , apiPunch : WebData ApiPunch
     , attachments : WebData (List Attachment)
+    , project : String
     }
 
 
@@ -177,6 +178,7 @@ encoder punch =
         , ( "typeDescription", E.string punch.typeDescription )
         , ( "sortingDescription", E.string punch.sortingDescription )
         , ( "attachmentCount", E.int punch.attachmentCount )
+        , ( "project", E.string punch.project )
         ]
 
 
@@ -200,6 +202,7 @@ decoder =
         |> optional "attachmentCount" D.int 0
         |> hardcoded NotLoaded
         |> hardcoded NotLoaded
+        |> optional "project" D.string ""
 
 
 apiDecoder : D.Decoder Punch
@@ -227,6 +230,7 @@ apiDecoder =
         |> required "AttachmentCount" D.int
         |> hardcoded NotLoaded
         |> hardcoded NotLoaded
+        |> required "CheckList__TagFormularType__Tag__Project__Name" D.string
 
 
 sort : List Punch -> List Punch

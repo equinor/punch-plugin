@@ -790,6 +790,7 @@ handleApiResult apiResult ( m, c ) =
                             , attachmentCount = x.attachmentCount
                             , apiPunch = Loaded "" x
                             , attachments = NotLoaded
+                            , project = ""
                             }
                     in
                     ( { m
